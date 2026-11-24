@@ -12,7 +12,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "findings": "tsx scripts/findings.ts"
+    "findings": "tsx scripts/findings.ts",
+    "ingest": "tsx scripts/ingest.ts",
+    "retrieval-table": "tsx scripts/retrieval-table.ts"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.46",

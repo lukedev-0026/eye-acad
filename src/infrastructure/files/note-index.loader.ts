@@ -3,18 +3,31 @@ import { readFile } from 'node:fs/promises';
 import { sha256OfFile } from '@/common/hash.server';
 import { getConfig } from '@/config/env.server';
 import { NoteIndexMissingError, NoteIndexStaleError } from '@/domain/note/note.error';
-import type { NoteIndex } from '@/domain/note/note.types';
+import { NoteIndexSchema } from '@/domain/note/note.schema';
+import type { NoteIndex } from '@/domain/note/note.schema';
+
+function parseNoteIndex(text: string, file: string): NoteIndex {
+  try {
+    return NoteIndexSchema.parse(JSON.parse(text));
+  } catch (error) {
+    throw new NoteIndexStaleError('The prepared reference note is not in the expected form. Run: pnpm ingest', {
+      cause: error,
+      details: { file },
+    });
+  }
+}
 
 // Loads the prepared note and refuses to use it if the PDF has changed since.
 // Quoting old text against a new document would be worse than stopping.
 export async function loadNoteIndex(): Promise<NoteIndex> {
   const { files, embeddings } = getConfig();
-  let index: NoteIndex;
+  let text: string;
   try {
-    index = JSON.parse(await readFile(files.noteIndex, 'utf8')) as NoteIndex;
+    text = await readFile(files.noteIndex, 'utf8');
   } catch (error) {
     throw new NoteIndexMissingError({ cause: error, details: { file: files.noteIndex } });
   }
+  const index = parseNoteIndex(text, files.noteIndex);
   const current = await sha256OfFile(files.notePdf);
   if (index.source.sha256 !== current) {
     throw new NoteIndexStaleError('The reference note PDF has changed since it was prepared. Run: pnpm ingest', {

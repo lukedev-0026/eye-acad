@@ -5,8 +5,8 @@ import { verifierPrompt } from '@/application/prompts/verifier.prompt';
 import type { CallResult } from '@/domain/llm/call-result';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepSettings } from '@/domain/llm/step-settings.schema';
-import { headingPath } from '@/domain/note/note.types';
-import type { NoteChunk } from '@/domain/note/note.types';
+import { headingPath } from '@/domain/note/note-text';
+import type { NoteChunk } from '@/domain/note/note.schema';
 
 const VerifierSchema = z.object({
   reason: z.string().max(400),

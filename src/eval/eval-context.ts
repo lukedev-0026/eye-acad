@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { getConfig } from '@/config/env.server';
 import { buildCatalogue } from '@/domain/examiner/catalogue';
-import type { NoteChunk, NoteIndex, NoteSentence } from '@/domain/note/note.types';
+import type { NoteChunk, NoteIndex, NoteSentence } from '@/domain/note/note.schema';
 import { loadCase, loadCitationGuidance, loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
 import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';

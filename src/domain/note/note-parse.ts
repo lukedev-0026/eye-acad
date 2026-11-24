@@ -1,4 +1,4 @@
-import type { NoteChunk, NoteSentence } from './note.types';
+import type { NoteChunk, NoteSentence } from './note.schema';
 
 // Turns the layout XML that poppler's `pdftohtml -xml` produces into passages.
 // Everything is decided from position and font size, never from font ids or

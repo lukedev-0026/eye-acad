@@ -3,7 +3,7 @@ import type { Catalogue } from '@/domain/examiner/catalogue';
 import type { CallOutcome } from '@/domain/llm/call-result';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
-import type { NoteIndex } from '@/domain/note/note.types';
+import type { NoteIndex } from '@/domain/note/note.schema';
 
 // The checks call the app's own step functions. Nothing here re-implements a
 // prompt or a model call: a copy would measure a different system.

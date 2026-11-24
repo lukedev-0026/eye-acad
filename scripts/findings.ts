@@ -1,25 +1,22 @@
 // Prints every finding and history item exactly as the app will show and say
 // it, straight from the current case file. Compare against the case PDF.
 //   pnpm findings
-import { configureCommandLineLogging } from '@/common/logging/logger.server';
+import type { RenderedItem } from '@/domain/examiner/render';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
+import { runCli } from '@/eval/cli';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 
-configureCommandLineLogging();
+function print(item: RenderedItem): void {
+  console.log(`  [${item.id}]`);
+  console.log(`    shown : ${item.display}`);
+  console.log(`    spoken: ${item.speech}`);
+}
 
-const c = await loadCase();
-console.log(`Case ${c.caseId} (file hash ${c.fileHash})\n`);
-console.log('FINDINGS');
-for (const row of c.findings) {
-  const r = renderFinding(row);
-  console.log(`  [${r.id}]`);
-  console.log(`    shown : ${r.display}`);
-  console.log(`    spoken: ${r.speech}`);
-}
-console.log('\nHISTORY');
-for (const [key, value] of Object.entries(c.patient)) {
-  const r = renderHistory(key, value);
-  console.log(`  [${r.id}]`);
-  console.log(`    shown : ${r.display}`);
-  console.log(`    spoken: ${r.speech}`);
-}
+await runCli(async () => {
+  const c = await loadCase();
+  console.log(`Case ${c.caseId} (file hash ${c.fileHash})\n`);
+  console.log('FINDINGS');
+  for (const row of c.findings) print(renderFinding(row));
+  console.log('\nHISTORY');
+  for (const [key, value] of Object.entries(c.patient)) print(renderHistory(key, value));
+});

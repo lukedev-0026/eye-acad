@@ -1,5 +1,5 @@
-import { searchText } from './note.types';
-import type { NoteChunk, NoteIndex } from './note.types';
+import { searchText } from './note-text';
+import type { NoteChunk, NoteIndex } from './note.schema';
 
 // Finding the passages of the note that bear on a key point. Two searches run
 // side by side and their rankings are combined. No language model is involved.

@@ -10,7 +10,7 @@ import type { ExaminerNotes } from '@/domain/case/case.schema';
 import { LINES } from '@/domain/examiner/lines';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
-import type { NoteIndex } from '@/domain/note/note.types';
+import type { NoteIndex } from '@/domain/note/note.schema';
 import { retrieve } from '@/domain/note/retrieve';
 import type { Retrieval } from '@/domain/note/retrieve';
 

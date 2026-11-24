@@ -27,3 +27,17 @@ export class NoteIndexStaleError extends NoteIndexError {
     super(message, options);
   }
 }
+
+// The PDF could not be turned into passages cleanly. The message lists what
+// was wrong; nothing is written.
+export class NotePreparationError extends NoteIndexError {
+  override readonly name = 'NotePreparationError';
+  readonly code = 'NOTE_PREPARATION_FAILED';
+
+  constructor(problems: ReadonlyArray<string>, options: AppErrorOptions = {}) {
+    super(`The note did not parse cleanly:\n- ${problems.join('\n- ')}`, {
+      ...options,
+      details: { problems, ...options.details },
+    });
+  }
+}

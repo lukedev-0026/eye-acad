@@ -6,7 +6,7 @@ import { writeFile } from 'node:fs/promises';
 
 import { coverageItems } from '@/application/steps/coverage.step';
 import { configureCommandLineLogging } from '@/common/logging/logger.server';
-import { headingPath, pageLabel } from '@/domain/note/note.types';
+import { headingPath, pageLabel } from '@/domain/note/note-text';
 import { findSentence, loadContext, readCases, resolveTarget } from '@/eval/eval-context';
 
 configureCommandLineLogging();

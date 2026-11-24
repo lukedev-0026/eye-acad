@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { pageLabel } from '@/domain/note/note.types';
-import type { NoteIndex } from '@/domain/note/note.types';
+import { pageLabel } from '@/domain/note/note-text';
+import type { NoteIndex } from '@/domain/note/note.schema';
 import { Bm25, retrieve, stem, tokenize } from '@/domain/note/retrieve';
 
 const index = JSON.parse(readFileSync('data/note-index.json', 'utf8')) as NoteIndex;

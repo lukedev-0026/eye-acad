@@ -6,8 +6,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
-import { pageLabel } from '@/domain/note/note.types';
-import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
+import { pageLabel } from '@/domain/note/note-text';
+import type { NoteChunk, NoteIndex } from '@/domain/note/note.schema';
 import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '@/domain/note/retrieve';
 import { loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';

@@ -5,7 +5,7 @@ import { runSelector } from '@/application/steps/selector.step';
 import { LINES } from '@/domain/examiner/lines';
 import { replyFor } from '@/domain/examiner/policy';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
-import { pageLabel } from '@/domain/note/note.types';
+import { pageLabel } from '@/domain/note/note-text';
 import { findSentence, resolveTarget, sentenceIds } from '@/eval/eval-context';
 import type { EvalContext } from '@/eval/eval.types';
 import { caseFilePath } from '@/infrastructure/files/case-file.loader';

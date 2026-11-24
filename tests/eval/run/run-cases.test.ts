@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { paired } from '@/eval/report/sweep.report';
-import { configId, summarise } from '@/eval/run/run-cases';
-import type { ResultRow } from '@/eval/run/run-cases';
+import { configId } from '@/eval/run/config-id';
+import type { ResultRow } from '@/eval/run/result-row';
+import { summarise } from '@/eval/run/summarise';
 import { settingsFor } from '@/eval/sweep/grid';
 
 const row = (over: Partial<ResultRow>): ResultRow => ({

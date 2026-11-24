@@ -4,18 +4,20 @@
 // settings fail end to end).
 import { writeFile } from 'node:fs/promises';
 
-import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
+import { runCli } from '@/eval/cli';
+import { PATHS } from '@/eval/paths';
 import { settingsFor, startSettings } from '@/eval/sweep/grid';
 
-configureCommandLineLogging();
+const asFile = (settings: (step: (typeof STEP_IDS)[number]) => StepSettings): string =>
+  `${JSON.stringify({ steps: Object.fromEntries(STEP_IDS.map((step) => [step, settings(step)])) }, null, 2)}\n`;
 
-const file = (steps: Record<string, unknown>) => `${JSON.stringify({ steps }, null, 2)}\n`;
-await writeFile('config/steps.start.json', file(Object.fromEntries(STEP_IDS.map((s) => [s, startSettings(s)]))));
-await writeFile(
-  'config/steps.small.json',
-  file(
-    Object.fromEntries(STEP_IDS.map((s) => [s, settingsFor(s, { size: 'small', thinking: false, forceFormat: true })])),
-  ),
-);
-console.log('Wrote config/steps.start.json and config/steps.small.json');
+await runCli(async () => {
+  await writeFile(PATHS.startConfig, asFile(startSettings));
+  await writeFile(
+    PATHS.smallConfig,
+    asFile((step) => settingsFor(step, { size: 'small', thinking: false, forceFormat: true })),
+  );
+  console.log(`Wrote ${PATHS.startConfig} and ${PATHS.smallConfig}`);
+});

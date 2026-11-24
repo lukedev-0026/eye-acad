@@ -6,8 +6,8 @@ import type { RevisionPassage } from '@/application/prompts/revision.prompt';
 import type { CallResult } from '@/domain/llm/call-result';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepSettings } from '@/domain/llm/step-settings.schema';
-import { headingPath, pageLabel } from '@/domain/note/note.types';
-import type { NoteChunk, NoteSentence } from '@/domain/note/note.types';
+import { headingPath, pageLabel } from '@/domain/note/note-text';
+import type { NoteChunk, NoteSentence } from '@/domain/note/note.schema';
 import { checkRevisionPoint } from '@/domain/text/text-checks';
 import type { CheckResult } from '@/domain/text/text-checks';
 

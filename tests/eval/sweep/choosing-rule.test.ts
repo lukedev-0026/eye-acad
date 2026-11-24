@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Summary } from '@/eval/run/run-cases';
+import type { Summary } from '@/eval/run/summarise';
 import { limitModels, rank, tieBand } from '@/eval/sweep/choosing-rule';
 import type { Candidate } from '@/eval/sweep/choosing-rule';
 import { settingsFor } from '@/eval/sweep/grid';

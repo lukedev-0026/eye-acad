@@ -32,6 +32,9 @@ export const PATHS = {
   startConfig: 'config/steps.start.json',
   smallConfig: 'config/steps.small.json',
 
+  // What a browser downloads, once the app is built.
+  builtClient: 'dist/client',
+
   // The recorded behaviour that `pnpm golden` compares with.
   golden: 'tests/golden/golden.json',
   queryVectors: 'tests/golden/query-vectors.json',

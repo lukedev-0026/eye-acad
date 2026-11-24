@@ -5,7 +5,7 @@ import type { Catalogue } from './catalogue';
 // What the selector is allowed to say: choices from closed lists and one
 // yes/no. It cannot return a value, a sentence or anything of its own.
 
-export const INTENTS = ['request_items', 'wants_to_answer', 'other'] as const;
+const INTENTS = ['request_items', 'wants_to_answer', 'other'] as const;
 export type Intent = (typeof INTENTS)[number];
 
 export const REQUEST_EYES = ['right', 'left', 'both', 'unspecified'] as const;

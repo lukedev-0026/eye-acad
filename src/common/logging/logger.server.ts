@@ -20,9 +20,6 @@ import { currentRequestContext } from './request-context.server';
 
 export type Logger = pino.Logger;
 
-// The outcome of the thing a line reports on.
-export type ActionResult = 'SUCCESS' | 'FAILED' | 'DONE' | 'ERROR';
-
 export type LogStream = 'stdout' | 'stderr';
 
 export interface LoggerOptions {
@@ -37,7 +34,7 @@ export interface LoggerOptions {
 
 // Belt and braces: nothing should put these in a line, and if something does,
 // the value is replaced.
-export const REDACTED_PATHS: ReadonlyArray<string> = [
+const REDACTED_PATHS: ReadonlyArray<string> = [
   'authorization',
   '*.authorization',
   'headers.authorization',

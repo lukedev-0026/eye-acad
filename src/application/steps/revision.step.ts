@@ -42,11 +42,11 @@ export interface RevisionResult {
 
 // Everything the wording check may draw on: the whole passage, not just the
 // quoted sentence.
-export function passageText(chunk: NoteChunk): string {
+function passageText(chunk: NoteChunk): string {
   return [chunk.headings.join('. '), chunk.leadIn ?? '', chunk.text].filter(Boolean).join('. ');
 }
 
-export function excerptOf(sentences: Array<NoteSentence>): string {
+function excerptOf(sentences: Array<NoteSentence>): string {
   return sentences.map((s) => (s.column ? `${s.column}: ${s.text}` : s.text)).join(' ');
 }
 

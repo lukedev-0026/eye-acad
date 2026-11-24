@@ -21,7 +21,7 @@ export interface VerifierResult {
 }
 
 // The passage as the verifier sees it, with the quoted sentences marked.
-export function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
+function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
   return chunk.sentences
     .map((s) => {
       const text = s.column ? `${s.column}: ${s.text}` : s.text;

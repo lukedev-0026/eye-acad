@@ -32,7 +32,7 @@ export type RunEnv = z.infer<typeof RunEnvSchema>;
 // As macOS numbers them.
 const POWER_MODES: Record<string, string> = { '0': 'automatic', '1': 'low power', '2': 'high power' };
 
-export function powerMode(): string {
+function powerMode(): string {
   const digit = /powermode\s+(\d)/.exec(sh('pmset', ['-g']))?.[1];
   return digit === undefined ? 'unknown' : (POWER_MODES[digit] ?? digit);
 }
@@ -42,7 +42,7 @@ export function swapUsedMb(): number | null {
   return m ? Math.round(Number(m[1])) : null;
 }
 
-export async function ollamaVersion(): Promise<string> {
+async function ollamaVersion(): Promise<string> {
   try {
     return (await new OllamaClient(getConfig().ollama.host).version()) ?? 'unknown';
   } catch {

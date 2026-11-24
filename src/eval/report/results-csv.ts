@@ -12,7 +12,7 @@ import type { Preflight } from '@/eval/sweep/sweep-rows.schema';
 // The results table: one row per configuration, stage and split, built from
 // the saved calls alone.
 
-export const COLUMNS = [
+const COLUMNS = [
   'run_id',
   'date_utc',
   'commit',

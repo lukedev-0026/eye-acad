@@ -24,7 +24,7 @@ import type { StepSettings } from '@/domain/llm/step-settings.schema';
 // - A reply can end with stop_reason "refusal"; that is reported as its own
 //   outcome and the caller uses its fixed fallback line.
 
-function thinkingParam(settings: StepSettings): Record<string, string> | undefined {
+function thinkingParam(settings: StepSettings): Anthropic.ThinkingConfigParam | undefined {
   if (settings.thinking) return { type: 'adaptive' };
   if (settings.model.includes('haiku')) return { type: 'disabled' };
   if (settings.model.includes('sonnet')) return { type: 'between_tools' };
@@ -49,7 +49,7 @@ export class AnthropicProvider implements LanguageModelProvider {
 
     try {
       const thinking = thinkingParam(settings);
-      const response = await client.messages.parse({
+      const message = await client.messages.parse({
         model: settings.model,
         max_tokens: settings.maxOutputTokens,
         system: prompt.system,
@@ -59,35 +59,23 @@ export class AnthropicProvider implements LanguageModelProvider {
           effort: settings.effort ?? 'low',
           ...(settings.forceFormat ? { format: zodOutputFormat(schema) } : {}),
         },
-        // The request shape follows the documentation for the current models;
-        // the cast covers fields newer than the installed type definitions.
-      } as never);
+      });
 
-      const message = response as unknown as {
-        model: string;
-        stop_reason: string | null;
-        content: Array<{ type: string; text?: string; thinking?: string }>;
-        parsed_output?: unknown;
-        usage?: { input_tokens?: number; output_tokens?: number };
-      };
-      const text =
-        message.parsed_output !== undefined && message.parsed_output !== null
-          ? JSON.stringify(message.parsed_output)
-          : message.content
-              .filter((b) => b.type === 'text')
-              .map((b) => b.text ?? '')
-              .join('');
+      // When a format was asked for, the reply's text is the JSON itself. The
+      // gateway checks it against the schema, as it does for the local models.
+      const text = message.content.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('');
       return {
         // Checked before the text is read: a refusal or a cut-off reply may
         // carry partial content.
         outcome:
           message.stop_reason === 'refusal' ? 'refusal' : message.stop_reason === 'max_tokens' ? 'truncated' : 'ok',
         text,
-        thinkingChars: message.content
-          .filter((b) => b.type === 'thinking')
-          .reduce((n, b) => n + (b.thinking?.length ?? 0), 0),
+        thinkingChars: message.content.reduce(
+          (total, block) => total + (block.type === 'thinking' ? block.thinking.length : 0),
+          0,
+        ),
         model: message.model,
-        server: { promptTokens: message.usage?.input_tokens, outputTokens: message.usage?.output_tokens },
+        server: { promptTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens },
       };
     } catch (e) {
       const detail = e instanceof Anthropic.APIError ? `HTTP ${e.status}: ${e.message}` : describeError(e);

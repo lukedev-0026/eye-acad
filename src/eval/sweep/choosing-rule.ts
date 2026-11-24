@@ -96,8 +96,6 @@ export function rank(step: StepId, candidates: Array<Candidate>, options: { ceil
   );
 }
 
-export const choose = (step: StepId, candidates: Array<Candidate>): Ranked | null => rank(step, candidates)[0] ?? null;
-
 // 4. At most two models across the five steps. If the winners need three, the
 //    step on the least-used model takes its best configuration on one of the
 //    other two.

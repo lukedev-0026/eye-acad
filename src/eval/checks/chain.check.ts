@@ -29,7 +29,7 @@ interface Observed {
   keyPointCheck: 'supported' | 'not_supported' | 'not_run';
 }
 
-export const chainCases = (): Promise<Array<EvalCase<Input, Expect>>> =>
+const chainCases = (): Promise<Array<EvalCase<Input, Expect>>> =>
   readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
 
 function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Graded {

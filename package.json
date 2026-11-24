@@ -19,12 +19,16 @@
     "findings": "tsx scripts/findings.ts",
     "ingest": "tsx scripts/ingest.ts",
     "retrieval-table": "tsx scripts/retrieval-table.ts",
+    "cases:review": "tsx scripts/cases-review.ts",
     "check": "tsx scripts/check.ts",
     "readback": "tsx scripts/readback.ts",
+    "voice:clips": "tsx scripts/make-voice-clips.ts",
     "sweep:preflight": "tsx scripts/sweep-preflight.ts",
     "sweep": "tsx scripts/sweep.ts",
     "sweep:report": "tsx scripts/sweep-report.ts",
-    "sweep:chart": "tsx scripts/sweep-chart.ts"
+    "sweep:chart": "tsx scripts/sweep-chart.ts",
+    "sweep:configs": "tsx scripts/write-configs.ts",
+    "followup:read": "tsx scripts/followup-read.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",

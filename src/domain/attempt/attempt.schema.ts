@@ -8,10 +8,10 @@ import { REQUEST_EYES } from '@/domain/examiner/selector.schema';
 // mistake. Hidden working (what was judged missing, search details, raw model
 // output) lives in a separate server-only record.
 
-export const PHASES = ['asking', 'follow_up', 'revising', 'complete'] as const;
+const PHASES = ['asking', 'follow_up', 'revising', 'complete'] as const;
 export type Phase = (typeof PHASES)[number];
 
-export const RevealedItemSchema = z.object({
+const RevealedItemSchema = z.object({
   id: z.string(),
   kind: z.enum(['finding', 'history']),
   eyeLabel: z.string(),
@@ -26,7 +26,7 @@ export const RevealedItemSchema = z.object({
 });
 export type RevealedItem = z.infer<typeof RevealedItemSchema>;
 
-export const TurnSchema = z.object({
+const TurnSchema = z.object({
   n: z.number().int(),
   atMs: z.number(),
   speaker: z.enum(['trainee', 'examiner']),
@@ -37,9 +37,9 @@ export const TurnSchema = z.object({
 });
 export type Turn = z.infer<typeof TurnSchema>;
 
-export const RequestSchema = z.object({ item: z.string(), eye: z.enum(REQUEST_EYES) });
+const RequestSchema = z.object({ item: z.string(), eye: z.enum(REQUEST_EYES) });
 
-export const FollowUpSchema = z.object({
+const FollowUpSchema = z.object({
   question: z.string(),
   // The trainee's own words the question responds to, when there are any.
   respondingTo: z.string().nullable(),
@@ -47,7 +47,7 @@ export const FollowUpSchema = z.object({
   atMs: z.number(),
 });
 
-export const RevisionCardSchema = z.object({
+const RevisionCardSchema = z.object({
   outcome: z.enum(['supported', 'no_support']),
   // In the trainee's terms: what the answer left out, or that nothing was.
   missed: z.string().nullable(),
@@ -65,7 +65,7 @@ export const RevisionCardSchema = z.object({
 });
 export type RevisionCard = z.infer<typeof RevisionCardSchema>;
 
-export const TimingSchema = z.object({
+const TimingSchema = z.object({
   turn: z.number().int(),
   via: z.enum(['typed', 'voice']),
   speechToTextMs: z.number().nullable(),

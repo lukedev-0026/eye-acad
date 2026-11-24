@@ -7,7 +7,6 @@ import { getPublicConfig } from '@/config/public-env';
 // Browser-side Firebase. The project id must match the server's
 // (src/infrastructure/firestore/firebase-admin.ts), or ID tokens fail verification.
 const { firebase } = getPublicConfig();
-export const FIREBASE_PROJECT_ID = firebase.projectId;
 
 const app =
   getApps()[0] ??

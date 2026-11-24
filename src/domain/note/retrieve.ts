@@ -75,7 +75,7 @@ export class Bm25 {
   }
 }
 
-export function cosine(a: Array<number>, b: Array<number>): number {
+function cosine(a: Array<number>, b: Array<number>): number {
   let dot = 0;
   let na = 0;
   let nb = 0;

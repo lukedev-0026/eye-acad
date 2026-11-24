@@ -13,7 +13,7 @@ import type { Preflight } from './sweep-rows.schema';
 // Which configurations the sweep runs, and in which order. Planning needs no
 // model: it reads what has been recorded so far and decides what comes next.
 
-export const CONFIRM_TOP = 3;
+const CONFIRM_TOP = 3;
 export const CONFIRM_TRIALS = 3;
 
 export interface Planned {

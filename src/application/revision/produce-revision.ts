@@ -25,7 +25,7 @@ export interface RevisionTrace {
 }
 
 // A named change to the logic, switched on per step in config/steps.json.
-export const CHECK_AGAINST_KEY_POINT = 'check-against-key-point';
+const CHECK_AGAINST_KEY_POINT = 'check-against-key-point';
 
 export interface RevisionInput {
   notes: ExaminerNotes;

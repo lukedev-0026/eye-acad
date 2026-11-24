@@ -4,7 +4,7 @@ import { z } from 'zod';
 // The file is read through these schemas, so a hand-edited or damaged index is
 // refused, not half-used.
 
-export const NoteSentenceSchema = z.object({
+const NoteSentenceSchema = z.object({
   // Stable id within the index, in reading order: "s1", "s2", ...
   id: z.string(),
   text: z.string(),
@@ -16,7 +16,7 @@ export const NoteSentenceSchema = z.object({
 });
 export type NoteSentence = z.infer<typeof NoteSentenceSchema>;
 
-export const NoteChunkSchema = z.object({
+const NoteChunkSchema = z.object({
   id: z.string(),
   kind: z.enum(['paragraph', 'bullet', 'table_row']),
   // Section heading, then sub-heading.

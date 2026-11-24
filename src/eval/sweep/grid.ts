@@ -10,7 +10,7 @@ export const SIZE_ORDER: Array<Size> = ['small', 'medium', 'large'];
 export const sizeOf = (model: string): Size | 'other' =>
   (Object.entries(SIZES).find(([, m]) => m === model)?.[0] as Size | undefined) ?? 'other';
 
-export const TEMPERATURES = [0, 0.7, 1] as const;
+const TEMPERATURES = [0, 0.7, 1] as const;
 export const PROMPTS: Array<PromptVariant> = ['minimal', 'rules', 'examples'];
 
 // One context size for every call, so a model is never reloaded between steps

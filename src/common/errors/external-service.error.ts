@@ -24,24 +24,6 @@ export class ModelProviderError extends ExternalServiceError {
   }
 }
 
-export class SpeechServiceError extends ExternalServiceError {
-  override readonly name = 'SpeechServiceError';
-  readonly code = 'SPEECH_SERVICE_FAILED';
-
-  constructor(message: string, options: AppErrorOptions = {}) {
-    super('deepgram', message, options);
-  }
-}
-
-export class EmbeddingServiceError extends ExternalServiceError {
-  override readonly name = 'EmbeddingServiceError';
-  readonly code = 'EMBEDDING_SERVICE_FAILED';
-
-  constructor(message: string, options: AppErrorOptions = {}) {
-    super('ollama', message, options);
-  }
-}
-
 export class AttemptStoreError extends ExternalServiceError {
   override readonly name = 'AttemptStoreError';
   readonly code = 'ATTEMPT_STORE_FAILED';

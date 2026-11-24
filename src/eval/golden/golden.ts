@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { z } from 'zod';
 
-import type { PromptVariant, StepId, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import { EvalRefusedError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
@@ -269,5 +269,3 @@ export function goldenDifferences(expected: unknown, actual: unknown, path = '')
   const keys = [...new Set([...Object.keys(expected), ...Object.keys(actual)])].sort();
   return keys.flatMap((k) => goldenDifferences(expected[k], actual[k], path ? `${path} > ${k}` : k));
 }
-
-export type { PromptVariant, StepId };

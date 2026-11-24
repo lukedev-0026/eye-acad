@@ -3,10 +3,10 @@ import { z } from 'zod';
 // Shape of the supplied case file. Unknown extra fields are allowed, so a
 // reviewer can add to the file without breaking the loader.
 
-export const EyeSchema = z.enum(['right', 'left', 'both']).nullable();
+const EyeSchema = z.enum(['right', 'left', 'both']).nullable();
 export type Eye = z.infer<typeof EyeSchema>;
 
-export const FindingSchema = z.looseObject({
+const FindingSchema = z.looseObject({
   id: z.string().min(1),
   eye: EyeSchema.default(null),
   label: z.string().min(1),
@@ -22,7 +22,7 @@ export type Finding = z.infer<typeof FindingSchema>;
 const PatientValue = z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))]);
 export type PatientValue = z.infer<typeof PatientValue>;
 
-export const ExaminerNotesSchema = z.looseObject({
+const ExaminerNotesSchema = z.looseObject({
   diagnosis: z.string().min(1),
   key_points: z.array(z.string().min(1)),
   follow_up_ideas: z.array(z.string().min(1)).default([]),

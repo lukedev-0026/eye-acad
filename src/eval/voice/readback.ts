@@ -97,7 +97,7 @@ function summariseReadback(rows: ReadonlyArray<ReadbackRow>) {
   };
 }
 
-export function readbackMarkdown(
+function readbackMarkdown(
   rows: ReadonlyArray<ReadbackRow>,
   meta: { runId: string; runs: number; voice: string },
 ): string {

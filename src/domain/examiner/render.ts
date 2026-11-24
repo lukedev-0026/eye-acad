@@ -31,7 +31,7 @@ const EYE_LABEL: Record<Exclude<Eye, null>, string> = {
 // double it.
 const BARE_NUMBER_OR_RATIO = /^\s*[+\-−]?\d+(\.\d+)?(\s*\/\s*\d+(\.\d+)?)?\s*$/;
 
-export function isBareNumberOrRatio(value: string | number): boolean {
+function isBareNumberOrRatio(value: string | number): boolean {
   return typeof value === 'number' || BARE_NUMBER_OR_RATIO.test(value);
 }
 

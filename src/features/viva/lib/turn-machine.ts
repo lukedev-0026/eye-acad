@@ -20,13 +20,6 @@ export const TURN_LABEL: Record<TurnState, string> = {
   speaking: 'Examiner is speaking',
 };
 
-export const TURN_HINT: Record<TurnState, string> = {
-  your_turn: 'Hold the button and speak, or type a request.',
-  listening: 'Release the button when you have finished.',
-  thinking: 'Please wait.',
-  speaking: 'Please wait until the examiner has finished.',
-};
-
 export function nextTurnState(state: TurnState, event: TurnEvent): TurnState {
   switch (event.type) {
     case 'START_LISTENING':

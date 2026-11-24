@@ -6,7 +6,7 @@ import { stem } from '@/domain/note/retrieve';
 
 // Lower-cased words, with apostrophes folded in and plurals stemmed, so that
 // "doesn't" and "pressures" compare sensibly.
-export function words(text: string): Array<string> {
+function words(text: string): Array<string> {
   return text
     .normalize('NFKD')
     .toLowerCase()
@@ -47,7 +47,7 @@ const VERDICT =
 
 export type CheckResult = { ok: true } | { ok: false; reason: string };
 
-export const MAX_QUESTION_WORDS = 25;
+const MAX_QUESTION_WORDS = 25;
 
 // The follow-up question may be spoken only if every meaningful word in it
 // came from the trainee's own answer or from the supplied follow-up
@@ -79,8 +79,8 @@ export function checkFollowUpQuestion(question: string, answer: string, supplied
   return { ok: true };
 }
 
-export const MIN_ANCHOR_WORDS = 3;
-export const MAX_ANCHOR_WORDS = 20;
+const MIN_ANCHOR_WORDS = 3;
+const MAX_ANCHOR_WORDS = 20;
 
 // The trainee's words the question responds to: a short, real quotation.
 export function checkAnchor(anchor: string, answer: string): CheckResult {
@@ -104,7 +104,7 @@ const SENTENCE_FRAME = new Set(
     .map(stem),
 );
 
-export const MAX_POINT_WORDS = 40;
+const MAX_POINT_WORDS = 40;
 
 // The revision point is one plain sentence, with no numbers of its own, and
 // every meaningful word in it must appear in the cited passage or in the key

@@ -6,13 +6,13 @@ import { Secret } from './secret';
 // one is optional: a fresh clone with no env file runs against the local
 // emulators and a local Ollama, by typing, with no key at all.
 
-export const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
+const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
 
-export const LOG_FORMATS = ['pretty', 'json'] as const;
+const LOG_FORMATS = ['pretty', 'json'] as const;
 export type LogFormat = (typeof LOG_FORMATS)[number];
 
-export const SPEECH_MODES = ['per-sentence', 'single'] as const;
+const SPEECH_MODES = ['per-sentence', 'single'] as const;
 export type SpeechMode = (typeof SPEECH_MODES)[number];
 
 // An unset variable and an empty one mean the same thing: use the default.
@@ -62,5 +62,3 @@ export const EnvSchema = z.object({
   VIVA_NOTE_PDF: optionalText.pipe(z.string().default('data/reference-note.pdf')),
   VIVA_NOTE_INDEX: optionalText.pipe(z.string().default('data/note-index.json')),
 });
-
-export type Env = z.infer<typeof EnvSchema>;

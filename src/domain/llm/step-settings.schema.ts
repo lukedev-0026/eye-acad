@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const STEP_IDS = ['selector', 'followup', 'coverage', 'revision', 'verifier'] as const;
 export type StepId = (typeof STEP_IDS)[number];
 
-export const PROMPT_VARIANTS = ['minimal', 'rules', 'examples'] as const;
+const PROMPT_VARIANTS = ['minimal', 'rules', 'examples'] as const;
 export type PromptVariant = (typeof PROMPT_VARIANTS)[number];
 
 // Everything that can be varied about one model call. Nothing is left to a

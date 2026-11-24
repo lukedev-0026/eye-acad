@@ -9,7 +9,7 @@ import type { SelectorOutput } from './selector.schema';
 // Turns the selector's choices into what the examiner does. Pure code: the
 // same choices always produce the same reply.
 
-export const MAX_ITEMS_PER_TURN = 6;
+const MAX_ITEMS_PER_TURN = 6;
 
 export type TurnDecision =
   | { kind: 'reveal'; items: Array<RenderedItem>; alsoNotRecorded: boolean }

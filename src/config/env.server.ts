@@ -52,7 +52,7 @@ export interface AppConfig {
   };
 }
 
-export const GENERAL_STT_MODEL = 'nova-3';
+const GENERAL_STT_MODEL = 'nova-3';
 const DEFAULT_AUTH_EMULATOR = '127.0.0.1:9099';
 const DEFAULT_FIRESTORE_EMULATOR = '127.0.0.1:8080';
 

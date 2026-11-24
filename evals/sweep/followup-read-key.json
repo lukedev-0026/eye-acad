@@ -1,0 +1,242 @@
+{
+  "items": [
+    {
+      "n": 1,
+      "caseId": "fu-rambling",
+      "question": "Why might pilocarpine not work at first when the pressure is very high?",
+      "path": "written",
+      "configs": [
+        "start",
+        "small"
+      ]
+    },
+    {
+      "n": 2,
+      "caseId": "fu-rambling",
+      "question": "Why treat the left eye as well?",
+      "path": "supplied",
+      "configs": [
+        "small"
+      ]
+    },
+    {
+      "n": 3,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "What would you do if the pressure does not come down with this plan?",
+      "path": "written",
+      "configs": [
+        "start"
+      ]
+    },
+    {
+      "n": 4,
+      "caseId": "fu-rambling",
+      "question": "What would you do if the pressure doesn't come down after giving those drops?",
+      "path": "written",
+      "configs": [
+        "start"
+      ]
+    },
+    {
+      "n": 5,
+      "caseId": "fu-gap-fellow-eye",
+      "question": "What would you do if the pressure doesn't come down?",
+      "path": "written",
+      "configs": [
+        "small",
+        "chosen"
+      ]
+    },
+    {
+      "n": 6,
+      "caseId": "fu-rambling",
+      "question": "You said you would do the other eye too, so why treat the left eye as well?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 7,
+      "caseId": "fu-complete",
+      "question": "Why treat the left eye as well?",
+      "path": "supplied",
+      "configs": [
+        "start",
+        "small"
+      ]
+    },
+    {
+      "n": 8,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "What would you do if the pressure doesn't come down?",
+      "path": "supplied",
+      "configs": [
+        "start",
+        "small"
+      ]
+    },
+    {
+      "n": 9,
+      "caseId": "fu-injection",
+      "question": "You said you would lower the pressure with drops, so what would you do if the pressure doesn't come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 10,
+      "caseId": "fu-injection",
+      "question": "Why might pilocarpine not work at first when the pressure is very high?",
+      "path": "written",
+      "configs": [
+        "start",
+        "small"
+      ]
+    },
+    {
+      "n": 11,
+      "caseId": "fu-complete",
+      "question": "Why might pilocarpine not work at first when the pressure is very high?",
+      "path": "written",
+      "configs": [
+        "start"
+      ]
+    },
+    {
+      "n": 12,
+      "caseId": "fu-complete",
+      "question": "You said you would give those drops and acetazolamide, so what would you do if the pressure does not come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 13,
+      "caseId": "fu-complete",
+      "question": "You said you would bring the pressure down, so what would you do if the pressure doesn't come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 14,
+      "caseId": "fu-rambling",
+      "question": "What would you do if the pressure doesn't come down after giving those drops and the drip?",
+      "path": "written",
+      "configs": [
+        "start"
+      ]
+    },
+    {
+      "n": 15,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "You said you would review her in a couple of days, so what would you do if the pressure does not come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 16,
+      "caseId": "fu-gap-fellow-eye",
+      "question": "You said you would lower the pressure with timolol, apraclonidine and intravenous acetazolamide, so what would you do if the pressure doesn't come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 17,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "Why treat the left eye as well?",
+      "path": "supplied",
+      "configs": [
+        "start"
+      ]
+    },
+    {
+      "n": 18,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "You said you would start chloramphenicol drops, so why treat the left eye as well?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 19,
+      "caseId": "fu-injection",
+      "question": "What would you do if the pressure doesn't come down?",
+      "path": "written",
+      "configs": [
+        "start",
+        "small"
+      ]
+    },
+    {
+      "n": 20,
+      "caseId": "fu-rambling",
+      "question": "You said you would do the other eye, so why treat the left eye as well?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 21,
+      "caseId": "fu-wrong-diagnosis",
+      "question": "You said you would start chloramphenicol drops, so what would you do if the pressure does not come down?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    },
+    {
+      "n": 22,
+      "caseId": "fu-gap-fellow-eye",
+      "question": "Why might pilocarpine not work at first when the pressure is very high?",
+      "path": "supplied",
+      "configs": [
+        "start",
+        "small",
+        "chosen"
+      ]
+    },
+    {
+      "n": 23,
+      "caseId": "fu-complete",
+      "question": "What would you do if the pressure doesn't come down?",
+      "path": "supplied",
+      "configs": [
+        "small"
+      ]
+    },
+    {
+      "n": 24,
+      "caseId": "fu-rambling",
+      "question": "Why might you choose to treat the left eye as well?",
+      "path": "written",
+      "configs": [
+        "small"
+      ]
+    },
+    {
+      "n": 25,
+      "caseId": "fu-complete",
+      "question": "You said you would do laser peripheral iridotomy in both eyes, so why treat the left eye as well?",
+      "path": "written",
+      "configs": [
+        "chosen"
+      ]
+    }
+  ],
+  "configs": {
+    "start": "start: medium, thinking off, format forced, temp 0.7, minimal prompt",
+    "small": "small: small, thinking off, format forced, temp 0.7, minimal prompt",
+    "chosen": "chosen: medium, thinking off, format forced, temp 0.7, examples prompt"
+  }
+}

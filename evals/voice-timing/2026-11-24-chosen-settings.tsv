@@ -1,0 +1,18 @@
+# Eleven spoken turns in Chrome on the chosen settings (medium model for the picker, format not forced), 24 Nov 2026, 13:45 UTC, High Power mode.
+# Speech is made one clip per sentence. The clips for every finding are made in the background when an attempt starts, so by the first question
+# here (26 seconds after the attempt began, while the opening was being read out) each reply's audio was already made: text_to_speech_ms is 0.
+# The "trainee" was a synthetic voice: the same recorded questions as the first run (evals/voice-clips), in the same order, sent through the
+# page's "No microphone?" option, which takes the same path as a held-button recording. Timer starts when the clip is handed over (the end of
+# speech) and stops when the browser reports the reply audio playing. Turn 1 is the cold first turn (the model was not loaded) and is reported separately.
+turn	via	release_to_response_ms	release_to_playback_ms	speech_to_text_ms	model_ms	text_to_speech_ms	server_total_ms	question
+1	voice	3617	3624	288	3257	0	3589	What is the intraocular pressure in the right eye? (cold)
+2	voice	1879	1887	564	1254	0	1852	Can I have gonioscopy of the right eye?
+3	voice	2245	2253	1620	556	0	2221	What is the visual acuity in both eyes?
+4	voice	2115	2121	1513	523	0	2087	What does the cornea look like in the right eye?
+5	voice	1470	1479	897	509	0	1444	What are the pupils doing?
+6	voice	1757	1763	1152	537	0	1729	Does she have any allergies?
+7	voice	1556	1564	994	496	0	1531	What medications is she taking?
+8	voice	1948	1956	1286	578	0	1909	Is there a relative afferent pupillary defect?
+9	voice	1494	1503	861	559	0	1465	What is the anterior chamber depth?
+10	voice	2314	2321	1699	539	0	2287	What is the central corneal thickness?
+11	voice	1540	1547	954	502	0	1502	What is the blood pressure?

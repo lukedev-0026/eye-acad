@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 
+import { z } from 'zod';
+
 import type { PromptVariant, StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import { EvalRefusedError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
 import type { ResultRow } from '@/eval/run/result-row';
 import { STEP_EVALS } from '@/eval/steps/registry';
@@ -20,7 +23,7 @@ import { PROMPTS, settingsFor } from '@/eval/sweep/grid';
 // The hashes are committed. If a later change moves any of them, either the
 // change is wrong or it was meant, and the file says which cases moved.
 
-export type Golden = {
+export interface Golden {
   // step -> prompt wording -> request shape -> case id -> hash of the chat request bodies
   requests: Record<string, Record<string, Record<string, Record<string, string>>>>;
   // Every distinct request for a query embedding, hashed together.
@@ -30,7 +33,7 @@ export type Golden = {
   // "step|configId" -> the replayed outcomes of that configuration's saved replies
   replays: Record<string, { rows: number; digest: string }>;
   skipped: { infraErrors: number; unknownCases: number };
-};
+}
 
 // The two request shapes cover both branches of each setting: format forced or
 // described in words, thinking off or on.
@@ -41,17 +44,32 @@ const SHAPES = {
 
 const sha256 = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
-type ChatBody = { model?: string; messages?: unknown };
-type EmbedBody = { input?: Array<string> };
+// What the app sends to the model, as far as the recorder reads it. A request
+// is checked against this and then kept exactly as it was sent, because it is
+// the sent form that is hashed.
+const ChatBodySchema = z.looseObject({
+  model: z.string(),
+  messages: z.array(z.looseObject({ role: z.string(), content: z.string() })),
+  format: z.unknown().optional(),
+});
+export type ChatBody = z.infer<typeof ChatBodySchema>;
+const isChatBody = (body: unknown): body is ChatBody => ChatBodySchema.safeParse(body).success;
 
-export type Recorder = {
-  chat: Array<unknown>;
+const EmbedBodySchema = z.looseObject({ input: z.array(z.string()).optional() });
+
+// The query vectors kept with the tests: the text searched for, and its vector.
+export const PinnedVectorsSchema = z.record(z.string(), z.array(z.number()));
+
+export interface Recorder {
+  chat: Array<ChatBody>;
   embeds: Map<string, unknown>;
   missingVectors: Set<string>;
   replies: Array<string>;
+  // When set, decides each reply from the request, in place of `replies`.
+  responder: ((body: ChatBody) => string) | null;
   doneReason: 'stop' | 'length';
   restore: () => void;
-};
+}
 
 // Replaces `fetch` for the length of a golden run. Chat requests are recorded
 // and answered from `replies`. Embedding requests are answered from the pinned
@@ -59,7 +77,7 @@ export type Recorder = {
 export function installRecorder(
   vectors: Map<string, Array<number>>,
   // Only when the pinned vectors are being captured: the real network.
-  capture?: (texts: Array<string>, body: unknown) => Promise<Array<Array<number>> | null>,
+  capture?: (texts: Array<string>, body: Record<string, unknown>) => Promise<Array<Array<number>> | null>,
 ): Recorder {
   const original = globalThis.fetch;
   const recorder: Recorder = {
@@ -67,6 +85,7 @@ export function installRecorder(
     embeds: new Map(),
     missingVectors: new Set(),
     replies: ['{}'],
+    responder: null,
     doneReason: 'stop',
     restore: () => {
       globalThis.fetch = original;
@@ -76,10 +95,15 @@ export function installRecorder(
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const body: unknown = JSON.parse(typeof init?.body === 'string' ? init.body : 'null');
     if (url.endsWith('/api/chat')) {
+      if (!isChatBody(body)) throw new EvalRefusedError(`The app sent a chat request the recorder cannot read: ${url}`);
       recorder.chat.push(body);
-      const content = recorder.replies.length > 1 ? (recorder.replies.shift() ?? '') : (recorder.replies[0] ?? '');
+      const content = recorder.responder
+        ? recorder.responder(body)
+        : recorder.replies.length > 1
+          ? (recorder.replies.shift() ?? '')
+          : (recorder.replies[0] ?? '');
       return Response.json({
-        model: (body as ChatBody).model,
+        model: body.model,
         message: { content },
         done_reason: recorder.doneReason,
         load_duration: 0,
@@ -90,11 +114,12 @@ export function installRecorder(
       });
     }
     if (url.endsWith('/api/embed')) {
-      const texts = (body as EmbedBody).input ?? [];
+      const embed = EmbedBodySchema.safeParse(body);
+      const texts = embed.success ? (embed.data.input ?? []) : [];
       recorder.embeds.set(sha256(body), body);
       const missing = texts.filter((t) => !vectors.has(t));
-      if (missing.length && capture) {
-        const fresh = await capture(missing, body);
+      if (missing.length && capture && embed.success) {
+        const fresh = await capture(missing, embed.data);
         missing.forEach((t, i) => {
           const v = fresh?.[i];
           if (v) vectors.set(t, v);
@@ -107,7 +132,7 @@ export function installRecorder(
       }
       return Response.json({ embeddings: found });
     }
-    throw new Error(`The golden run made a network call it should not have: ${url}`);
+    throw new EvalRefusedError(`The golden run made a network call it should not have: ${url}`);
   };
   return recorder;
 }
@@ -124,7 +149,7 @@ async function recordRequests(
   const promptFingerprints: Golden['promptFingerprints'] = {};
   for (const step of STEP_IDS) {
     const evalDef = STEP_EVALS[step];
-    const cases = ((await evalDef.cases(ctx)) as Array<EvalCase>).filter((c) => c.split === 'tune');
+    const cases = (await evalDef.cases(ctx)).filter((c) => c.split === 'tune');
     requests[step] = {};
     promptFingerprints[step] = {};
     for (const variant of PROMPTS) {
@@ -139,7 +164,7 @@ async function recordRequests(
           recorder.doneReason = 'stop';
           await evalDef.run(c, settings, ctx);
           perCase.push([c.id, sha256(recorder.chat)]);
-          prompts.push(recorder.chat.map((body) => (body as ChatBody).messages));
+          prompts.push(recorder.chat.map((body) => body.messages));
         }
         requests[step][variant][shape] = keyed(perCase);
         if (flags.forceFormat) promptFingerprints[step][variant] = sha256(prompts).slice(0, 10);
@@ -149,7 +174,7 @@ async function recordRequests(
   return { requests, promptFingerprints };
 }
 
-export type ReplayDetail = {
+export interface ReplayDetail {
   key: string;
   outcome: string;
   observed: unknown;
@@ -159,7 +184,7 @@ export type ReplayDetail = {
   fallback: boolean;
   detail: string;
   secondary: unknown;
-};
+}
 
 async function replay(
   ctx: EvalContext,
@@ -168,7 +193,7 @@ async function replay(
 ): Promise<{ replays: Golden['replays']; skipped: Golden['skipped']; details: Array<ReplayDetail> }> {
   const cases = new Map<string, EvalCase>();
   for (const step of STEP_IDS) {
-    for (const c of (await STEP_EVALS[step].cases(ctx)) as Array<EvalCase>) cases.set(`${step}|${c.id}`, c);
+    for (const c of await STEP_EVALS[step].cases(ctx)) cases.set(`${step}|${c.id}`, c);
   }
   const byConfig = new Map<string, Array<ReplayDetail>>();
   const details: Array<ReplayDetail> = [];

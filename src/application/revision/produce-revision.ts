@@ -14,7 +14,7 @@ import type { NoteIndex } from '@/domain/note/note.schema';
 import { retrieve } from '@/domain/note/retrieve';
 import type { Retrieval } from '@/domain/note/retrieve';
 
-export type RevisionTrace = {
+export interface RevisionTrace {
   coverage: CoverageResult | null;
   target: { id: string; kind: string; text: string } | null;
   retrieval: Retrieval | null;
@@ -22,19 +22,19 @@ export type RevisionTrace = {
   verifier: VerifierResult | null;
   // The improvement, when it is switched on: see below.
   keyPointCheck: VerifierResult | null;
-};
+}
 
 // A named change to the logic, switched on per step in config/steps.json.
 export const CHECK_AGAINST_KEY_POINT = 'check-against-key-point';
 
-export type RevisionInput = {
+export interface RevisionInput {
   notes: ExaminerNotes;
   // The main answer only. The reply to the follow-up is not judged: the
   // follow-up can hint at a gap, and counting the reply would hide it.
   answer: string;
   followUpQuestion: string | null;
   guidance: string | null;
-};
+}
 
 // From the trainee's answer to the card they see:
 //   1. what did the answer miss?            (model judges, code checks quotes)
@@ -92,11 +92,11 @@ export async function produceRevision(
 
   // The note says of itself that it is a revision summary, not guidance.
   const noteLine = index.disclaimer.split(/(?<=[.])\s+/).find((s) => /not clinical guidance/i.test(s)) ?? null;
-  const base = {
+  const base: Pick<RevisionCard, 'missed' | 'noteLine' | 'retrievedPages' | 'retrievalMode'> = {
     missed,
     noteLine,
-    retrievedPages: [] as Array<number>,
-    retrievalMode: 'keyword_only' as RevisionCard['retrievalMode'],
+    retrievedPages: [],
+    retrievalMode: 'keyword_only',
   };
   const noSupport = (extra: Partial<RevisionCard> = {}): RevisionCard => ({
     ...base,

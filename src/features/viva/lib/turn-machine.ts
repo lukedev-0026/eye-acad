@@ -49,4 +49,4 @@ export function nextTurnState(state: TurnState, event: TurnEvent): TurnState {
   }
 }
 
-export const canTraineeAct = (state: TurnState) => state === 'your_turn';
+export const canTraineeAct = (state: TurnState): boolean => state === 'your_turn';

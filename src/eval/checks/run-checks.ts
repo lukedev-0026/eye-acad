@@ -10,7 +10,7 @@ import type { EvalCase, EvalContext } from '@/eval/eval.types';
 import { PATHS, resultsFile } from '@/eval/paths';
 import { checksMarkdown } from '@/eval/report/checks.report';
 import type { ResultRow } from '@/eval/run/result-row';
-import { appendRow, readRows } from '@/eval/run/results.store';
+import { appendRow } from '@/eval/run/results.store';
 import { runCases } from '@/eval/run/run-cases';
 import { selfTest } from '@/eval/run/self-test';
 import { summarise } from '@/eval/run/summarise';
@@ -19,6 +19,7 @@ import { STEP_EVALS } from '@/eval/steps/registry';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
 import { runChain } from './chain.check';
+import { readCheckRun } from './check-run';
 import { runRequiredChecks } from './required.check';
 
 export interface CheckOptions {
@@ -103,7 +104,9 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
       split: options.split,
       trials: options.trials,
       label: 'configured',
-      onRow: (row) => progress(mark(row)),
+      onRow: (row) => {
+        progress(mark(row));
+      },
     });
     const s = summarise(rows);
     print(
@@ -112,7 +115,7 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
   }
 
   if (options.report) {
-    await writeFile(PATHS.checksMarkdown, `${checksMarkdown(await readRows(resultsFile(runId)))}\n`);
+    await writeFile(PATHS.checksMarkdown, `${checksMarkdown(await readCheckRun(resultsFile(runId)))}\n`);
     print(`\nWrote ${PATHS.checksMarkdown} from ${resultsFile(runId)}`);
   }
 }
@@ -128,7 +131,7 @@ async function runStepCases(
   const { split, trials } = run.options;
   let cases: Array<EvalCase>;
   try {
-    cases = ((await evalDef.cases(ctx)) as Array<EvalCase>).filter((c) => split === 'all' || c.split === split);
+    cases = (await evalDef.cases(ctx)).filter((c) => split === 'all' || c.split === split);
   } catch (error) {
     print(`\n${step}: no case set yet (${errorMessage(error).slice(0, 80)})`);
     return;
@@ -149,7 +152,9 @@ async function runStepCases(
     ctx,
     runId: run.runId,
     stage: 'check',
-    onRow: (row) => progress(mark(row)),
+    onRow: (row) => {
+      progress(mark(row));
+    },
   });
   const s = summarise(rows);
   print(

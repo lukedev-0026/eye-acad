@@ -17,6 +17,9 @@ export interface RuleOutcome {
   readonly complete: boolean;
 }
 
+const hasEveryStep = (ranked: Partial<Record<StepId, Array<Ranked>>>): ranked is Record<StepId, Array<Ranked>> =>
+  STEP_IDS.every((step) => ranked[step] !== undefined);
+
 // Applies the written rule (evals/sweep/RULE.md) to what the sweep recorded.
 export function applyRule(data: SweepData): RuleOutcome {
   const ranked: Partial<Record<StepId, Array<Ranked>>> = {};
@@ -37,15 +40,14 @@ export function applyRule(data: SweepData): RuleOutcome {
     ranked[step] = rank(step, pool);
   }
 
-  const complete = stepsWithData.length === STEP_IDS.length;
-  if (complete) {
-    const { chosen, changed } = limitModels(ranked as Record<StepId, Array<Ranked>>);
-    return { ranked, chosen, stepsWithData, changed, complete };
+  if (hasEveryStep(ranked)) {
+    const { chosen, changed } = limitModels(ranked);
+    return { ranked, chosen, stepsWithData, changed, complete: true };
   }
   const chosen: Partial<Record<StepId, Ranked>> = {};
   for (const step of stepsWithData) {
     const best = ranked[step]?.[0];
     if (best) chosen[step] = best;
   }
-  return { ranked, chosen, stepsWithData, changed: [], complete };
+  return { ranked, chosen, stepsWithData, changed: [], complete: false };
 }

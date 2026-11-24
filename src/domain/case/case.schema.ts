@@ -41,13 +41,13 @@ export const CaseFileSchema = z
     reference_source: z.looseObject({ note: z.string().optional() }).optional(),
   })
   .refine((c) => new Set(c.findings.map((f) => f.id)).size === c.findings.length, {
-    message: 'Two findings share the same id.',
+    error: 'Two findings share the same id.',
   });
 
-// What the questioning phase is allowed to hold: everything except the notes.
 export type CaseFile = z.infer<typeof CaseFileSchema>;
 
-export type PublicCase = {
+// What the questioning phase is allowed to hold: everything except the notes.
+export interface PublicCase {
   caseId: string;
   title: string;
   openingPrompt: string;
@@ -55,4 +55,4 @@ export type PublicCase = {
   findings: Array<Finding>;
   // Changes whenever the file's bytes change. Stored with each attempt.
   fileHash: string;
-};
+}

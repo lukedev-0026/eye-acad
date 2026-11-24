@@ -5,7 +5,7 @@ import { speakLabel, speakValue } from './spoken-value';
 // Turns one row of the case file into the words shown and the words spoken.
 // No model is involved: this is the only place clinical values become text.
 
-export type RenderedItem = {
+export interface RenderedItem {
   // A finding id, or `history:<key>` for part of the patient's history.
   id: string;
   kind: 'finding' | 'history';
@@ -17,7 +17,7 @@ export type RenderedItem = {
   available: boolean;
   display: string;
   speech: string;
-};
+}
 
 const EYE_LABEL: Record<Exclude<Eye, null>, string> = {
   right: 'Right eye',

@@ -145,7 +145,9 @@ describe('the request context', () => {
   });
 
   it('does nothing when asked to add to a context that is not open', () => {
-    expect(() => annotateRequestContext({ uid: 'nobody' })).not.toThrow();
+    expect(() => {
+      annotateRequestContext({ uid: 'nobody' });
+    }).not.toThrow();
     expect(currentRequestContext()).toBeUndefined();
   });
 });

@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
+import type { JSX } from 'react';
 
-export function NotFoundScreen() {
+export function NotFoundScreen(): JSX.Element {
   return (
     <main className="page narrow">
       <h1>Page not found</h1>

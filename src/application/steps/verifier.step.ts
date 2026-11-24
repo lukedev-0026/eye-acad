@@ -14,11 +14,11 @@ const VerifierSchema = z.object({
 });
 export type VerifierOutput = z.infer<typeof VerifierSchema>;
 
-export type VerifierResult = {
+export interface VerifierResult {
   call: CallResult<VerifierOutput>;
   // Anything other than a clear "supported" counts as not supported.
   supported: boolean;
-};
+}
 
 // The passage as the verifier sees it, with the quoted sentences marked.
 export function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
@@ -54,5 +54,5 @@ export async function runVerifier(
     VerifierSchema,
     { step: 'verifier' },
   );
-  return { call, supported: call.outcome === 'ok' && call.value?.verdict === 'supported' };
+  return { call, supported: call.outcome === 'ok' && call.value.verdict === 'supported' };
 }

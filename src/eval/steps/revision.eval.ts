@@ -17,7 +17,7 @@ export const RevisionInputSchema = z.object({
 export const RevisionExpectSchema = z.object({ support: z.boolean(), targetId: z.string().optional() });
 type Input = z.infer<typeof RevisionInputSchema>;
 type Expect = z.infer<typeof RevisionExpectSchema>;
-type Observed = {
+interface Observed {
   outcome: 'supported' | 'no_support' | 'unusable';
   cited: Array<string>;
   citedText: string;
@@ -28,7 +28,7 @@ type Observed = {
   retrievedPages: Array<number>;
   // True when the code floor refused before any model was called.
   refusedByFloor: boolean;
-};
+}
 
 function spec(ctx: EvalContext, id: string | undefined): RetrievalTarget | undefined {
   return ctx.targets.find((t) => t.id === id);

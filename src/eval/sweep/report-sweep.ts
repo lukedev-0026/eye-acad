@@ -1,5 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
+import { z } from 'zod';
+
 import { sha1Hex } from '@/common/hash.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
@@ -53,11 +55,13 @@ async function shortHash(file: string): Promise<string> {
 // wording. It comes from the golden file, which a check (`pnpm golden`) holds
 // equal to what the code sends. Hashing the prompt's source file would change
 // whenever that file was reformatted or moved, with the prompt unchanged.
+const GoldenFingerprintsSchema = z.looseObject({
+  promptFingerprints: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+});
+
 async function readPromptFingerprints(): Promise<Record<string, Record<string, string>>> {
   try {
-    const golden = JSON.parse(await readFile(PATHS.golden, 'utf8')) as {
-      promptFingerprints?: Record<string, Record<string, string>>;
-    };
+    const golden = GoldenFingerprintsSchema.parse(JSON.parse(await readFile(PATHS.golden, 'utf8')));
     return golden.promptFingerprints ?? {};
   } catch {
     return {};

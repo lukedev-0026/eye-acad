@@ -7,7 +7,7 @@ import { median } from '@/common/stats';
 // is playing. It therefore includes: upload, speech-to-text, the model call,
 // building the sentence, text-to-speech, download and decode. It excludes the
 // time the trainee spent speaking, and the playing time of the reply itself.
-export type TurnTiming = {
+export interface TurnTiming {
   n: number;
   via: 'voice' | 'typed';
   // Release -> the server's reply arrived in the browser.
@@ -20,12 +20,18 @@ export type TurnTiming = {
     textToSpeechMs: number | null;
     serverTotalMs: number;
   };
-};
+}
 
-export function summarise(timings: Array<TurnTiming>) {
-  const played = timings
-    .filter((t) => t.via === 'voice' && t.toPlaybackMs !== null)
-    .map((t) => t.toPlaybackMs as number);
+export interface TimingSummary {
+  n: number;
+  medianMs: number | null;
+  minMs: number;
+  maxMs: number;
+}
+
+// Spoken turns whose reply was played. Null when there are none yet.
+export function summarise(timings: ReadonlyArray<TurnTiming>): TimingSummary | null {
+  const played = timings.flatMap((t) => (t.via === 'voice' && t.toPlaybackMs !== null ? [t.toPlaybackMs] : []));
   return played.length
     ? { n: played.length, medianMs: median(played), minMs: Math.min(...played), maxMs: Math.max(...played) }
     : null;

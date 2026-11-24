@@ -3,14 +3,14 @@ import type { SelectorRequest } from '@/domain/examiner/selector.schema';
 import type { Prompt } from '@/domain/llm/call-result';
 import type { PromptVariant } from '@/domain/llm/step-settings.schema';
 
-export type SelectorPromptInput = {
+export interface SelectorPromptInput {
   openingPrompt: string;
   catalogue: Catalogue;
   // The previous turn's choices, so "and the left?" can be resolved without
   // replaying any earlier words from the trainee.
   previous: Array<SelectorRequest>;
   utterance: string;
-};
+}
 
 const TASK = `You are the routing step of a practice oral exam for trainee eye doctors. A trainee is asking an examiner for information about one patient. Your only job is to say which items on a fixed list the trainee is asking for.
 

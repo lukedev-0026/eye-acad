@@ -6,9 +6,9 @@ export function parseCsv(text: string): Array<Record<string, string>> {
   let cell = '';
   let quoted = false;
   for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    const ch = text.charAt(i);
     if (quoted) {
-      if (ch === '"' && text[i + 1] === '"') {
+      if (ch === '"' && text.charAt(i + 1) === '"') {
         cell += '"';
         i++;
       } else if (ch === '"') quoted = false;

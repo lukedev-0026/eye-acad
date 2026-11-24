@@ -12,11 +12,11 @@ import type { StepSettings } from '@/domain/llm/step-settings.schema';
 
 export const MAX_UTTERANCE_CHARS = 500;
 
-export type SelectorRun = {
+export interface SelectorRun {
   call: CallResult<SelectorOutput>;
   // Undefined when the call did not produce a usable choice.
   decision?: TurnDecision;
-};
+}
 
 // One request from the trainee -> one model call -> a decision made by code.
 // The model sees the menu and the words. It never sees a result.

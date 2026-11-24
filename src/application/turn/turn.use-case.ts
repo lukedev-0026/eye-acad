@@ -12,19 +12,19 @@ import type { SpokenReply } from '@/domain/speech/speech.service';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
-export type TurnTimings = {
+export interface TurnTimings {
   speechToTextMs: number | null;
   modelMs: number | null;
   textToSpeechMs: number | null;
   serverTotalMs: number;
-};
+}
 
-export type TurnResult = {
+export interface TurnResult {
   reply: ExaminerReply;
   heard: string;
   speech: SpokenReply | null;
   timings: TurnTimings;
-};
+}
 
 // One request for findings. A spoken request is turned into text first; from
 // then on typed and spoken requests take exactly the same path.

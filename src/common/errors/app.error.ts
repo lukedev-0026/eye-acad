@@ -1,3 +1,4 @@
+import { describeValue } from './describe-value';
 import type { ErrorCode } from './error-codes';
 
 export type ErrorDetails = Readonly<Record<string, unknown>>;
@@ -60,7 +61,7 @@ function deepestCause(error: Error): unknown {
 // An error, and the chain of causes under it, as plain data.
 export function serialiseError(value: unknown, depth = 0): SerialisedError {
   if (!(value instanceof Error)) {
-    return { name: 'NonError', message: typeof value === 'string' ? value : describeValue(value) };
+    return { name: 'NonError', message: describeValue(value) };
   }
   const isApp = value instanceof AppError;
   return {
@@ -70,12 +71,4 @@ export function serialiseError(value: unknown, depth = 0): SerialisedError {
     ...(isApp && value.details ? { details: value.details } : {}),
     ...(value.cause !== undefined && depth < MAX_CAUSE_DEPTH ? { cause: serialiseError(value.cause, depth + 1) } : {}),
   };
-}
-
-function describeValue(value: unknown): string {
-  try {
-    return JSON.stringify(value) ?? String(value);
-  } catch {
-    return Object.prototype.toString.call(value);
-  }
 }

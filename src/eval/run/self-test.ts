@@ -1,8 +1,18 @@
 import type { AnyStepEval, EvalCase, EvalContext } from '@/eval/eval.types';
 
+export interface SelfTestResult {
+  cases: number;
+  // Cases whose own expected answer passes the grader. It should be all of them.
+  idealPass: number;
+  wrong: Array<string>;
+  // The floor: what a step that ignores its input scores.
+  constantName: string;
+  constantPass: number;
+}
+
 // Before any model runs: do the graders agree with their own expected
 // answers, and what does a step that ignores its input score?
-export function selfTest(evalDef: AnyStepEval, cases: Array<EvalCase>, ctx: EvalContext) {
+export function selfTest(evalDef: AnyStepEval, cases: ReadonlyArray<EvalCase>, ctx: EvalContext): SelfTestResult {
   const wrong: Array<string> = [];
   let constantPass = 0;
   for (const c of cases) {

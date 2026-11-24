@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { inspect } from 'node:util';
 
-import { describe, expect, it } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import { InvalidEnvironmentError } from '@/config/config.error';
 import { loadConfig } from '@/config/env.server';
@@ -106,8 +106,8 @@ describe('loadConfig', () => {
     const config = loadConfig({ DEEPGRAM_API_KEY: 'dg-very-secret' }, PROJECT);
     const key = config.deepgram.apiKey;
 
-    expect(key).toBeInstanceOf(Secret);
-    expect(key?.reveal()).toBe('dg-very-secret');
+    assert(key instanceof Secret);
+    expect(key.reveal()).toBe('dg-very-secret');
     expect(String(key)).toBe('[REDACTED]');
     expect(`${key}`).toBe('[REDACTED]');
     expect(JSON.stringify(config)).not.toContain('dg-very-secret');

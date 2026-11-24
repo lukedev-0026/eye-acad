@@ -12,7 +12,11 @@ import { isQuoteFrom } from '@/domain/text/text-checks';
 export const STATUSES = ['covered', 'partial', 'not_covered'] as const;
 export type Status = (typeof STATUSES)[number];
 
-export type CoverageItem = { id: string; kind: 'diagnosis' | 'key_point'; text: string };
+export interface CoverageItem {
+  id: string;
+  kind: 'diagnosis' | 'key_point';
+  text: string;
+}
 
 // The diagnosis counts as an item alongside the key points. Otherwise a wrong
 // diagnosis could never be the thing to revise.
@@ -44,7 +48,7 @@ export type JudgedItem = CoverageItem & {
   quote: string | null;
 };
 
-export type CoverageResult = {
+export interface CoverageResult {
   call: CallResult<CoverageOutput>;
   items: Array<JudgedItem>;
   // The one thing to revise, or null when nothing was missed.
@@ -52,7 +56,7 @@ export type CoverageResult = {
   // model: the model named it and code agreed it was open.
   // order: code took the first open item in case-file order.
   targetChosenBy: 'model' | 'order' | null;
-};
+}
 
 // Works out what the answer missed. The model judges; code checks its
 // evidence and has the final say on which gap is used.
@@ -96,7 +100,7 @@ export async function runCoverage(
   const named = judged.find((i) => i.id === call.value.priority);
   let target: JudgedItem | null = null;
   let targetChosenBy: CoverageResult['targetChosenBy'] = null;
-  if (named && named.status === 'not_covered') {
+  if (named?.status === 'not_covered') {
     target = named;
     targetChosenBy = 'model';
   } else if (open.length) {

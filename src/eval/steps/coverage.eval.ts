@@ -17,7 +17,11 @@ export const CoverageExpectSchema = z.object({
 });
 type Input = z.infer<typeof CoverageInputSchema>;
 type Expect = z.infer<typeof CoverageExpectSchema>;
-type Observed = { target: string; statuses: Record<string, Status>; chosenBy: string | null };
+interface Observed {
+  target: string;
+  statuses: Record<string, Status>;
+  chosenBy: string | null;
+}
 
 export const coverageEval: StepEval<Input, Expect, Observed> = {
   step: 'coverage',

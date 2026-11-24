@@ -29,7 +29,7 @@ function shuffled<T>(items: Array<T>, seed: string): Array<T> {
   return out;
 }
 
-export type RunOptions = {
+export interface RunOptions {
   evalDef: AnyStepEval;
   cases: Array<EvalCase>;
   settings: StepSettings;
@@ -44,7 +44,7 @@ export type RunOptions = {
   // Return true to stop this configuration early (for example, far too slow).
   shouldStop?: (rows: Array<ResultRow>) => boolean;
   onRow?: (row: ResultRow) => void;
-};
+}
 
 // Runs one configuration over a set of cases, one call at a time, writing a
 // row per call as it goes.

@@ -1,12 +1,12 @@
 import { median } from '@/common/stats';
 import type { CallOutcome } from '@/domain/llm/call-result';
 
-import type { ResultRow } from './result-row';
+import type { ChainRow, ResultRow } from './result-row';
 
 // How one configuration did on one set of cases. n is the number of CASES and
 // k the number that passed on every run: twenty cases run three times is 20,
 // never 60.
-export type Summary = {
+export interface Summary {
   cases: number;
   trialsPerCase: number;
   casesAllPass: number;
@@ -27,12 +27,12 @@ export type Summary = {
   secondaryK: number;
   secondaryN: number;
   secondaryLeftOut: number;
-};
+}
 
-export function summarise(rows: Array<ResultRow>): Summary {
+export function summarise(rows: ReadonlyArray<ResultRow | ChainRow>): Summary {
   // A call that never reached the model says nothing about the configuration.
   const counted = rows.filter((r) => r.outcome !== 'infra_error');
-  const byCase = new Map<string, Array<ResultRow>>();
+  const byCase = new Map<string, Array<ResultRow | ChainRow>>();
   for (const r of counted) byCase.set(r.caseId, [...(byCase.get(r.caseId) ?? []), r]);
   const groups = [...byCase.values()];
   const timed = counted.filter((r) => r.calls > 0).map((r) => r.ms);

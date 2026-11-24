@@ -1,12 +1,9 @@
-import { z } from 'zod';
-
 import type { StepId } from '@/domain/llm/step-settings.schema';
-import { EvalRefusedError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
 import { resultsFile } from '@/eval/paths';
 import { ResultRowSchema, rowKey } from '@/eval/run/result-row';
 import type { ResultRow } from '@/eval/run/result-row';
-import { readRows } from '@/eval/run/results.store';
+import { parseRow, readRows } from '@/eval/run/results.store';
 import { summarise } from '@/eval/run/summarise';
 import type { Summary } from '@/eval/run/summarise';
 import { STEP_EVALS } from '@/eval/steps/registry';
@@ -18,8 +15,6 @@ import type { ConfigRow, ModelLoadedRow, RunRow } from './sweep-rows.schema';
 // Everything the sweep has recorded so far, read back from its results file.
 // The runner uses it to resume; the report and the chart use nothing else.
 export interface SweepData {
-  // Every row, as saved.
-  readonly rows: Array<Record<string, unknown>>;
   readonly results: Array<ResultRow>;
   readonly configs: Map<string, ConfigRow>;
   readonly runs: Array<RunRow>;
@@ -30,21 +25,10 @@ export interface SweepData {
   readonly stopped: Set<string>;
 }
 
-// A saved row of a known kind is checked against its shape. A file with a
-// damaged row is refused by line, not half-read.
-function parseRow<T>(schema: z.ZodType<T>, row: unknown, file: string, line: number): T {
-  const parsed = schema.safeParse(row);
-  if (!parsed.success) {
-    throw new EvalRefusedError(`${file}, line ${line}, is not a valid row:\n${z.prettifyError(parsed.error)}`);
-  }
-  return parsed.data;
-}
-
 export async function loadSweep(runId: string): Promise<SweepData> {
   const file = resultsFile(runId);
   const rows = await readRows(file);
   const data: SweepData = {
-    rows,
     results: [],
     configs: new Map(),
     runs: [],

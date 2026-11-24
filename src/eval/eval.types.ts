@@ -14,7 +14,7 @@ import type { RetrievalTargetSchema } from './eval-case.schema';
 
 export type Split = 'tune' | 'holdout';
 
-export type EvalCase<I = unknown, E = unknown> = {
+export interface EvalCase<I = unknown, E = unknown> {
   id: string;
   // tune: used to choose settings and the improvement.
   // holdout: only ever used to report.
@@ -23,11 +23,11 @@ export type EvalCase<I = unknown, E = unknown> = {
   input: I;
   expect: E;
   note?: string;
-};
+}
 
 export type RetrievalTarget = z.infer<typeof RetrievalTargetSchema>;
 
-export type EvalContext = {
+export interface EvalContext {
   // The model gateway the steps are called with: the app's own.
   models: LanguageModelGateway;
   publicCase: PublicCase;
@@ -38,9 +38,9 @@ export type EvalContext = {
   targets: Array<RetrievalTarget>;
   // Query embeddings, kept so that every configuration searches identically.
   vectors: Map<string, Array<number> | null>;
-};
+}
 
-export type Graded = {
+export interface Graded {
   pass: boolean;
   // The expensive kind of mistake for this step, counted separately.
   costly: boolean;
@@ -49,9 +49,9 @@ export type Graded = {
   detail: string;
   // A second, finer count where a step has one (item agreement for coverage).
   secondary?: { k: number; n: number; leftOut: number };
-};
+}
 
-export type StepRun<O> = {
+export interface StepRun<O> {
   outcome: CallOutcome;
   observed: O;
   calls: number;
@@ -63,9 +63,9 @@ export type StepRun<O> = {
   thinkingChars: number;
   model: string;
   raw: string;
-};
+}
 
-export type StepEval<I, E, O> = {
+export interface StepEval<I, E, O> {
   step: StepId;
   cases: (ctx: EvalContext) => Promise<Array<EvalCase<I, E>>>;
   run: (c: EvalCase<I, E>, settings: StepSettings, ctx: EvalContext) => Promise<StepRun<O>>;
@@ -75,7 +75,7 @@ export type StepEval<I, E, O> = {
   ideal: (c: EvalCase<I, E>, ctx: EvalContext) => O;
   // What a step that ignores its input would produce: the floor.
   constant: { name: string; observe: (c: EvalCase<I, E>, ctx: EvalContext) => O };
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyStepEval = StepEval<any, any, any>;

@@ -5,7 +5,7 @@ import type { StepsConfig } from '@/domain/llm/step-settings.schema';
 import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
 import { InvalidEvalCaseError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext, Graded } from '@/eval/eval.types';
-import type { ResultRow } from '@/eval/run/result-row';
+import type { ChainRow } from '@/eval/run/result-row';
 import { appendRow } from '@/eval/run/results.store';
 import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision.eval';
 
@@ -17,7 +17,7 @@ import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision
 
 type Input = z.infer<typeof RevisionInputSchema>;
 type Expect = z.infer<typeof RevisionExpectSchema>;
-type Observed = {
+interface Observed {
   outcome: 'supported' | 'no_support' | 'unavailable';
   cited: Array<string>;
   page: string | null;
@@ -27,9 +27,10 @@ type Observed = {
   selectionOutcome: string | null;
   supportCheck: 'supported' | 'not_supported' | 'not_reached';
   keyPointCheck: 'supported' | 'not_supported' | 'not_run';
-};
+}
 
-export const chainCases = () => readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
+export const chainCases = (): Promise<Array<EvalCase<Input, Expect>>> =>
+  readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
 
 function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Graded {
   if (o.outcome === 'unavailable')
@@ -72,11 +73,11 @@ export async function runChain(
     split: 'tune' | 'holdout';
     trials: number;
     label: string;
-    onRow?: (row: ResultRow) => void;
+    onRow?: (row: ChainRow) => void;
   },
-): Promise<Array<ResultRow>> {
+): Promise<Array<ChainRow>> {
   const cases = (await chainCases()).filter((c) => c.split === o.split);
-  const rows: Array<ResultRow> = [];
+  const rows: Array<ChainRow> = [];
   for (let trial = 1; trial <= o.trials; trial++) {
     for (const c of cases) {
       const target = resolveTarget(ctx, c.input.target);
@@ -141,7 +142,7 @@ export async function runChain(
         };
       }
       const g = grade(c, observed, ctx);
-      const row = {
+      const row: ChainRow = {
         type: 'result',
         runId: o.runId,
         stage: o.stage,
@@ -168,9 +169,9 @@ export async function runChain(
         model,
         observed,
         raw: '',
-      } as unknown as ResultRow;
+      };
       rows.push(row);
-      await appendRow(o.runId, row as unknown as Record<string, unknown>);
+      await appendRow(o.runId, row);
       o.onRow?.(row);
     }
   }

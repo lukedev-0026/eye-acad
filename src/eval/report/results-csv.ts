@@ -77,8 +77,8 @@ export interface CsvMeta {
   readonly promptFingerprints: Record<string, Record<string, string>>;
 }
 
-const csvCell = (value: unknown): string => {
-  const text = value === null || value === undefined ? '' : String(value);
+const csvCell = (value: string | number): string => {
+  const text = String(value);
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };
 
@@ -101,7 +101,7 @@ function csvRow(
   const canaryKey = `thinking ${st.thinking ? 'on' : 'off'}, format ${st.forceFormat ? 'forced' : 'not forced'}`;
   const isChosen = chosen[step]?.configId === cfgId;
   const tooSlow = s.medianMs === null || s.medianMs > CEILING_MS[step];
-  const row: Record<Column, unknown> = {
+  const row: Record<Column, string | number> = {
     run_id: meta.runId,
     date_utc: rows[0]?.at.slice(0, 10) ?? '',
     commit: run?.env?.commit ?? '',

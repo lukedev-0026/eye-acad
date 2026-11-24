@@ -64,7 +64,7 @@ export function decide(c: PublicCase, catalogue: Catalogue, selected: SelectorOu
   return { kind: 'reveal', items, alsoNotRecorded: missed };
 }
 
-export type ExaminerReply = {
+export interface ExaminerReply {
   kind: TurnDecision['kind'] | 'did_not_catch' | 'error';
   // What is shown, one entry per line.
   lines: Array<string>;
@@ -74,7 +74,7 @@ export type ExaminerReply = {
   // kept) on its own, so a reply about two eyes does not wait twice as long.
   speechParts: Array<string>;
   items: Array<RenderedItem>;
-};
+}
 
 export function replyFor(decision: TurnDecision): ExaminerReply {
   switch (decision.kind) {

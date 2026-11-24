@@ -1,3 +1,5 @@
+import { itemAt } from '@/common/arrays';
+import { keysOf, recordOf } from '@/common/objects';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import type { Summary } from '@/eval/run/summarise';
 
@@ -8,7 +10,12 @@ import { CEILING_MS, SIZE_ORDER, sizeOf } from './grid';
 // report re-applies it to the results and must print what config/steps.json
 // holds.
 
-export type Candidate = { configId: string; settings: StepSettings; summary: Summary; stopped?: boolean };
+export interface Candidate {
+  configId: string;
+  settings: StepSettings;
+  summary: Summary;
+  stopped?: boolean;
+}
 
 export type Ranked = Candidate & {
   eligible: boolean;
@@ -19,7 +26,7 @@ export type Ranked = Candidate & {
 
 // Two configurations are tied when their counts of cases passing every run
 // differ by no more than one case, or 5% of the cases if that is larger.
-export const tieBand = (cases: number) => Math.max(1, Math.round(cases * 0.05));
+export const tieBand = (cases: number): number => Math.max(1, Math.round(cases * 0.05));
 
 // Simpler wins a tie: faster, then smaller model, thinking off, forced format
 // on, temperature 0, the minimal prompt. Speeds within about 10% of each other
@@ -98,8 +105,8 @@ export function limitModels(
   ranked: Record<StepId, Array<Ranked>>,
   maxModels = 2,
 ): { chosen: Record<StepId, Ranked>; changed: Array<StepId> } {
-  const steps = Object.keys(ranked) as Array<StepId>;
-  const chosen = Object.fromEntries(steps.map((s) => [s, ranked[s][0]])) as Record<StepId, Ranked>;
+  const steps = keysOf(ranked);
+  const chosen = recordOf(steps, (s) => itemAt(ranked[s], 0));
   const changed: Array<StepId> = [];
   for (;;) {
     const use = new Map<string, Array<StepId>>();

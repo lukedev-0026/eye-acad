@@ -5,6 +5,9 @@ import { NotFoundScreen } from '@/features/errors/components/not-found-screen';
 
 import { routeTree } from './routeTree.gen';
 
+// The router's type is worked out from the route tree and registered below,
+// so it is not written out here.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function getRouter() {
   const router = createTanStackRouter({
     routeTree,

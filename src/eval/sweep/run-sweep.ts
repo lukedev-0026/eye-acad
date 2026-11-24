@@ -244,9 +244,7 @@ class SweepRun {
   private async sentinel(label: string): Promise<void> {
     const stage = `sentinel-${label}`;
     const settings = startSettings('selector');
-    const cases = ((await STEP_EVALS.selector.cases(this.ctx)) as Array<EvalCase>)
-      .filter((c) => c.split === 'tune')
-      .slice(0, 10);
+    const cases = (await STEP_EVALS.selector.cases(this.ctx)).filter((c) => c.split === 'tune').slice(0, 10);
     const cfg = configId('selector', settings);
     if (cases.every((c) => this.data.done.has(rowKey(stage, cfg, c.id, 1)))) return;
     await this.runConfig({ step: 'selector', settings, block: 'start', stage, cases, trials: 1 });
@@ -263,7 +261,7 @@ class SweepRun {
     const started = performance.now();
     // Three calls that are not timed: the first loads the model.
     const selector = STEP_EVALS.selector;
-    const warm = ((await selector.cases(this.ctx)) as Array<EvalCase>).slice(0, WARM_UP_CALLS);
+    const warm = (await selector.cases(this.ctx)).slice(0, WARM_UP_CALLS);
     for (const c of warm) {
       await selector.run(c, { ...startSettings('selector'), model, seed: 1 }, this.ctx);
     }
@@ -367,7 +365,7 @@ export async function runSweep(options: SweepOptions, print: Print): Promise<voi
   const tune: Record<string, Array<EvalCase>> = {};
   const holdout: Record<string, Array<EvalCase>> = {};
   for (const step of options.steps) {
-    const all = (await STEP_EVALS[step].cases(ctx)) as Array<EvalCase>;
+    const all: Array<EvalCase> = await STEP_EVALS[step].cases(ctx);
     tune[step] = all.filter((c) => c.split === 'tune');
     holdout[step] = all.filter((c) => c.split === 'holdout');
   }

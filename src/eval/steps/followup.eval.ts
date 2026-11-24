@@ -9,13 +9,13 @@ export const FollowUpInputSchema = z.object({ answer: z.string() });
 export const FollowUpExpectSchema = z.object({});
 type Input = z.infer<typeof FollowUpInputSchema>;
 type Expect = z.infer<typeof FollowUpExpectSchema>;
-type Observed = {
+interface Observed {
   path: 'written' | 'supplied' | 'fixed';
   question: string;
   respondingTo: string | null;
   firstAttemptOk: boolean;
   reasons: Array<string>;
-};
+}
 
 export const followupEval: StepEval<Input, Expect, Observed> = {
   step: 'followup',
@@ -25,6 +25,7 @@ export const followupEval: StepEval<Input, Expect, Observed> = {
     const result = await runFollowUp(ctx.models, ctx.notes, c.input.answer, settings);
     const calls = result.attempts.map((a) => a.call);
     const last = calls.at(-1);
+    const first = result.attempts[0];
     return {
       // A step that fell back to a supplied question still completed.
       outcome: calls.some((x) => x.outcome === 'ok') ? 'ok' : (last?.outcome ?? 'ok'),
@@ -32,7 +33,7 @@ export const followupEval: StepEval<Input, Expect, Observed> = {
         path: result.path,
         question: result.question,
         respondingTo: result.respondingTo,
-        firstAttemptOk: Boolean(result.attempts[0]?.questionCheck?.ok && result.attempts[0]?.anchorCheck?.ok),
+        firstAttemptOk: Boolean(first?.questionCheck?.ok && first.anchorCheck?.ok),
         reasons: result.attempts.flatMap((a) => [
           ...(a.questionCheck && !a.questionCheck.ok ? [`question ${a.questionCheck.reason}`] : []),
           ...(a.anchorCheck && !a.anchorCheck.ok ? [a.anchorCheck.reason] : []),

@@ -20,16 +20,16 @@ function revisionSchema(refs: Array<string>) {
 }
 export type RevisionOutput = z.infer<ReturnType<typeof revisionSchema>>;
 
-export type Citation = {
+export interface Citation {
   chunk: NoteChunk;
   sentences: Array<NoteSentence>;
   // Copied from the prepared note, never typed by a model.
   excerpt: string;
   page: string;
   heading: string;
-};
+}
 
-export type RevisionResult = {
+export interface RevisionResult {
   call: CallResult<RevisionOutput>;
   outcome: 'supported' | 'no_support' | 'unusable';
   citation: Citation | null;
@@ -38,7 +38,7 @@ export type RevisionResult = {
   // supplied: it did not, so the key point itself is shown instead.
   pointSource: 'written' | 'supplied' | null;
   wordingCheck: CheckResult | null;
-};
+}
 
 // Everything the wording check may draw on: the whole passage, not just the
 // quoted sentence.

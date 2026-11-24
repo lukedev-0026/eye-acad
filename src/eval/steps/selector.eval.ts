@@ -21,7 +21,11 @@ export const SelectorExpectSchema = z.object({
 });
 type Input = z.infer<typeof SelectorInputSchema>;
 type Expect = z.infer<typeof SelectorExpectSchema>;
-type Observed = { kind: string; ids: Array<string>; alsoNotRecorded: boolean };
+interface Observed {
+  kind: string;
+  ids: Array<string>;
+  alsoNotRecorded: boolean;
+}
 
 const EYE_WORDS = { right: 'in the right eye', left: 'in the left eye' } as const;
 

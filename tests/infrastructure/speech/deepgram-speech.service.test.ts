@@ -118,7 +118,7 @@ describe('turning text into speech', () => {
       'mp3:Left eye, eighteen.',
     ]);
     expect(reply).toMatchObject({ voice: 'aura-2-draco-en', fromCache: 0 });
-    expect(reply?.clips.every((clip) => clip.mimeType === 'audio/mpeg')).toBe(true);
+    expect(reply?.clips.map((clip) => clip.mimeType)).toEqual(['audio/mpeg', 'audio/mpeg']);
   });
 
   it('keeps each clip, so a sentence already said is not asked for again', async () => {
@@ -163,7 +163,9 @@ describe('turning text into speech', () => {
     const voice = service();
 
     voice.prepare(['One.', 'Two.', 'Three.', 'Four.', 'One.', '  ']);
-    await vi.waitFor(() => expect(voice.heldCount).toBe(4));
+    await vi.waitFor(() => {
+      expect(voice.heldCount).toBe(4);
+    });
     const reply = await voice.speak(['Two.', 'Four.']);
 
     expect(sent.filter(isSpeak)).toHaveLength(4);
@@ -204,7 +206,9 @@ describe('choosing the speech service', () => {
       ms: 0,
       error: 'No Deepgram key is set.',
     });
-    expect(() => speech.prepare(['Hello.'])).not.toThrow();
+    expect(() => {
+      speech.prepare(['Hello.']);
+    }).not.toThrow();
     expect(sent).toHaveLength(0);
   });
 });

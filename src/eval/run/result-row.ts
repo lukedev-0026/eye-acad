@@ -40,6 +40,11 @@ export const ResultRowSchema = z.object({
 });
 export type ResultRow = z.infer<typeof ResultRowSchema>;
 
+// The revision step and the support check run together (`pnpm check`) are
+// saved in the same form, under a step name of their own.
+export const ChainRowSchema = ResultRowSchema.extend({ step: z.literal('chain') });
+export type ChainRow = z.infer<typeof ChainRowSchema>;
+
 // What makes a saved row the same piece of work as one about to be run.
 export const rowKey = (stage: string, cfg: string, caseId: string, trial: number): string =>
   `${stage}|${cfg}|${caseId}|${trial}`;

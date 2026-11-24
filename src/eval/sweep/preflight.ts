@@ -34,7 +34,7 @@ interface Findings {
 }
 
 const tuneCases = async (step: (typeof STEP_IDS)[number], ctx: EvalContext): Promise<Array<EvalCase>> =>
-  ((await STEP_EVALS[step].cases(ctx)) as Array<EvalCase>).filter((c) => c.split === 'tune');
+  (await STEP_EVALS[step].cases(ctx)).filter((c) => c.split === 'tune');
 
 // 1. Graders, with no model.
 async function checkGraders(ctx: EvalContext, { problems, print }: Findings): Promise<Record<string, unknown>> {
@@ -42,7 +42,7 @@ async function checkGraders(ctx: EvalContext, { problems, print }: Findings): Pr
   const graders: Record<string, unknown> = {};
   for (const step of STEP_IDS) {
     const evalDef = STEP_EVALS[step];
-    const cases = (await evalDef.cases(ctx)) as Array<EvalCase>;
+    const cases = await evalDef.cases(ctx);
     const st = selfTest(evalDef, cases, ctx);
     graders[step] = {
       cases: st.cases,
@@ -236,9 +236,11 @@ async function checkModel(
   const shipped = Object.fromEntries(
     (shown.parameters ?? '')
       .split('\n')
-      .map((line) => line.trim().split(/\s+/))
-      .filter((parts) => parts.length === 2)
-      .map(([name, value]) => [name, Number(value)]),
+      // A line that is a name and one value, such as "temperature 0.7".
+      .flatMap((line): Array<[string, number]> => {
+        const [name, value, ...rest] = line.trim().split(/\s+/);
+        return name !== undefined && value !== undefined && rest.length === 0 ? [[name, Number(value)]] : [];
+      }),
   );
   findings.print(`   shipped options: ${JSON.stringify(shipped)}; thinking ${JSON.stringify(shown.thinking)}`);
 

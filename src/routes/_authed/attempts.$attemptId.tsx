@@ -10,6 +10,7 @@ import { TalkButton } from '@/features/viva/components/talk-button';
 import { recordingSupported, useRecorder } from '@/features/viva/hooks/use-recorder';
 import { playReply } from '@/features/viva/lib/audio-player';
 import type { ReplyAudio } from '@/features/viva/lib/audio-player';
+import { blobToBase64 } from '@/features/viva/lib/blob-to-base64';
 import { asTsv, summarise } from '@/features/viva/lib/latency';
 import type { TurnTiming } from '@/features/viva/lib/latency';
 import { TURN_LABEL, canTraineeAct, nextTurnState } from '@/features/viva/lib/turn-machine';
@@ -110,7 +111,9 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     send({ type: 'SUBMIT_TEXT' });
     speakOpening({ data: { attemptId } })
       .then(({ audio }) => speak(audio))
-      .catch(() => send({ type: 'FAILED' }));
+      .catch(() => {
+        send({ type: 'FAILED' });
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId]);
 
@@ -193,13 +196,11 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     setProblem(null);
     send({ type: 'START_LISTENING' });
     send({ type: 'STOP_LISTENING' });
-    const base64 = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
-      reader.onerror = () => resolve('');
-      reader.readAsDataURL(file);
-    });
-    if (!base64) return fail('That file could not be read.');
+    const base64 = await blobToBase64(file).catch(() => '');
+    if (!base64) {
+      fail('That file could not be read.');
+      return;
+    }
     await sendSpoken({ base64, mimeType: file.type || 'audio/mpeg' }, releasedAt);
   }
 
@@ -350,7 +351,9 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                   autoComplete="off"
                   placeholder="Or type: what is the pressure in the right eye?"
                   disabled={!canAct}
-                  onChange={(e) => setRequest(e.target.value)}
+                  onChange={(e) => {
+                    setRequest(e.target.value);
+                  }}
                 />
                 <button className="button" disabled={!canAct || !request.trim()}>
                   Ask
@@ -373,7 +376,13 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                     />
                   </label>
                 </details>
-                <button className="button primary" disabled={!canAct} onClick={() => setAnswering(true)}>
+                <button
+                  className="button primary"
+                  disabled={!canAct}
+                  onClick={() => {
+                    setAnswering(true);
+                  }}
+                >
                   Give my answer
                 </button>
               </div>
@@ -402,7 +411,9 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                     value={draft}
                     maxLength={4000}
                     disabled={!canAct}
-                    onChange={(e) => setDraft(e.target.value)}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                    }}
                   />
                   <div className="row between">
                     {micOk ? (
@@ -419,7 +430,13 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                     <span className="row">
                       {mode === 'answering' ? (
                         <>
-                          <button className="button quiet" disabled={!canAct} onClick={() => setAnswering(false)}>
+                          <button
+                            className="button quiet"
+                            disabled={!canAct}
+                            onClick={() => {
+                              setAnswering(false);
+                            }}
+                          >
                             Back to asking
                           </button>
                           <button

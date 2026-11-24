@@ -10,7 +10,7 @@ import { loadCase, loadCitationGuidance, loadExaminerNotes } from '@/infrastruct
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
 import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
-import { RetrievalSpecSchema, evalCaseSchema } from './eval-case.schema';
+import { RetrievalSpecSchema, SPLITS } from './eval-case.schema';
 import type { RetrievalSpec } from './eval-case.schema';
 import { InvalidEvalCaseError } from './eval.error';
 import type { EvalCase, EvalContext } from './eval.types';
@@ -42,6 +42,25 @@ export async function loadContext(): Promise<EvalContext> {
   };
 }
 
+// The parts every case has. `input` and `expect` have a shape of their own
+// for each step, and are checked against it next.
+const CaseEnvelopeSchema = z.object({
+  id: z.string().min(1),
+  // tune: used to choose settings and the improvement.
+  // holdout: only ever used to report.
+  split: z.enum(SPLITS),
+  type: z.string(),
+  input: z.unknown(),
+  expect: z.unknown(),
+  note: z.string().optional(),
+});
+
+function parseCasePart<S extends z.ZodType>(schema: S, value: unknown, where: string): z.output<S> {
+  const parsed = schema.safeParse(value);
+  if (!parsed.success) throw new InvalidEvalCaseError(`${where}:\n${z.prettifyError(parsed.error)}`);
+  return parsed.data;
+}
+
 // The cases for one step, each checked against that step's shapes. A case
 // file with a mistake in it is refused by name, before any model runs.
 export async function readCases<I extends z.ZodType, E extends z.ZodType>(
@@ -49,14 +68,15 @@ export async function readCases<I extends z.ZodType, E extends z.ZodType>(
   input: I,
   expect: E,
 ): Promise<Array<EvalCase<z.output<I>, z.output<E>>>> {
-  const schema = evalCaseSchema(input, expect);
   const rows = await readJsonl(caseFile(name));
   return rows.map((row, i) => {
-    const parsed = schema.safeParse(row);
-    if (!parsed.success) {
-      throw new InvalidEvalCaseError(`${caseFile(name)}, line ${i + 1}:\n${z.prettifyError(parsed.error)}`);
-    }
-    return parsed.data as EvalCase<z.output<I>, z.output<E>>;
+    const where = `${caseFile(name)}, line ${i + 1}`;
+    const envelope = parseCasePart(CaseEnvelopeSchema, row, where);
+    return {
+      ...envelope,
+      input: parseCasePart(input, envelope.input, `${where}, input`),
+      expect: parseCasePart(expect, envelope.expect, `${where}, expect`),
+    };
   });
 }
 

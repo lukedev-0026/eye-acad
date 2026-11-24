@@ -24,13 +24,18 @@ export function useAttempt(uid: string, attemptId: string): AttemptState {
         );
       },
       // Not found and "not yours" look the same to the trainee, on purpose.
-      () => setState({ status: 'unavailable' }),
+      () => {
+        setState({ status: 'unavailable' });
+      },
     );
   }, [uid, attemptId]);
   return state;
 }
 
-export type AttemptSummary = { id: string; attempt: PublicAttempt };
+export interface AttemptSummary {
+  id: string;
+  attempt: PublicAttempt;
+}
 
 export function useAttemptList(uid: string): Array<AttemptSummary> | null {
   const [list, setList] = useState<Array<AttemptSummary> | null>(null);
@@ -46,7 +51,9 @@ export function useAttemptList(uid: string): Array<AttemptSummary> | null {
         }
         setList(out);
       },
-      () => setList([]),
+      () => {
+        setList([]);
+      },
     );
   }, [uid]);
   return list;

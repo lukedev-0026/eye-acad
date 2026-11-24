@@ -76,7 +76,7 @@ export function settingsFor(
 }
 
 // The configuration the app was built on. One dot among the rest.
-export const startSettings = (step: StepId) =>
+export const startSettings = (step: StepId): StepSettings =>
   settingsFor(step, { size: 'medium', thinking: false, forceFormat: true });
 
 // Block 1: every combination of size, thinking and forced format, at the

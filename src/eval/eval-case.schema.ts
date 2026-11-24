@@ -4,21 +4,6 @@ import { z } from 'zod';
 
 export const SPLITS = ['tune', 'holdout'] as const;
 
-// One case: an input for a step, and what a correct result looks like. Each
-// step has its own shape for the two, so the schema is built per step.
-export function evalCaseSchema<I extends z.ZodType, E extends z.ZodType>(input: I, expect: E) {
-  return z.object({
-    id: z.string().min(1),
-    // tune: used to choose settings and the improvement.
-    // holdout: only ever used to report.
-    split: z.enum(SPLITS),
-    type: z.string(),
-    input,
-    expect,
-    note: z.string().optional(),
-  });
-}
-
 // A point the note should (or should not) back, with the sentences that
 // settle it. Sentences are named by a phrase they contain.
 export const RetrievalTargetSchema = z.object({

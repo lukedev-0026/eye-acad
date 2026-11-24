@@ -12,7 +12,9 @@ export default defineConfig([
   globalIgnores(['dist/', '.output/', '.tanstack/', 'src/routeTree.gen.ts', 'data/', 'evals/', 'config/', 'docs/']),
 
   js.configs.recommended,
-  tsConfigs.recommended,
+  tsConfigs.strictTypeChecked,
+  tsConfigs.stylisticTypeChecked,
+  { languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } } },
   importX.flatConfigs.recommended,
   importX.flatConfigs.typescript,
   ...pluginRouter.configs['flat/recommended'],
@@ -100,6 +102,29 @@ export default defineConfig([
         },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      // House style: Array<T>, and interfaces for the shape of an object.
+      '@typescript-eslint/array-type': ['error', { default: 'generic' }],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      // A number or a yes/no in a sentence is fine. Nothing, or an object, is a bug.
+      // A Secret prints as [REDACTED], which is the point of it.
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        {
+          allowNumber: true,
+          allowBoolean: true,
+          allow: [
+            { from: 'lib', name: ['Error', 'URL', 'URLSearchParams'] },
+            { from: 'file', name: 'Secret', path: 'src/config/secret.ts' },
+          ],
+        },
+      ],
+      // `||` on text is often meant: an empty string should fall through. On
+      // anything else, `??` is required.
+      '@typescript-eslint/prefer-nullish-coalescing': ['error', { ignorePrimitives: { string: true, boolean: true } }],
+      // This one rewrites a cast as `!`, which the rule against `!` then rejects.
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // What an exported function returns is part of its contract.
+      '@typescript-eslint/explicit-module-boundary-types': 'error',
     },
   },
 
@@ -127,6 +152,18 @@ export default defineConfig([
   // their output is the product.
   { files: ['src/**'], rules: { 'no-console': 'error' } },
 
+  // The rules test signs in through Firebase's test kit, whose database handle
+  // is the older "compat" class. It is the same object underneath, and the
+  // test kit's own documentation passes it to these functions.
+  {
+    files: ['tests/integration/firestore-rules.test.ts'],
+    rules: { '@typescript-eslint/no-unsafe-class-instance-assignment': 'off' },
+  },
+
   // Tool configuration files must export a default.
   { files: ['*.config.{js,ts}'], rules: { 'import-x/no-default-export': 'off' } },
+
+  // Plain JavaScript (this file) has no types to check against. Last, so that
+  // it switches off every type-aware rule set above.
+  { files: ['**/*.js'], extends: [tsConfigs.disableTypeChecked] },
 ]);

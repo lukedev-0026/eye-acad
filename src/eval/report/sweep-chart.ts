@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import { keysOf } from '@/common/objects';
 import type { StepId } from '@/domain/llm/step-settings.schema';
-import type { EvalCase, EvalContext } from '@/eval/eval.types';
+import type { EvalContext } from '@/eval/eval.types';
 import { selfTest } from '@/eval/run/self-test';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { CEILING_MS } from '@/eval/sweep/grid';
@@ -60,13 +60,18 @@ interface ChartFrame {
 }
 
 export async function chartFloors(ctx: EvalContext): Promise<Record<StepId, Floor>> {
-  const floors: Partial<Record<StepId, Floor>> = {};
-  for (const step of STEP_IDS) {
-    const cases = ((await STEP_EVALS[step].cases(ctx)) as Array<EvalCase>).filter((c) => c.split === 'tune');
+  const floorFor = async (step: StepId): Promise<Floor> => {
+    const cases = (await STEP_EVALS[step].cases(ctx)).filter((c) => c.split === 'tune');
     const st = selfTest(STEP_EVALS[step], cases, ctx);
-    floors[step] = { k: st.constantPass, name: st.constantName };
-  }
-  return floors as Record<StepId, Floor>;
+    return { k: st.constantPass, name: st.constantName };
+  };
+  return {
+    selector: await floorFor('selector'),
+    followup: await floorFor('followup'),
+    coverage: await floorFor('coverage'),
+    revision: await floorFor('revision'),
+    verifier: await floorFor('verifier'),
+  };
 }
 
 // ---------- look ----------
@@ -258,7 +263,7 @@ function legend(): string {
     out.push(draw, `<text class="legend" x="${ox + 30}" y="${yy + 4}">${esc(text)}</text>`);
     yy += 23;
   };
-  for (const key of Object.keys(SIZE) as Array<SizeKey>) {
+  for (const key of keysOf(SIZE)) {
     line(marker(SIZE[key].shape, ox + 10, yy, 5, `solid s-${key}`), `${SIZE[key].label} model`);
   }
   line(marker('circle', ox + 10, yy, 5, 'hollow s-small'), 'hollow: thinking on (filled: off)');

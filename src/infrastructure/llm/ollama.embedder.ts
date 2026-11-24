@@ -33,7 +33,7 @@ export class OllamaEmbedder {
         TIMEOUT_MS,
       );
       const vectors = response.body.embeddings;
-      if (!response.ok || !vectors || vectors.length !== texts.length) {
+      if (!response.ok || vectors?.length !== texts.length) {
         log().warn(
           { actionResult: 'FAILED', model: this.model, status: response.status, texts: texts.length },
           'embed.unusable',

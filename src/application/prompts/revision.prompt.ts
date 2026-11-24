@@ -29,12 +29,12 @@ Passage B — Fungal keratitis › Management
 - Point: "Arrange a CT scan of the orbits"
   {"outcome":"no_support","sentence_refs":[],"revision_point":""}`;
 
-export type RevisionPassage = {
+export interface RevisionPassage {
   letter: string;
   heading: string;
   leadIn: string | null;
   sentences: Array<{ ref: string; text: string }>;
-};
+}
 
 export function revisionPrompt(
   variant: PromptVariant,

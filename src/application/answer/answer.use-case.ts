@@ -16,12 +16,12 @@ const log = () => getLogger('answer');
 // Everything that happens after the trainee presses "Give my answer". This is
 // the only code that reads the examiner notes.
 
-export type FollowUpReplyOut = {
+export interface FollowUpReplyOut {
   question: string;
   speech: string;
   respondingTo: string | null;
   path: 'written' | 'supplied' | 'fixed';
-};
+}
 
 const clean = (text: string) => text.trim().slice(0, MAX_ANSWER_CHARS);
 

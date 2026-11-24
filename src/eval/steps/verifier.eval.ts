@@ -14,7 +14,10 @@ export const VerifierInputSchema = z.object({
 export const VerifierExpectSchema = z.object({ verdict: z.enum(['supported', 'not_supported']) });
 type Input = z.infer<typeof VerifierInputSchema>;
 type Expect = z.infer<typeof VerifierExpectSchema>;
-type Observed = { supported: boolean; reason: string };
+interface Observed {
+  supported: boolean;
+  reason: string;
+}
 
 export const verifierEval: StepEval<Input, Expect, Observed> = {
   step: 'verifier',

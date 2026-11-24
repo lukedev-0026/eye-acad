@@ -9,6 +9,7 @@ import type { InMemoryAttemptRepository } from '@tests/fakes/in-memory-attempt.r
 import { NOT_JSON, scriptModel } from '@tests/fakes/scripted-model';
 import type { ScriptedModel } from '@tests/fakes/scripted-model';
 import { testDeps } from '@tests/fakes/test-deps';
+import type { TestDeps } from '@tests/fakes/test-deps';
 
 const UID = 'trainee-a';
 const pick = (item: string, eye: string) => ({
@@ -18,7 +19,7 @@ const pick = (item: string, eye: string) => ({
 });
 
 let model: ScriptedModel;
-let deps: ReturnType<typeof testDeps>;
+let deps: TestDeps;
 let attempts: InMemoryAttemptRepository;
 let attemptId: string;
 

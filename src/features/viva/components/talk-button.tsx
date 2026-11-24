@@ -1,14 +1,17 @@
 import { useRef } from 'react';
+import type { JSX } from 'react';
 
 // Hold to talk, with the mouse, a finger, or the space bar. Holding makes it
 // unmistakable when the trainee may speak and when they have finished.
-export function TalkButton(props: {
+interface TalkButtonProps {
   label: string;
   disabled: boolean;
   recording: boolean;
   onStart: () => void;
   onStop: () => void;
-}) {
+}
+
+export function TalkButton(props: TalkButtonProps): JSX.Element {
   const held = useRef(false);
   const begin = () => {
     if (props.disabled || held.current) return;

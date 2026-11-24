@@ -1,4 +1,7 @@
-export type ReplyAudio = { base64: string; mimeType: string };
+export interface ReplyAudio {
+  base64: string;
+  mimeType: string;
+}
 
 // Plays the clips of one reply back to back. They all arrived inside the same
 // server reply. Resolves `started` with the time the first clip began playing
@@ -19,9 +22,11 @@ export function playReply(clips: Array<ReplyAudio>): {
     element.preload = 'auto';
     return element;
   });
-  let stopped = false;
+  const stopping = new AbortController();
   let current: HTMLAudioElement | null = null;
-  let resolveStarted: (at: number | null) => void = () => {};
+  let resolveStarted: (at: number | null) => void = () => {
+    // Replaced on the next line, before anything can call it.
+  };
   const started = new Promise<number | null>((resolve) => {
     resolveStarted = resolve;
   });
@@ -32,15 +37,36 @@ export function playReply(clips: Array<ReplyAudio>): {
       // `playing` fires when the browser has audio ready and has begun to
       // output it. It marks "playback ready", not the instant sound reaches
       // the ear.
-      if (first) element.addEventListener('playing', () => resolveStarted(performance.now()), { once: true });
-      element.addEventListener('ended', () => done(), { once: true });
-      element.addEventListener('error', () => done(), { once: true });
-      element.play().catch(() => done());
+      if (first)
+        element.addEventListener(
+          'playing',
+          () => {
+            resolveStarted(performance.now());
+          },
+          { once: true },
+        );
+      element.addEventListener(
+        'ended',
+        () => {
+          done();
+        },
+        { once: true },
+      );
+      element.addEventListener(
+        'error',
+        () => {
+          done();
+        },
+        { once: true },
+      );
+      element.play().catch(() => {
+        done();
+      });
     });
 
   const ended = (async () => {
     for (const [i, element] of elements.entries()) {
-      if (stopped) break;
+      if (stopping.signal.aborted) break;
       await playOne(element, i === 0);
     }
     resolveStarted(null);
@@ -51,7 +77,7 @@ export function playReply(clips: Array<ReplyAudio>): {
     started,
     ended,
     stop: () => {
-      stopped = true;
+      stopping.abort();
       current?.pause();
       current?.dispatchEvent(new Event('ended'));
     },

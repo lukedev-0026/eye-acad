@@ -16,6 +16,7 @@ import type { InMemoryAttemptRepository } from '@tests/fakes/in-memory-attempt.r
 import { NOT_JSON, scriptModel } from '@tests/fakes/scripted-model';
 import type { ScriptedModel } from '@tests/fakes/scripted-model';
 import { testDeps } from '@tests/fakes/test-deps';
+import type { TestDeps } from '@tests/fakes/test-deps';
 
 const UID = 'trainee-a';
 const ANSWER = "It's acute glaucoma in the right eye, so I'd lower the pressure with drops.";
@@ -58,7 +59,7 @@ const SUPPORTED = { reason: 'The passage says so.', verdict: 'supported' };
 const NOT_SUPPORTED = { reason: 'The passage is about something else.', verdict: 'not_supported' };
 
 let model: ScriptedModel;
-let deps: ReturnType<typeof testDeps>;
+let deps: TestDeps;
 let attempts: InMemoryAttemptRepository;
 let attemptId: string;
 

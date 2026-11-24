@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
 
+import { z } from 'zod';
+
 import { getConfig } from '@/config/env.server';
 import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
@@ -14,17 +16,18 @@ function sh(command: string, args: Array<string>): string {
   }
 }
 
-export type RunEnv = {
-  machine: string;
-  memoryGb: number | null;
-  powerMode: string;
-  onMains: boolean | null;
-  swapUsedMb: number | null;
-  ollamaVersion: string;
-  node: string;
-  commit: string;
-  dirty: boolean;
-};
+export const RunEnvSchema = z.object({
+  machine: z.string(),
+  memoryGb: z.number().nullable(),
+  powerMode: z.string(),
+  onMains: z.boolean().nullable(),
+  swapUsedMb: z.number().nullable(),
+  ollamaVersion: z.string(),
+  node: z.string(),
+  commit: z.string(),
+  dirty: z.boolean(),
+});
+export type RunEnv = z.infer<typeof RunEnvSchema>;
 
 // As macOS numbers them.
 const POWER_MODES: Record<string, string> = { '0': 'automatic', '1': 'low power', '2': 'high power' };
@@ -53,7 +56,7 @@ export function batteryState(): { percent: number | null; onMains: boolean | nul
   const report = sh('pmset', ['-g', 'batt']);
   if (!report) return { percent: null, onMains: null };
   const percent = /(\d+)%/.exec(report)?.[1];
-  return { percent: percent === undefined ? null : Number(percent), onMains: /AC Power/.test(report) };
+  return { percent: percent === undefined ? null : Number(percent), onMains: report.includes('AC Power') };
 }
 
 export async function captureEnv(): Promise<RunEnv> {
@@ -71,7 +74,13 @@ export async function captureEnv(): Promise<RunEnv> {
   };
 }
 
-export type ModelInfo = { name: string; digest: string; engine: string; quantisation: string; sizeGb: number };
+export interface ModelInfo {
+  name: string;
+  digest: string;
+  engine: string;
+  quantisation: string;
+  sizeGb: number;
+}
 
 export async function modelInfo(name: string): Promise<ModelInfo | null> {
   try {

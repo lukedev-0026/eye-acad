@@ -1,5 +1,6 @@
 import { Link, useRouter } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
+import type { JSX } from 'react';
 
 import { PublicError } from '@/common/errors/public.error';
 import { messageFor } from '@/features/errors/lib/message-for';
@@ -7,7 +8,7 @@ import { messageFor } from '@/features/errors/lib/message-for';
 // Shown when a page fails to load or render. Nothing about the failure itself
 // is shown beyond a message written for the reader; the reference can be
 // quoted to find the rest in the server's log.
-export function ErrorScreen({ error }: ErrorComponentProps) {
+export function ErrorScreen({ error }: ErrorComponentProps): JSX.Element {
   const router = useRouter();
   return (
     <main className="page narrow">

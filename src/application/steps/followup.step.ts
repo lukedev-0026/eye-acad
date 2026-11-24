@@ -22,13 +22,13 @@ function followUpSchema(ideaCount: number) {
 }
 export type FollowUpOutput = z.infer<ReturnType<typeof followUpSchema>>;
 
-export type FollowUpAttempt = {
+export interface FollowUpAttempt {
   call: CallResult<FollowUpOutput>;
   questionCheck?: CheckResult;
   anchorCheck?: CheckResult;
-};
+}
 
-export type FollowUpResult = {
+export interface FollowUpResult {
   // Exactly what is shown and spoken.
   question: string;
   // The trainee's own words it responds to, if a real quotation was found.
@@ -39,7 +39,7 @@ export type FollowUpResult = {
   path: 'written' | 'supplied' | 'fixed';
   ideaIndex: number | null;
   attempts: Array<FollowUpAttempt>;
-};
+}
 
 // One follow-up question. The model may write it, but it is only used if code
 // finds every meaningful word in the trainee's answer or in the case file's

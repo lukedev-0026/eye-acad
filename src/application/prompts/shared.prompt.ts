@@ -1,7 +1,7 @@
 import type { PromptVariant } from '@/domain/llm/step-settings.schema';
 
 // Wraps text that came from the trainee so it cannot close its own quotation.
-export const quoted = (text: string) => `"""${text.replaceAll('"""', '"').trim()}"""`;
+export const quoted = (text: string): string => `"""${text.replaceAll('"""', '"').trim()}"""`;
 
 // Each step has one task description, plus either explicit rules or worked
 // examples. Keeping the three variants side by side is what lets the sweep

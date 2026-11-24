@@ -1,6 +1,8 @@
+import type { JSX } from 'react';
+
 import type { RevisionCard } from '@/domain/attempt/attempt.schema';
 
-export function RevisionCardView({ card }: { card: RevisionCard }) {
+export function RevisionCardView({ card }: { card: RevisionCard }): JSX.Element {
   const searched = card.retrievedPages.length
     ? `Pages searched: ${card.retrievedPages.join(', ')}`
     : 'No pages were retrieved';

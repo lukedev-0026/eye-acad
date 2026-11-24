@@ -106,7 +106,7 @@ const RRF_K = 60;
 export const MIN_SHARED_WORDS = 2;
 export const COSINE_FLOOR = 0.55;
 
-export type Retrieved = {
+export interface Retrieved {
   chunk: NoteChunk;
   keywordRank: number;
   keywordScore: number;
@@ -114,16 +114,16 @@ export type Retrieved = {
   cosine: number | null;
   fusedRank: number;
   sharedWords: number;
-};
+}
 
-export type Retrieval = {
+export interface Retrieval {
   mode: 'hybrid' | 'keyword_only';
   results: Array<Retrieved>;
   // Every passage, best first, for the comparison table.
   ranking: Array<Retrieved>;
   noSupport: boolean;
   best: { sharedWords: number; cosine: number | null };
-};
+}
 
 export function retrieve(
   index: NoteIndex,

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { keysOf } from '@/common/objects';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import { EvalRefusedError } from '@/eval/eval.error';
@@ -19,8 +20,7 @@ function parseList<T extends string>(option: string, text: string, allowed: Read
 
 export const parseSteps = (text: string): Array<StepId> => parseList('steps', text, STEP_IDS);
 
-export const parseSizes = (option: string, text: string): Array<Size> =>
-  parseList(option, text, Object.keys(SIZES) as Array<Size>);
+export const parseSizes = (option: string, text: string): Array<Size> => parseList(option, text, keysOf(SIZES));
 
 export function parseWholeNumber(option: string, text: string): number {
   const parsed = z.coerce.number().int().nonnegative().safeParse(text);

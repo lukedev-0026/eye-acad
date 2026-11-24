@@ -8,17 +8,17 @@ import { historyLabel } from './render';
 export type CatalogueItem =
   { name: string; kind: 'finding'; label: string; eyes: Array<Eye> } | { name: string; kind: 'history'; key: string };
 
-export type Catalogue = {
+export interface Catalogue {
   items: Array<CatalogueItem>;
   names: Array<string>;
-};
+}
 
 export function buildCatalogue(c: PublicCase): Catalogue {
   const items: Array<CatalogueItem> = [];
 
   for (const f of c.findings) {
     const existing = items.find((i) => i.kind === 'finding' && i.label === f.label);
-    if (existing && existing.kind === 'finding') {
+    if (existing?.kind === 'finding') {
       if (!existing.eyes.includes(f.eye)) existing.eyes.push(f.eye);
     } else {
       items.push({ name: f.label, kind: 'finding', label: f.label, eyes: [f.eye] });

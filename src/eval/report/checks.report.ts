@@ -1,41 +1,13 @@
-import type { RequiredRow } from '@/eval/checks/required.check';
-import type { ResultRow } from '@/eval/run/result-row';
+import type { CheckRun } from '@/eval/checks/check-run';
+import type { RequiredRow } from '@/eval/checks/required-row.schema';
+import type { ChainRow, ResultRow } from '@/eval/run/result-row';
 import { summarise } from '@/eval/run/summarise';
-import type { RunEnv } from '@/eval/run-env';
 
-type Header = {
-  type: 'run';
-  runId: string;
-  at: string;
-  env: RunEnv;
-  models: Record<string, unknown>;
-  split: string;
-  trials: number;
-  configFile: string;
-  steps: Record<
-    string,
-    { model: string; thinking: boolean; forceFormat: boolean; promptVariant: string; temperature?: number }
-  >;
-};
-type SelfTest = {
-  type: 'selftest';
-  step: string;
-  cases: number;
-  idealPass: number;
-  constantName: string;
-  constantPass: number;
-  wrong: Array<string>;
-};
-
-const cell = (text: string) => text.replaceAll('|', '\\|').replaceAll('\n', ' ');
-const clip = (text: string, n: number) => (text.length > n ? `${text.slice(0, n - 1)}…` : text);
+const cell = (text: string): string => text.replaceAll('|', '\\|').replaceAll('\n', ' ');
+const clip = (text: string, n: number): string => (text.length > n ? `${text.slice(0, n - 1)}…` : text);
 
 // Builds CHECKS.md from the rows of one `pnpm check` run and nothing else.
-export function checksMarkdown(all: Array<Record<string, unknown>>): string {
-  const header = all.find((r) => r.type === 'run') as Header | undefined;
-  const required = all.filter((r) => r.type === 'required') as unknown as Array<RequiredRow>;
-  const results = all.filter((r) => r.type === 'result') as unknown as Array<ResultRow>;
-  const selfTests = all.filter((r) => r.type === 'selftest') as unknown as Array<SelfTest>;
+export function checksMarkdown({ header, required, results, selfTests }: CheckRun): string {
   const date = header?.at.slice(0, 10) ?? 'unknown date';
   const out: Array<string> = [];
 
@@ -134,9 +106,13 @@ export function checksMarkdown(all: Array<Record<string, unknown>>): string {
   out.push('### Cases that did not pass every run', '');
   let any = false;
   for (const step of steps) {
-    const byCase = new Map<string, Array<ResultRow>>();
+    const byCase = new Map<string, Array<ResultRow | ChainRow>>();
     for (const r of results.filter((x) => x.step === step)) byCase.set(r.caseId, [...(byCase.get(r.caseId) ?? []), r]);
-    const failing = [...byCase.entries()].filter(([, rows]) => rows.some((r) => !r.pass));
+    // Each case that failed at least once, with one of its failing runs.
+    const failing = [...byCase.entries()].flatMap(([id, rows]) => {
+      const bad = rows.find((r) => !r.pass);
+      return bad ? [{ id, rows, bad }] : [];
+    });
     if (!failing.length) continue;
     any = true;
     out.push(
@@ -145,8 +121,7 @@ export function checksMarkdown(all: Array<Record<string, unknown>>): string {
       '| Case | Type | Passed | Costly | What happened (a failing run) |',
       '|---|---|---|---|---|',
     );
-    for (const [id, rows] of failing) {
-      const bad = rows.find((r) => !r.pass)!;
+    for (const { id, rows, bad } of failing) {
       out.push(
         `| ${id} | ${bad.caseType} | ${rows.filter((r) => r.pass).length} of ${rows.length} | ${rows.some((r) => r.costly) ? 'yes' : ''} | ${cell(clip(bad.detail, 260))} |`,
       );

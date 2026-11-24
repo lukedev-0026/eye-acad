@@ -16,12 +16,10 @@ const app =
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Connecting twice throws, and hot reload re-runs this module.
-const flag = globalThis as { __vivaEmulatorsConnected?: boolean };
 // A `demo-` project id never talks to real Google services, so the app is
-// pointed at the local emulators whenever one is in use.
-if (firebase.useEmulators && !flag.__vivaEmulatorsConnected) {
-  flag.__vivaEmulatorsConnected = true;
+// pointed at the local emulators whenever one is in use. Connecting twice
+// throws, and hot reload re-runs this module, so it asks first.
+if (firebase.useEmulators && !auth.emulatorConfig) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
 }

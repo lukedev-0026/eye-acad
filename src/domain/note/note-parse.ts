@@ -6,8 +6,11 @@ import type { NoteChunk, NoteSentence } from './note.schema';
 // Everything is decided from position and font size, never from font ids or
 // from the wording, so a re-exported or lightly edited PDF still parses.
 
-type Font = { size: number; color: string };
-type Item = {
+interface Font {
+  size: number;
+  color: string;
+}
+interface Item {
   page: number;
   top: number;
   left: number;
@@ -15,7 +18,7 @@ type Item = {
   white: boolean;
   bold: boolean;
   text: string;
-};
+}
 
 const ENTITIES: Record<string, string> = {
   '&amp;': '&',
@@ -34,7 +37,10 @@ function decode(raw: string): string {
     .replace(/&(?:amp|lt|gt|quot|apos|#\d+);/g, (m) => ENTITIES[m] ?? String.fromCodePoint(Number(m.slice(2, -1))));
 }
 
-export type ParsedPage = { number: number; footerNumber: number | null };
+export interface ParsedPage {
+  number: number;
+  footerNumber: number | null;
+}
 
 function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> } {
   const fonts = new Map<string, Font>();
@@ -70,7 +76,7 @@ function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> 
         left: Number(leftText),
         size: font.size,
         white: font.color === '#ffffff',
-        bold: /<b>/.test(inner),
+        bold: inner.includes('<b>'),
         text,
       });
     }
@@ -92,8 +98,12 @@ function roleOf(item: Item): Role {
 }
 
 // A run of body text: the words, and which page each stretch of them is on.
-type Span = { start: number; end: number; page: number };
-type Block = {
+interface Span {
+  start: number;
+  end: number;
+  page: number;
+}
+interface Block {
   kind: 'paragraph' | 'bullet';
   headings: Array<string>;
   leadIn: string | null;
@@ -101,7 +111,7 @@ type Block = {
   spans: Array<Span>;
   firstPage: number;
   lastPage: number;
-};
+}
 
 function appendLine(block: Block, line: string, page: number) {
   const piece = line.replace(/\s+/g, ' ').trim();
@@ -134,12 +144,12 @@ function splitSentences(text: string): Array<{ start: number; end: number }> {
 
 const HIDDEN_SECTIONS = /^(about this note|sources|references)$/i;
 
-export type ParsedNote = {
+export interface ParsedNote {
   title: string;
   disclaimer: string;
   pages: Array<ParsedPage>;
   chunks: Array<Omit<NoteChunk, 'vector'>>;
-};
+}
 
 export function parseNoteXml(xml: string): ParsedNote {
   const { items, pages } = readItems(xml);
@@ -152,23 +162,28 @@ export function parseNoteXml(xml: string): ParsedNote {
   let hidden = false;
   const blocks: Array<Block | TableRow> = [];
 
-  type TableRow = {
+  interface TableRow {
     kind: 'table_row';
     headings: Array<string>;
     label: string;
     cells: Array<{ column: string; text: string }>;
     page: number;
-  };
+  }
 
   let open: Block | null = null;
   let lastBody: { page: number; top: number; left: number } | null = null;
   const close = () => {
-    if (open && open.text) blocks.push(open);
+    if (open?.text) blocks.push(open);
     open = null;
   };
 
   // Body items that share a line (a bold label followed by ordinary text).
-  type Line = { page: number; top: number; left: number; parts: Array<Item> };
+  interface Line {
+    page: number;
+    top: number;
+    left: number;
+    parts: Array<Item>;
+  }
   const lines: Array<Line | { table: Array<Item>; page: number } | { heading: Item; role: 'h2' | 'h3' | 'title' }> = [];
   let tableRun: Array<Item> = [];
   const flushTable = () => {

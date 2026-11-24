@@ -6,8 +6,9 @@ import { loadContext } from '@/eval/eval-context';
 import { EvalRefusedError } from '@/eval/eval.error';
 import { PATHS } from '@/eval/paths';
 import { loadSweep } from '@/eval/sweep/sweep-data';
+import { OllamaEmbedReplySchema } from '@/infrastructure/llm/ollama.schema';
 
-import { buildGolden, goldenDifferences } from './golden';
+import { PinnedVectorsSchema, buildGolden, goldenDifferences } from './golden';
 import type { Golden } from './golden';
 
 export interface GoldenOptions {
@@ -35,23 +36,24 @@ async function readJson(file: string): Promise<unknown> {
 // Asks the real embeddings model, bypassing the recorder. Used once, to pin a
 // query vector that is not in the fixture yet.
 function embedFromOllama(realFetch: typeof fetch) {
-  return async (texts: Array<string>, body: unknown): Promise<Array<Array<number>> | null> => {
+  return async (texts: Array<string>, body: Record<string, unknown>): Promise<Array<Array<number>> | null> => {
     const res = await realFetch(`${getConfig().ollama.host}/api/embed`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ...(body as object), input: texts }),
+      body: JSON.stringify({ ...body, input: texts }),
     });
     if (!res.ok) return null;
-    const json = (await res.json()) as { embeddings?: Array<Array<number>> };
-    return json.embeddings?.map(round) ?? null;
+    const reply = OllamaEmbedReplySchema.safeParse(await res.json());
+    return reply.success ? (reply.data.embeddings?.map(round) ?? null) : null;
   };
 }
 
 // Checks that the app still sends the model exactly what it sent before, and
 // still makes exactly the same of every reply a model has given it.
 export async function runGolden(options: GoldenOptions, print: Print): Promise<void> {
-  const pinned = ((await readJson(PATHS.queryVectors)) ?? {}) as Record<string, Array<number>>;
-  const vectors = new Map(Object.entries(pinned));
+  const pinned = PinnedVectorsSchema.safeParse((await readJson(PATHS.queryVectors)) ?? {});
+  if (!pinned.success) throw new EvalRefusedError(`${PATHS.queryVectors} is not a list of vectors by query text.`);
+  const vectors = new Map(Object.entries(pinned.data));
   const pinnedBefore = vectors.size;
 
   const ctx = await loadContext();

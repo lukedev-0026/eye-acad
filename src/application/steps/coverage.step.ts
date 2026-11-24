@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 import { coveragePrompt } from '@/application/prompts/coverage.prompt';
+import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
 import { MAX_ANSWER_CHARS } from '@/domain/attempt/attempt';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
-import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { CallResult } from '@/domain/llm/call-result';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { isQuoteFrom } from '@/domain/text/text-checks';
-import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
 
 export const STATUSES = ['covered', 'partial', 'not_covered'] as const;
 export type Status = (typeof STATUSES)[number];
@@ -55,6 +57,7 @@ export type CoverageResult = {
 // Works out what the answer missed. The model judges; code checks its
 // evidence and has the final say on which gap is used.
 export async function runCoverage(
+  models: LanguageModelGateway,
   notes: ExaminerNotes,
   rawAnswer: string,
   settings: StepSettings,
@@ -62,17 +65,17 @@ export async function runCoverage(
   const answer = rawAnswer.slice(0, MAX_ANSWER_CHARS);
   const items = coverageItems(notes);
   const schema = coverageSchema(items);
-  const call = await callStep(
+  const call = await models.callStep(
     settings,
     coveragePrompt(settings.promptVariant, { items, answer }, describeJsonShape(schema)),
     schema,
   );
-  if (call.outcome !== 'ok' || !call.value) {
+  if (call.outcome !== 'ok') {
     return { call, items: [], target: null, targetChosenBy: null };
   }
 
   const judged: Array<JudgedItem> = items.map((item) => {
-    const j = call.value!.items[item.id];
+    const j = call.value.items[item.id];
     const claimed = j.status !== 'not_covered';
     // "Covered" must come with the trainee's own words. A claim without a real
     // quotation is not believed: a gap wrongly shown is cheaper than a gap
@@ -87,7 +90,7 @@ export async function runCoverage(
   });
 
   const open = judged.filter((i) => i.status === 'not_covered');
-  const named = judged.find((i) => i.id === call.value!.priority);
+  const named = judged.find((i) => i.id === call.value.priority);
   let target: JudgedItem | null = null;
   let targetChosenBy: CoverageResult['targetChosenBy'] = null;
   if (named && named.status === 'not_covered') {

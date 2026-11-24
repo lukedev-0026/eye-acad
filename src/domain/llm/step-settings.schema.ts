@@ -51,39 +51,3 @@ export const StepsConfigSchema = z.object({
   }),
 });
 export type StepsConfig = z.infer<typeof StepsConfigSchema>;
-
-export type Prompt = { system: string; user: string };
-
-// How a call ended. Only `ok` carries a value. Every other outcome maps to a
-// fixed fallback in the app and to a failed run in the checks.
-export type CallOutcome = 'ok' | 'refusal' | 'truncated' | 'schema_invalid' | 'infra_error';
-
-export type CallResult<T> = {
-  outcome: CallOutcome;
-  value?: T;
-  rawText: string;
-  thinkingChars: number;
-  model: string;
-  provider: StepSettings['provider'];
-  // Wall-clock around the whole call, as the app experiences it.
-  ms: number;
-  // The provider's own figures, where it reports them.
-  server: {
-    loadMs?: number;
-    promptEvalMs?: number;
-    evalMs?: number;
-    promptTokens?: number;
-    outputTokens?: number;
-  };
-  error?: string;
-};
-
-// What a provider adapter returns before the output is parsed and checked.
-export type RawCall = {
-  outcome: Exclude<CallOutcome, 'schema_invalid'>;
-  text: string;
-  thinkingChars: number;
-  model: string;
-  server: CallResult<unknown>['server'];
-  error?: string;
-};

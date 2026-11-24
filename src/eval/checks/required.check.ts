@@ -140,7 +140,10 @@ export async function runRequiredChecks(
           : '') +
         `. Reveals only ${a.row}`;
     for (let trial = 1; trial <= a.trials; trial++) {
-      const run = await runSelector(ctx.publicCase, a.utterance, [], { ...config.steps.selector, seed: trial });
+      const run = await runSelector(ctx.models, ctx.publicCase, a.utterance, [], {
+        ...config.steps.selector,
+        seed: trial,
+      });
       const reply = run.decision ? replyFor(run.decision) : null;
       const shown = reply ? reply.lines.join(' / ') : `(${run.call.outcome})`;
       const spoken = reply?.speech ?? '';
@@ -191,6 +194,7 @@ export async function runRequiredChecks(
       let model = config.steps.revision.model;
       try {
         const { card, trace } = await produceRevision(
+          ctx.models,
           { notes: ctx.notes, answer: c.answer, followUpQuestion: null, guidance: ctx.guidance },
           seeded,
           ctx.index,
@@ -255,6 +259,7 @@ export async function runRequiredChecks(
         let retrieved: RequiredRow['retrieved'];
         try {
           const { card, trace } = await produceRevision(
+            ctx.models,
             { notes: ctx.notes, answer: '', followUpQuestion: null, guidance: ctx.guidance },
             seeded,
             ctx.index,

@@ -93,6 +93,7 @@ export async function runChain(
       let calls = 0;
       try {
         const { card, trace } = await produceRevision(
+          ctx.models,
           { notes: ctx.notes, answer: '', followUpQuestion: null, guidance: ctx.guidance },
           seeded,
           ctx.index,

@@ -16,7 +16,7 @@ export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
   cases: () => readCases<Input, Record<string, never>>('followup.jsonl'),
 
   async run(c, settings, ctx) {
-    const result = await runFollowUp(ctx.notes, c.input.answer, settings);
+    const result = await runFollowUp(ctx.models, ctx.notes, c.input.answer, settings);
     const calls = result.attempts.map((a) => a.call);
     const last = calls.at(-1);
     return {

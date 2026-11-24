@@ -1,6 +1,7 @@
 import type { Catalogue } from '@/domain/examiner/catalogue';
 import type { SelectorRequest } from '@/domain/examiner/selector.schema';
-import type { Prompt, PromptVariant } from '@/domain/llm/step-settings.schema';
+import type { Prompt } from '@/domain/llm/call-result';
+import type { PromptVariant } from '@/domain/llm/step-settings.schema';
 
 export type SelectorPromptInput = {
   openingPrompt: string;

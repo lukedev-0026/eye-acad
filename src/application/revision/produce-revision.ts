@@ -8,11 +8,11 @@ import type { VerifierResult } from '@/application/steps/verifier.step';
 import type { RevisionCard } from '@/domain/attempt/attempt.schema';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
 import { LINES } from '@/domain/examiner/lines';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
 import type { NoteIndex } from '@/domain/note/note.types';
 import { retrieve } from '@/domain/note/retrieve';
 import type { Retrieval } from '@/domain/note/retrieve';
-import { embed } from '@/infrastructure/llm/ollama-embedding';
 
 export type RevisionTrace = {
   coverage: CoverageResult | null;
@@ -42,6 +42,7 @@ export type RevisionInput = {
 //   3. pick the supporting sentence, word   (model picks numbers, code quotes)
 //   4. does the quote support the advice?   (separate model call)
 export async function produceRevision(
+  models: LanguageModelGateway,
   input: RevisionInput,
   config: StepsConfig,
   index: NoteIndex,
@@ -68,7 +69,7 @@ export async function produceRevision(
     target = options.pinnedTarget;
     missed = target.text;
   } else {
-    const coverage = await runCoverage(input.notes, input.answer, config.steps.coverage);
+    const coverage = await runCoverage(models, input.notes, input.answer, config.steps.coverage);
     trace.coverage = coverage;
     if (coverage.call.outcome !== 'ok') {
       throw new RevisionUnavailableError('coverage', coverage.call.outcome, coverage.call.error);
@@ -110,7 +111,7 @@ export async function produceRevision(
     ...extra,
   });
 
-  const vector = (await embed([target.text], 'query'))?.[0] ?? null;
+  const vector = (await models.embed([target.text], 'query'))?.[0] ?? null;
   const retrieval = retrieve(index, { target: target.text, vector }, { exclude: options.exclude });
   trace.retrieval = retrieval;
   base.retrievalMode = retrieval.mode;
@@ -118,6 +119,7 @@ export async function produceRevision(
   if (retrieval.noSupport) return { card: noSupport(), trace };
 
   const revision = await runRevision(
+    models,
     target.text,
     input.guidance,
     retrieval.results.map((r) => r.chunk),
@@ -132,6 +134,7 @@ export async function produceRevision(
   }
 
   const verifier = await runVerifier(
+    models,
     revision.point,
     revision.citation.chunk,
     revision.citation.sentences.map((s) => s.id),
@@ -157,6 +160,7 @@ export async function produceRevision(
     revision.point !== target.text
   ) {
     const keyPointCheck = await runVerifier(
+      models,
       target.text,
       revision.citation.chunk,
       revision.citation.sentences.map((s) => s.id),

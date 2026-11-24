@@ -1,13 +1,15 @@
 import { z } from 'zod';
 
+import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
 import { revisionPrompt } from '@/application/prompts/revision.prompt';
 import type { RevisionPassage } from '@/application/prompts/revision.prompt';
-import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { CallResult } from '@/domain/llm/call-result';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { headingPath, pageLabel } from '@/domain/note/note.types';
 import type { NoteChunk, NoteSentence } from '@/domain/note/note.types';
 import { checkRevisionPoint } from '@/domain/text/text-checks';
 import type { CheckResult } from '@/domain/text/text-checks';
-import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
 
 function revisionSchema(refs: Array<string>) {
   return z.object({
@@ -52,6 +54,7 @@ export function excerptOf(sentences: Array<NoteSentence>): string {
 // with sentence numbers and one sentence of advice. Code turns the numbers
 // into the quotation and the page.
 export async function runRevision(
+  models: LanguageModelGateway,
   target: string,
   guidance: string | null,
   chunks: Array<NoteChunk>,
@@ -71,13 +74,13 @@ export async function runRevision(
   }));
 
   const schema = revisionSchema([...byRef.keys()]);
-  const call = await callStep(
+  const call = await models.callStep(
     settings,
     revisionPrompt(settings.promptVariant, { target, guidance, passages }, describeJsonShape(schema)),
     schema,
   );
   const none = { citation: null, point: null, pointSource: null, wordingCheck: null };
-  if (call.outcome !== 'ok' || !call.value) return { call, outcome: 'unusable', ...none };
+  if (call.outcome !== 'ok') return { call, outcome: 'unusable', ...none };
   if (call.value.outcome === 'no_support' || call.value.sentence_refs.length === 0) {
     return { call, outcome: 'no_support', ...none };
   }

@@ -66,6 +66,7 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       };
     }
     const result = await runRevision(
+      ctx.models,
       target,
       ctx.guidance,
       found.results.map((r) => r.chunk),

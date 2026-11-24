@@ -14,7 +14,7 @@ export const verifierEval: StepEval<Input, Expect, Observed> = {
 
   async run(c, settings, ctx) {
     const { chunk, sentence } = findSentence(ctx.index, c.input.cite);
-    const result = await runVerifier(c.input.statement, chunk, [sentence.id], settings);
+    const result = await runVerifier(ctx.models, c.input.statement, chunk, [sentence.id], settings);
     return asRun(result.call, { supported: result.supported, reason: result.call.value?.reason ?? '' });
   },
 

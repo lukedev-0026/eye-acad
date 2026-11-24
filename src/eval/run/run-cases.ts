@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { CallOutcome, StepId, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { CallOutcome } from '@/domain/llm/call-result';
+import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import type { AnyStepEval, EvalCase, EvalContext, Graded, Split } from '@/eval/eval.types';
 
 // A short, stable name for one configuration of one step. Two runs with the

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { REQUEST_EYES } from '@/domain/examiner/selector.schema';
+
 // The saved attempt, exactly as the trainee's browser may read it. The server
 // passes every write through this schema, and zod drops any field not listed
 // here, so nothing can reach the browser by being added to an object by
@@ -35,7 +37,7 @@ export const TurnSchema = z.object({
 });
 export type Turn = z.infer<typeof TurnSchema>;
 
-export const RequestSchema = z.object({ item: z.string(), eye: z.string() });
+export const RequestSchema = z.object({ item: z.string(), eye: z.enum(REQUEST_EYES) });
 
 export const FollowUpSchema = z.object({
   question: z.string(),

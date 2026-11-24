@@ -1,13 +1,15 @@
 import { z } from 'zod';
 
 import { followUpPrompt } from '@/application/prompts/followup.prompt';
+import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
 import { MAX_ANSWER_CHARS } from '@/domain/attempt/attempt';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
 import { LINES } from '@/domain/examiner/lines';
-import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { CallResult } from '@/domain/llm/call-result';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { checkAnchor, checkFollowUpQuestion, closestIdea } from '@/domain/text/text-checks';
 import type { CheckResult } from '@/domain/text/text-checks';
-import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
 
 function followUpSchema(ideaCount: number) {
   const ids = Array.from({ length: ideaCount }, (_, i) => `idea_${i + 1}`);
@@ -42,6 +44,7 @@ export type FollowUpResult = {
 // finds every meaningful word in the trainee's answer or in the case file's
 // own follow-up questions. Otherwise one of those questions is used verbatim.
 export async function runFollowUp(
+  models: LanguageModelGateway,
   notes: ExaminerNotes,
   rawAnswer: string,
   settings: StepSettings,
@@ -61,14 +64,14 @@ export async function runFollowUp(
 
   // One retry, told why the first attempt could not be used.
   for (let i = 0; i < 2; i++) {
-    const call = await callStep(
+    const call = await models.callStep(
       settings,
       followUpPrompt(settings.promptVariant, { notes, answer, retryReason }, shape),
       schema,
     );
     const attempt: FollowUpAttempt = { call };
     attempts.push(attempt);
-    if (call.outcome !== 'ok' || !call.value) {
+    if (call.outcome !== 'ok') {
       retryReason = 'the reply was not in the required format';
       continue;
     }

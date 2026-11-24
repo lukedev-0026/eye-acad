@@ -7,6 +7,8 @@ import { parseArgs } from 'node:util';
 
 import { z } from 'zod';
 
+import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
+import { getConfig } from '@/config/env.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
 import { selfTest } from '@/eval/run/run-cases';
@@ -14,8 +16,7 @@ import { captureEnv, modelInfo } from '@/eval/run-env';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { NUM_CTX, SIZES, settingsFor } from '@/eval/sweep/grid';
 import type { Size } from '@/eval/sweep/grid';
-import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
-import { ollamaHost } from '@/infrastructure/llm/ollama.provider';
+import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
 const { values: args } = parseArgs({ options: { models: { type: 'string', default: 'small,medium,large' } } });
 const sizes = (args.models ?? '').split(',').filter((s): s is Size => s in SIZES);
@@ -68,14 +69,7 @@ const Canary = z.object({ animal: z.enum(['cat', 'dog']), legs: z.enum(['two', '
 const models: Record<string, unknown> = {};
 const engines = new Set<string>();
 
-async function show(model: string) {
-  const res = await fetch(`${ollamaHost()}/api/show`, { method: 'POST', body: JSON.stringify({ model }) });
-  return (await res.json()) as {
-    parameters?: string;
-    thinking?: { values?: Array<unknown>; default?: unknown };
-    details?: { runner?: string };
-  };
-}
+const ollama = new OllamaClient(getConfig().ollama.host);
 
 for (const size of sizes) {
   const model = SIZES[size];
@@ -87,7 +81,7 @@ for (const size of sizes) {
   }
   say(`\n3. ${model} (${info.sizeGb} GB, engine ${info.engine}, ${info.quantisation}, digest ${info.digest})`);
   engines.add(info.engine);
-  const shown = await show(model);
+  const shown = await ollama.show(model);
   const shipped = Object.fromEntries(
     (shown.parameters ?? '')
       .split('\n')
@@ -107,7 +101,7 @@ for (const size of sizes) {
   for (const thinking of [false, true]) {
     for (const forceFormat of [true, false]) {
       const s = { ...settingsFor('verifier', { size, thinking, forceFormat }), seed: 1 };
-      const r = await callStep(s, canaryPrompt, Canary);
+      const r = await ctx.models.callStep(s, canaryPrompt, Canary);
       const key = `thinking ${thinking ? 'on' : 'off'}, format ${forceFormat ? 'forced' : 'not forced'}`;
       canaries[key] = {
         outcome: r.outcome,
@@ -134,7 +128,7 @@ for (const size of sizes) {
   const OnList = z.object({ colour: z.enum(['red', 'green', 'blue']) });
   const enumChecks: Array<string> = [];
   for (const thinking of [false, true]) {
-    const r = await callStep(
+    const r = await ctx.models.callStep(
       { ...settingsFor('verifier', { size, thinking, forceFormat: true }), seed: 1 },
       {
         system: `Reply in JSON. ${describeJsonShape(OnList)}`,

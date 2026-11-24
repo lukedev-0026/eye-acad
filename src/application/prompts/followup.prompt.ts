@@ -1,5 +1,6 @@
 import type { ExaminerNotes } from '@/domain/case/case.schema';
-import type { Prompt, PromptVariant } from '@/domain/llm/step-settings.schema';
+import type { Prompt } from '@/domain/llm/call-result';
+import type { PromptVariant } from '@/domain/llm/step-settings.schema';
 
 import { assemble, quoted } from './shared.prompt';
 

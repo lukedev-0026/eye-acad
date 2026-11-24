@@ -29,7 +29,7 @@ export type TurnResult = {
 // One request for findings. A spoken request is turned into text first; from
 // then on typed and spoken requests take exactly the same path.
 export async function handleRequest(
-  deps: Pick<VivaDeps, 'attempts'>,
+  deps: Pick<VivaDeps, 'attempts' | 'models'>,
   uid: string,
   attemptId: string,
   input: { text: string } | { audio: Buffer; mimeType: string },
@@ -37,7 +37,7 @@ export async function handleRequest(
   const started = performance.now();
   const via = 'audio' in input ? 'voice' : 'typed';
 
-  const { attempts } = deps;
+  const { attempts, models } = deps;
   const attempt = await attempts.read(uid, attemptId);
   if (attempt.phase !== 'asking') {
     throw new AttemptPhaseError('This attempt is no longer taking questions.');
@@ -73,12 +73,7 @@ export async function handleRequest(
   } else if (attempt.turns.length >= MAX_TURNS) {
     reply = fixedReply('wants_to_answer', LINES.pressTheButton);
   } else {
-    const run = await runSelector(
-      c,
-      heard,
-      attempt.lastRequests as Parameters<typeof runSelector>[2],
-      config.steps.selector,
-    );
+    const run = await runSelector(models, c, heard, attempt.lastRequests, config.steps.selector);
     modelMs = run.call.ms;
     // Refusal, truncation, an unusable reply or a provider error all end the
     // same way: a fixed line, nothing revealed, and the trainee's turn again.

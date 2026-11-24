@@ -1,10 +1,11 @@
 import { readFile } from 'node:fs/promises';
 
+import { getConfig } from '@/config/env.server';
 import { buildCatalogue } from '@/domain/examiner/catalogue';
 import type { NoteChunk, NoteIndex, NoteSentence } from '@/domain/note/note.types';
 import { loadCase, loadCitationGuidance, loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
-import { embed } from '@/infrastructure/llm/ollama-embedding';
+import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
 import type { EvalCase, EvalContext, RetrievalTarget } from './eval.types';
 
@@ -12,6 +13,7 @@ export async function loadContext(): Promise<EvalContext> {
   const publicCase = await loadCase();
   const spec = JSON.parse(await readFile('evals/cases/retrieval.json', 'utf8')) as { targets: Array<RetrievalTarget> };
   return {
+    models: createLanguageModelGateway(getConfig()),
     publicCase,
     catalogue: buildCatalogue(publicCase),
     notes: await loadExaminerNotes(),
@@ -56,6 +58,6 @@ export function sentenceIds(index: NoteIndex, phrases: Array<string>): Set<strin
 }
 
 export async function queryVector(ctx: EvalContext, text: string): Promise<Array<number> | null> {
-  if (!ctx.vectors.has(text)) ctx.vectors.set(text, (await embed([text], 'query'))?.[0] ?? null);
+  if (!ctx.vectors.has(text)) ctx.vectors.set(text, (await ctx.models.embed([text], 'query'))?.[0] ?? null);
   return ctx.vectors.get(text) ?? null;
 }

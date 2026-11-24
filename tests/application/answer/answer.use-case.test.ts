@@ -12,9 +12,10 @@ import { startAttempt } from '@/application/attempt/start-attempt.use-case';
 import { RevisionUnavailableError } from '@/application/revision/revision.error';
 import { AttemptPhaseError, EmptyAnswerError } from '@/domain/attempt/attempt.error';
 import { LINES } from '@/domain/examiner/lines';
-import { InMemoryAttemptRepository } from '@tests/fakes/in-memory-attempt.repository';
+import type { InMemoryAttemptRepository } from '@tests/fakes/in-memory-attempt.repository';
 import { NOT_JSON, scriptModel } from '@tests/fakes/scripted-model';
 import type { ScriptedModel } from '@tests/fakes/scripted-model';
+import { testDeps } from '@tests/fakes/test-deps';
 
 const UID = 'trainee-a';
 const ANSWER = "It's acute glaucoma in the right eye, so I'd lower the pressure with drops.";
@@ -57,6 +58,7 @@ const SUPPORTED = { reason: 'The passage says so.', verdict: 'supported' };
 const NOT_SUPPORTED = { reason: 'The passage is about something else.', verdict: 'not_supported' };
 
 let model: ScriptedModel;
+let deps: ReturnType<typeof testDeps>;
 let attempts: InMemoryAttemptRepository;
 let attemptId: string;
 
@@ -70,22 +72,23 @@ afterAll(() => {
   vi.unstubAllEnvs();
 });
 beforeEach(async () => {
-  attempts = new InMemoryAttemptRepository();
-  attemptId = await startAttempt({ attempts }, UID);
+  deps = testDeps();
+  attempts = deps.attempts;
+  attemptId = await startAttempt(deps, UID);
 });
 
 const kinds = async () => (await attempts.read(UID, attemptId)).turns.map((t) => t.kind ?? null);
 
 describe('giving the answer', () => {
   it('is refused when empty, and the attempt stays open for questions', async () => {
-    await expect(handleAnswer({ attempts }, UID, attemptId, '   ', 'typed')).rejects.toBeInstanceOf(EmptyAnswerError);
+    await expect(handleAnswer(deps, UID, attemptId, '   ', 'typed')).rejects.toBeInstanceOf(EmptyAnswerError);
     expect((await attempts.read(UID, attemptId)).phase).toBe('asking');
   });
 
   it('records the answer and asks one follow-up that responds to what was said', async () => {
     model.willReply(GOOD_FOLLOW_UP);
 
-    const followUp = await handleAnswer({ attempts }, UID, attemptId, `  ${ANSWER}  `, 'typed');
+    const followUp = await handleAnswer(deps, UID, attemptId, `  ${ANSWER}  `, 'typed');
     const attempt = await attempts.read(UID, attemptId);
 
     expect(followUp).toEqual({
@@ -103,9 +106,9 @@ describe('giving the answer', () => {
 
   it('asks exactly one follow-up: a second answer is refused', async () => {
     model.willReply(GOOD_FOLLOW_UP);
-    await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'typed');
+    await handleAnswer(deps, UID, attemptId, ANSWER, 'typed');
 
-    await expect(handleAnswer({ attempts }, UID, attemptId, 'Another answer', 'typed')).rejects.toBeInstanceOf(
+    await expect(handleAnswer(deps, UID, attemptId, 'Another answer', 'typed')).rejects.toBeInstanceOf(
       AttemptPhaseError,
     );
     expect((await kinds()).filter((kind) => kind === 'follow_up')).toHaveLength(1);
@@ -114,10 +117,10 @@ describe('giving the answer', () => {
 
   it('gives the same follow-up back when asked again, without calling the model', async () => {
     model.willReply(GOOD_FOLLOW_UP);
-    const first = await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'typed');
+    const first = await handleAnswer(deps, UID, attemptId, ANSWER, 'typed');
     model.willReply(LEAKY_FOLLOW_UP);
 
-    const again = await ensureFollowUp({ attempts }, UID, attemptId);
+    const again = await ensureFollowUp(deps, UID, attemptId);
 
     expect(again).toEqual(first);
     expect(model.requests()).toHaveLength(0);
@@ -126,7 +129,7 @@ describe('giving the answer', () => {
   it('retries once, saying why, then uses a question from the case file word for word', async () => {
     model.willReply(LEAKY_FOLLOW_UP);
 
-    const followUp = await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'typed');
+    const followUp = await handleAnswer(deps, UID, attemptId, ANSWER, 'typed');
     const [first, second] = model.requests();
 
     expect(model.requests()).toHaveLength(2);
@@ -141,7 +144,7 @@ describe('giving the answer', () => {
   it('uses a question from the case file when the model gives nothing usable', async () => {
     model.willReply(NOT_JSON);
 
-    const followUp = await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'voice');
+    const followUp = await handleAnswer(deps, UID, attemptId, ANSWER, 'voice');
 
     expect(followUp.path).toBe('supplied');
     expect(followUp.respondingTo).toBeNull();
@@ -153,7 +156,7 @@ describe('giving the answer', () => {
   it('keeps a working note of every attempt at the question', async () => {
     model.willReply(LEAKY_FOLLOW_UP);
 
-    await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'typed');
+    await handleAnswer(deps, UID, attemptId, ANSWER, 'typed');
     const [note] = attempts.workingNotes(UID, attemptId);
 
     expect(note).toMatchObject({ step: 'followup', path: 'supplied' });
@@ -161,18 +164,18 @@ describe('giving the answer', () => {
   });
 
   it('is refused when no follow-up is due', async () => {
-    await expect(ensureFollowUp({ attempts }, UID, attemptId)).rejects.toBeInstanceOf(AttemptPhaseError);
+    await expect(ensureFollowUp(deps, UID, attemptId)).rejects.toBeInstanceOf(AttemptPhaseError);
   });
 });
 
 describe('replying to the follow-up', () => {
   const answered = async () => {
     model.willReply(GOOD_FOLLOW_UP);
-    await handleAnswer({ attempts }, UID, attemptId, ANSWER, 'typed');
+    await handleAnswer(deps, UID, attemptId, ANSWER, 'typed');
   };
 
   it('is refused before the follow-up has been asked', async () => {
-    await expect(handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed')).rejects.toBeInstanceOf(
+    await expect(handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed')).rejects.toBeInstanceOf(
       AttemptPhaseError,
     );
   });
@@ -181,7 +184,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
 
-    const card = await handleFollowUpReply({ attempts }, UID, attemptId, 'Because it is ischaemic.', 'typed');
+    const card = await handleFollowUpReply(deps, UID, attemptId, 'Because it is ischaemic.', 'typed');
     const attempt = await attempts.read(UID, attemptId);
 
     expect(card.outcome).toBe('supported');
@@ -202,7 +205,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
 
-    await handleFollowUpReply({ attempts }, UID, attemptId, 'A reply mentioning sulfonamide allergy.', 'typed');
+    await handleFollowUpReply(deps, UID, attemptId, 'A reply mentioning sulfonamide allergy.', 'typed');
     const coverageRequest = JSON.stringify(model.requests()[0]);
 
     expect(coverageRequest).toContain('lower the pressure with drops');
@@ -213,7 +216,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, NOT_SUPPORTED);
 
-    const card = await handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed');
+    const card = await handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed');
 
     expect(card).toMatchObject({
       outcome: 'no_support',
@@ -229,7 +232,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
 
-    await handleFollowUpReply({ attempts }, UID, attemptId, '   ', 'typed');
+    await handleFollowUpReply(deps, UID, attemptId, '   ', 'typed');
 
     expect((await attempts.read(UID, attemptId)).followUpReply?.text).toBe('(no reply)');
   });
@@ -238,7 +241,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOT_JSON);
 
-    await expect(handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed')).rejects.toBeInstanceOf(
+    await expect(handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed')).rejects.toBeInstanceOf(
       RevisionUnavailableError,
     );
     const waiting = await attempts.read(UID, attemptId);
@@ -247,7 +250,7 @@ describe('replying to the follow-up', () => {
     expect(waiting.revision).toBeNull();
 
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
-    const card = await prepareRevision({ attempts }, UID, attemptId);
+    const card = await prepareRevision(deps, UID, attemptId);
 
     expect(card.outcome).toBe('supported');
     expect((await attempts.read(UID, attemptId)).phase).toBe('complete');
@@ -257,7 +260,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOT_JSON);
 
-    await expect(handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed')).rejects.toMatchObject({
+    await expect(handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed')).rejects.toMatchObject({
       code: 'REVISION_UNAVAILABLE',
       details: { step: 'coverage', outcome: 'schema_invalid' },
     });
@@ -266,19 +269,19 @@ describe('replying to the follow-up', () => {
   it('gives the same revision point back when asked again, without calling the model', async () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
-    const card = await handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed');
+    const card = await handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed');
     model.willReply(NOT_JSON);
 
-    expect(await prepareRevision({ attempts }, UID, attemptId)).toEqual(card);
+    expect(await prepareRevision(deps, UID, attemptId)).toEqual(card);
     expect(model.requests()).toHaveLength(0);
   });
 
   it('accepts one reply only', async () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
-    await handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed');
+    await handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed');
 
-    await expect(handleFollowUpReply({ attempts }, UID, attemptId, 'Another', 'typed')).rejects.toBeInstanceOf(
+    await expect(handleFollowUpReply(deps, UID, attemptId, 'Another', 'typed')).rejects.toBeInstanceOf(
       AttemptPhaseError,
     );
   });
@@ -287,7 +290,7 @@ describe('replying to the follow-up', () => {
     await answered();
     model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
 
-    await handleFollowUpReply({ attempts }, UID, attemptId, 'A reply', 'typed');
+    await handleFollowUpReply(deps, UID, attemptId, 'A reply', 'typed');
     const note = attempts.workingNotes(UID, attemptId).find((n) => n.step === 'revision');
 
     expect(note).toMatchObject({ step: 'revision', target: { id: 'item_2', kind: 'key_point' } });

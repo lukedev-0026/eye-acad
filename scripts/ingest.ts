@@ -6,11 +6,12 @@ import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { getConfig } from '@/config/env.server';
 import { parseNoteXml } from '@/domain/note/note-parse';
 import { searchText } from '@/domain/note/note.types';
 import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
 import { NOTE_INDEX, NOTE_PDF, sha256OfFile } from '@/infrastructure/files/note-index.loader';
-import { EMBEDDING_MODEL, embed } from '@/infrastructure/llm/ollama-embedding';
+import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
 const pdf = path.resolve(process.argv[2] ?? NOTE_PDF());
 // Arguments are passed as a list, never through a shell.
@@ -44,12 +45,13 @@ if (problems.length) {
   process.exit(1);
 }
 
-const vectors = await embed(
+const embeddingModel = getConfig().embeddings.model;
+const vectors = await createLanguageModelGateway(getConfig()).embed(
   note.chunks.map((c) => searchText(c as NoteChunk)),
   'document',
 );
 if (!vectors) {
-  console.warn(`Could not reach the embeddings model (${EMBEDDING_MODEL}). Writing a keyword-only index.`);
+  console.warn(`Could not reach the embeddings model (${embeddingModel}). Writing a keyword-only index.`);
 }
 
 const index: NoteIndex = {
@@ -59,7 +61,7 @@ const index: NoteIndex = {
     pages: note.pages.length,
   },
   disclaimer: note.disclaimer,
-  embedding: vectors ? { model: EMBEDDING_MODEL, dimensions: vectors[0].length } : null,
+  embedding: vectors ? { model: embeddingModel, dimensions: vectors[0].length } : null,
   chunks: note.chunks.map((c, i) => (vectors ? { ...c, vector: vectors[i] } : c)),
 };
 

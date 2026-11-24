@@ -12,6 +12,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
+import { getConfig } from '@/config/env.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
@@ -36,8 +37,7 @@ import {
 import type { Size } from '@/eval/sweep/grid';
 import { candidatesFor, loadSweep } from '@/eval/sweep/sweep-data';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
-import { EMBEDDING_MODEL } from '@/infrastructure/llm/ollama-embedding';
-import { ollamaHost } from '@/infrastructure/llm/ollama.provider';
+import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
 const { values: args } = parseArgs({
   options: {
@@ -95,23 +95,20 @@ const log = (line: string) => console.log(`${new Date().toISOString().slice(11, 
 
 // ---------- models ----------
 
-type Ps = { models?: Array<{ name: string; size: number; size_vram: number }> };
-async function loaded(): Promise<NonNullable<Ps['models']>> {
-  const res = await fetch(`${ollamaHost()}/api/ps`);
-  return ((await res.json()) as Ps).models ?? [];
-}
+const ollama = new OllamaClient(getConfig().ollama.host);
+const embeddingModel = getConfig().embeddings.model;
+// The share of a loaded model that sits on the GPU, as Ollama reports it.
+const onGpu = (m: { size?: number | null; size_vram?: number | null } | undefined) =>
+  m?.size && m.size_vram != null ? `${Math.round((m.size_vram / m.size) * 100)}%` : null;
 
 let current: string | null = null;
 // One language model in memory at a time. Load time is recorded and kept out
 // of every timing.
 async function useModel(model: string) {
   if (current === model) return;
-  for (const m of await loaded()) {
-    if (m.name === model || m.name.startsWith(EMBEDDING_MODEL)) continue;
-    await fetch(`${ollamaHost()}/api/generate`, {
-      method: 'POST',
-      body: JSON.stringify({ model: m.name, keep_alive: 0 }),
-    });
+  for (const m of await ollama.loadedModels()) {
+    if (m.name === model || m.name.startsWith(embeddingModel)) continue;
+    await ollama.unload(m.name);
   }
   const started = performance.now();
   // Three calls that are not timed: the first loads the model.
@@ -120,18 +117,18 @@ async function useModel(model: string) {
   for (const c of warm) {
     await selector.run(c, { ...startSettings('selector'), model, seed: 1 }, ctx);
   }
-  const ps = (await loaded()).find((m) => m.name === model);
+  const ps = (await ollama.loadedModels()).find((m) => m.name === model);
   await appendRow(runId, {
     type: 'model_loaded',
     at: new Date().toISOString(),
     model,
     info: await modelInfo(model),
     loadAndWarmUpMs: Math.round(performance.now() - started),
-    onGpu: ps ? `${Math.round((ps.size_vram / ps.size) * 100)}%` : 'unknown',
+    onGpu: onGpu(ps) ?? 'unknown',
     swapUsedMb: swapUsedMb(),
   });
   log(
-    `model ${model} loaded (${ps ? `${Math.round((ps.size_vram / ps.size) * 100)}% on GPU` : 'not listed'}), swap ${swapUsedMb()} MB`,
+    `model ${model} loaded (${ps ? `${onGpu(ps) ?? 'unknown share'} on GPU` : 'not listed'}), swap ${swapUsedMb()} MB`,
   );
   current = model;
 }

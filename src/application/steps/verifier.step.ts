@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
+import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
 import { verifierPrompt } from '@/application/prompts/verifier.prompt';
-import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
+import type { CallResult } from '@/domain/llm/call-result';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { headingPath } from '@/domain/note/note.types';
 import type { NoteChunk } from '@/domain/note/note.types';
-import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
 
 const VerifierSchema = z.object({
   reason: z.string().max(400),
@@ -31,12 +33,13 @@ export function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): str
 // A separate, fresh call that has seen none of the conversation. A quotation
 // can be word-for-word accurate and still not back the claim attached to it.
 export async function runVerifier(
+  models: LanguageModelGateway,
   statement: string,
   chunk: NoteChunk,
   sentenceIds: Array<string>,
   settings: StepSettings,
 ): Promise<VerifierResult> {
-  const call = await callStep(
+  const call = await models.callStep(
     settings,
     verifierPrompt(
       settings.promptVariant,

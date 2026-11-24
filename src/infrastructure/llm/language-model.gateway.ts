@@ -1,66 +1,91 @@
 import { z } from 'zod';
 
+import type { AppConfig } from '@/config/env.server';
+import type { CallResult, Prompt } from '@/domain/llm/call-result';
 import { extractJson } from '@/domain/llm/extract-json';
-import type { CallResult, Prompt, RawCall, StepSettings } from '@/domain/llm/step-settings.schema';
+import type {
+  CallStepOptions,
+  EmbeddingKind,
+  LanguageModelGateway,
+  LanguageModelProvider,
+} from '@/domain/llm/language-model.gateway';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
 
-import { callAnthropic } from './anthropic.provider';
-import { callOllama } from './ollama.provider';
+import { AnthropicProvider } from './anthropic.provider';
+import { OllamaClient } from './ollama-http';
+import { OllamaEmbedder } from './ollama.embedder';
+import { OllamaProvider } from './ollama.provider';
 
-// The single door every model call goes through, in the app and in the checks
-// alike. It returns a typed result and never throws: the caller decides which
-// fixed fallback an unusable result maps to.
-export async function callStep<T>(
-  settings: StepSettings,
-  prompt: Prompt,
-  schema: z.ZodType<T>,
-  options: {
-    // Tidies a parsed reply before it is checked (for example matching a
-    // label case-insensitively). It cannot widen what the schema accepts.
-    normalise?: (value: unknown) => unknown;
-  } = {},
-): Promise<CallResult<T>> {
-  const started = performance.now();
-  const jsonSchema = z.toJSONSchema(schema);
+type ProviderName = StepSettings['provider'];
 
-  let raw: RawCall;
-  if (settings.provider === 'ollama') {
-    raw = await callOllama(settings, prompt, jsonSchema);
-  } else {
-    raw = await callAnthropic(settings, prompt, schema);
-  }
-
-  const base = {
-    rawText: raw.text,
-    thinkingChars: raw.thinkingChars,
-    model: raw.model,
-    provider: settings.provider,
-    ms: Math.round(performance.now() - started),
-    server: raw.server,
-  };
-  if (raw.outcome !== 'ok') {
-    return { ...base, outcome: raw.outcome, error: raw.error };
-  }
-
-  // The same check whether or not the provider was asked to enforce the
-  // format. This, not the provider, is what keeps an out-of-list answer out.
-  const json = extractJson(raw.text);
-  const candidate = options.normalise ? options.normalise(json) : json;
-  const parsed = schema.safeParse(candidate);
-  if (!parsed.success) {
-    return {
-      ...base,
-      outcome: 'schema_invalid',
-      error: z.prettifyError(parsed.error),
-    };
-  }
-  return { ...base, outcome: 'ok', value: parsed.data };
+interface Embedder {
+  embed(texts: ReadonlyArray<string>, kind: EmbeddingKind): Promise<Array<Array<number>> | null>;
 }
 
-// Appended to every prompt, forced format or not, so that switching the
-// provider's enforcement on and off changes one thing only.
-export function describeJsonShape(schema: z.ZodType): string {
-  return (
-    'Reply with one JSON object and nothing else. It must match this JSON schema:\n' +
-    JSON.stringify(z.toJSONSchema(schema))
+// Sends each call to the provider its settings name, then checks the reply
+// here, the same way for every provider.
+export class ProviderLanguageModelGateway implements LanguageModelGateway {
+  private readonly providers: Readonly<Record<ProviderName, LanguageModelProvider>>;
+  private readonly embedder: Embedder;
+
+  constructor(providers: Readonly<Record<ProviderName, LanguageModelProvider>>, embedder: Embedder) {
+    this.providers = providers;
+    this.embedder = embedder;
+  }
+
+  async callStep<T>(
+    settings: StepSettings,
+    prompt: Prompt,
+    schema: z.ZodType<T>,
+    options: CallStepOptions = {},
+  ): Promise<CallResult<T>> {
+    const started = performance.now();
+    const reply = await this.providers[settings.provider].call({
+      settings,
+      prompt,
+      schema,
+      jsonSchema: z.toJSONSchema(schema),
+    });
+
+    const facts = {
+      rawText: reply.text,
+      thinkingChars: reply.thinkingChars,
+      model: reply.model,
+      provider: settings.provider,
+      ms: Math.round(performance.now() - started),
+      server: reply.server,
+    };
+    if (reply.outcome !== 'ok') {
+      return { ...facts, outcome: reply.outcome, error: reply.error };
+    }
+
+    // The same check whether or not the provider was asked to enforce the
+    // format. This, not the provider, is what keeps an out-of-list answer out.
+    const json = extractJson(reply.text);
+    const candidate = options.normalise ? options.normalise(json) : json;
+    const parsed = schema.safeParse(candidate);
+    if (!parsed.success) {
+      return { ...facts, outcome: 'schema_invalid', error: z.prettifyError(parsed.error) };
+    }
+    return { ...facts, outcome: 'ok', value: parsed.data };
+  }
+
+  embed(texts: ReadonlyArray<string>, kind: EmbeddingKind): Promise<Array<Array<number>> | null> {
+    return this.embedder.embed(texts, kind);
+  }
+}
+
+// The real gateway: local models through Ollama, Claude through Anthropic's
+// API, embeddings from the local embeddings model.
+export function createLanguageModelGateway(
+  config: Pick<AppConfig, 'ollama' | 'embeddings' | 'anthropic'>,
+): LanguageModelGateway {
+  const ollama = new OllamaClient(config.ollama.host);
+  return new ProviderLanguageModelGateway(
+    {
+      ollama: new OllamaProvider(ollama, config.ollama.keepAlive),
+      anthropic: new AnthropicProvider(config.anthropic.apiKey),
+    },
+    new OllamaEmbedder(ollama, config.embeddings.model),
   );
 }

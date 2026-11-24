@@ -1,7 +1,7 @@
 import { runSelector } from '@/application/steps/selector.step';
 import { historyLabel } from '@/domain/examiner/render';
 import type { SelectorRequest } from '@/domain/examiner/selector.schema';
-import type { CallResult } from '@/domain/llm/step-settings.schema';
+import type { CallResult } from '@/domain/llm/call-result';
 import { readCases } from '@/eval/eval-context';
 import type { EvalCase, StepEval, StepRun } from '@/eval/eval.types';
 
@@ -56,7 +56,7 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
   },
 
   async run(c, settings, ctx) {
-    const run = await runSelector(ctx.publicCase, c.input.utterance, c.input.previous ?? [], settings);
+    const run = await runSelector(ctx.models, ctx.publicCase, c.input.utterance, c.input.previous ?? [], settings);
     const d = run.decision;
     return asRun(run.call, {
       kind: d ? d.kind : 'error',

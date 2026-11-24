@@ -14,7 +14,7 @@ export const coverageEval: StepEval<Input, Expect, Observed> = {
   cases: () => readCases<Input, Expect>('coverage.jsonl'),
 
   async run(c, settings, ctx) {
-    const result = await runCoverage(ctx.notes, c.input.answer, settings);
+    const result = await runCoverage(ctx.models, ctx.notes, c.input.answer, settings);
     return asRun(result.call, {
       target: result.call.outcome !== 'ok' ? 'error' : (result.target?.id ?? 'none'),
       statuses: Object.fromEntries(result.items.map((i) => [i.id, i.status])),

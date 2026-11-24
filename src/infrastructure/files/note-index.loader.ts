@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { getConfig } from '@/config/env.server';
 import type { NoteIndex } from '@/domain/note/note.types';
-import { EMBEDDING_MODEL } from '@/infrastructure/llm/ollama-embedding';
 
 export const NOTE_PDF = () => path.resolve(process.cwd(), process.env.VIVA_NOTE_PDF ?? 'data/reference-note.pdf');
 export const NOTE_INDEX = () => path.resolve(process.cwd(), process.env.VIVA_NOTE_INDEX ?? 'data/note-index.json');
@@ -29,9 +29,10 @@ export async function loadNoteIndex(): Promise<NoteIndex> {
   if (index.source.sha256 !== current) {
     throw new StaleIndexError('The reference note PDF has changed since it was prepared. Run: pnpm ingest');
   }
-  if (index.embedding && index.embedding.model !== EMBEDDING_MODEL) {
+  const embeddingModel = getConfig().embeddings.model;
+  if (index.embedding && index.embedding.model !== embeddingModel) {
     throw new StaleIndexError(
-      `The note was prepared with ${index.embedding.model} but the app is set to ${EMBEDDING_MODEL}. Run: pnpm ingest`,
+      `The note was prepared with ${index.embedding.model} but the app is set to ${embeddingModel}. Run: pnpm ingest`,
     );
   }
   return index;

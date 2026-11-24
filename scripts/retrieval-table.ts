@@ -4,12 +4,15 @@
 //   pnpm retrieval-table
 import { readFile, writeFile } from 'node:fs/promises';
 
+import { getConfig } from '@/config/env.server';
 import { pageLabel } from '@/domain/note/note.types';
 import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
 import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '@/domain/note/retrieve';
 import { loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
-import { embed } from '@/infrastructure/llm/ollama-embedding';
+import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
+
+const models = createLanguageModelGateway(getConfig());
 
 type Target = {
   id: string;
@@ -59,7 +62,7 @@ for (const withQuote of [false, true]) {
   for (const t of spec.targets) {
     const target = targetText(t.source);
     const extra = withQuote ? spec.quotes[t.id] : undefined;
-    const vector = (await embed([`${target} ${extra ?? ''}`.trim()], 'query'))?.[0] ?? null;
+    const vector = (await models.embed([`${target} ${extra ?? ''}`.trim()], 'query'))?.[0] ?? null;
     const run = retrieve(index, { target, extra, vector });
     const rank = (chunks: Array<NoteChunk>, key: 'keywordRank' | 'meaningRank' | 'fusedRank') =>
       best(chunks.map((c) => run.ranking.find((r) => r.chunk.id === c.id)?.[key] ?? null));
@@ -95,7 +98,7 @@ for (const withQuote of [false, true]) {
 }
 
 for (const text of spec.unsupported) {
-  const vector = (await embed([text], 'query'))?.[0] ?? null;
+  const vector = (await models.embed([text], 'query'))?.[0] ?? null;
   const run = retrieve(index, { target: text, vector });
   floorData.push({
     what: `unsupported: "${text}"`,

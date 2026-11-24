@@ -8,7 +8,7 @@ import { loadCitationGuidance, loadExaminerNotes } from '@/infrastructure/files/
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
-type Deps = Pick<VivaDeps, 'attempts'>;
+type Deps = Pick<VivaDeps, 'attempts' | 'models'>;
 
 // Everything that happens after the trainee presses "Give my answer". This is
 // the only code that reads the examiner notes.
@@ -53,7 +53,7 @@ export async function ensureFollowUp(deps: Deps, uid: string, attemptId: string)
   }
 
   const [notes, config] = await Promise.all([loadExaminerNotes(), loadStepsConfig()]);
-  const result = await runFollowUp(notes, attempt.answer.text, config.steps.followup);
+  const result = await runFollowUp(deps.models, notes, attempt.answer.text, config.steps.followup);
   const speech = followUpSpeech(result);
 
   const saved = await deps.attempts.update(uid, attemptId, (a) => {
@@ -128,6 +128,7 @@ export async function prepareRevision(deps: Deps, uid: string, attemptId: string
     loadNoteIndex(),
   ]);
   const { card, trace: working } = await produceRevision(
+    deps.models,
     { notes, answer: attempt.answer.text, followUpQuestion: attempt.followUp?.question ?? null, guidance },
     config,
     index,

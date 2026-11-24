@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 
-import { ollamaHost } from '@/infrastructure/llm/ollama.provider';
+import { getConfig } from '@/config/env.server';
+import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
 // What the machine was doing when a result was recorded. Timings mean little
 // without it: this Mac was found in Low Power Mode with swap in use.
@@ -38,8 +39,7 @@ export function swapUsedMb(): number | null {
 
 export async function ollamaVersion(): Promise<string> {
   try {
-    const res = await fetch(`${ollamaHost()}/api/version`, { signal: AbortSignal.timeout(3000) });
-    return ((await res.json()) as { version?: string }).version ?? 'unknown';
+    return (await new OllamaClient(getConfig().ollama.host).version()) ?? 'unknown';
   } catch {
     return 'not running';
   }
@@ -65,23 +65,15 @@ export type ModelInfo = { name: string; digest: string; engine: string; quantisa
 
 export async function modelInfo(name: string): Promise<ModelInfo | null> {
   try {
-    const res = await fetch(`${ollamaHost()}/api/tags`, { signal: AbortSignal.timeout(5000) });
-    const json = (await res.json()) as {
-      models?: Array<{
-        name: string;
-        digest: string;
-        size: number;
-        details?: { format?: string; quantization_level?: string };
-      }>;
-    };
-    const m = json.models?.find((x) => x.name === name || x.name === `${name}:latest`);
+    const models = await new OllamaClient(getConfig().ollama.host).installedModels();
+    const m = models.find((x) => x.name === name || x.name === `${name}:latest`);
     if (!m) return null;
     return {
       name: m.name,
-      digest: m.digest.slice(0, 12),
+      digest: (m.digest ?? '').slice(0, 12),
       engine: m.details?.format === 'safetensors' ? 'mlx' : (m.details?.format ?? 'unknown'),
       quantisation: m.details?.quantization_level ?? 'unknown',
-      sizeGb: Math.round((m.size / 1e9) * 10) / 10,
+      sizeGb: Math.round(((m.size ?? 0) / 1e9) * 10) / 10,
     };
   } catch {
     return null;

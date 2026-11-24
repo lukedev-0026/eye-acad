@@ -9,6 +9,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
+import { getConfig } from '@/config/env.server';
 import { loadContext } from '@/eval/eval-context';
 import { buildGolden, goldenDifferences } from '@/eval/golden/golden';
 import type { Golden } from '@/eval/golden/golden';
@@ -47,7 +48,7 @@ const { golden, details, missingVectors } = await buildGolden(
   vectors,
   args['capture-vectors']
     ? async (texts, body) => {
-        const res = await realFetch('http://127.0.0.1:11434/api/embed', {
+        const res = await realFetch(`${getConfig().ollama.host}/api/embed`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ ...(body as object), input: texts }),

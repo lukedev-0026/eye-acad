@@ -128,7 +128,7 @@ named in the tables above. The project's `README.md` and `CHECKS.md` hold the co
 | 26 | Met ([`evals/rehearsal/`](../evals/rehearsal/README.md)), and held by a test. In the rehearsal the finding marked unavailable was checked through `pnpm findings`, not asked ten times. |
 | 27 | Met for a note that has not been prepared (by hand: its own message, HTTP 503) and, by a test, for a PDF changed since it was prepared. |
 | 28 | Met in the sense written: 27 of 32 sentences on every run, and the five failures listed in `evals/readback.md`. |
-| 29 | Not yet checked from a fresh copy. |
+| 29 | Met, with one limit. On 24 November the project was cloned into an empty folder and installed from the lockfile, with no key file: `pnpm verify` and the emulator tests passed, and the app started from that copy answered both required questions correctly by typing. Java, Ollama and the model downloads were already on the machine, so those steps were not exercised from nothing. |
 | 30 to 32, 34 | Met, in `README.md` and `HANDOVER.md`. |
 | 33 | Met except for the person's yes or no on the citation, which is Luke's to give. |
 | 35 to 41 | Met. For 39, the sweep was stopped and restarted several times for the battery, and finished work was skipped each time. |

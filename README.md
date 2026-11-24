@@ -48,6 +48,9 @@ pnpm emulators                  # terminal 1: Firebase Auth + Firestore, local, 
 pnpm dev                        # terminal 2: http://localhost:3000
 ```
 
+`pnpm install` warns that some packages' build scripts were ignored. That is expected, and
+nothing needs approving.
+
 Open <http://localhost:3000> in Chrome and click **Sign in as Trainee A**. There are two demo
 trainees so you can see that one cannot open the other's attempts. Nothing leaves your machine
 except audio and text sent to Deepgram when a key is set.
@@ -297,7 +300,7 @@ All times are GMT on 24 November 2026, and each is a commit time or a line in
 |---|---|
 | Build started | 05:58, from the planning documents alone |
 | The four-hour point | 09:58. The tag `four-hour-mark` is on commit `3b5ef30` (08:25), the last one saved before it |
-| Last change | 15:52 |
+| Last change | 15:55 |
 | Start to finish by the clock | about 10 hours |
 
 That clock time is not hands-on time. It includes about an hour and a quarter of the settings
@@ -327,7 +330,7 @@ supplies. **Luke's own time at the keyboard:** _to be filled in by Luke_.
 | 13:16 | The one improvement switched on and frozen |
 | 13:45 to 13:49 | Ten spoken turns timed on the final settings; the change rehearsal |
 | 15:25 to 15:43 | The held-back cases, opened once |
-| After 15:43 | This write-up. The final run of every check on the shipped settings is made once the battery has recharged |
+| After 15:43 | This write-up, a run from a fresh copy of the project, and (once the battery has recharged) the final run of every check on the shipped settings |
 
 Planning and research were done before the build, with an AI coding assistant, and are written
 up in [`docs/04-investigation.md`](docs/04-investigation.md). The build itself was done with the

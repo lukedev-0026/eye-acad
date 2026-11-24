@@ -110,12 +110,17 @@ export function renderHistory(
 // (and paid) synthesis. Whole items only: a value is never cut in half.
 export const MAX_SPEECH_CHARS = 600
 
-export function composeSpeech(parts: Array<string>, closing: string): string {
-  let out = ''
+export function composeSpeechParts(parts: Array<string>, closing: string): Array<string> {
+  const out: Array<string> = []
+  let length = 0
   for (const [i, part] of parts.entries()) {
-    const next = out ? `${out} ${part}` : part
-    if (next.length > MAX_SPEECH_CHARS && i > 0) return `${out} ${closing}`
-    out = next
+    const next = length + (length ? 1 : 0) + part.length
+    if (next > MAX_SPEECH_CHARS && i > 0) return [...out, closing]
+    out.push(part)
+    length = next
   }
   return out
 }
+
+export const composeSpeech = (parts: Array<string>, closing: string): string =>
+  composeSpeechParts(parts, closing).join(' ')

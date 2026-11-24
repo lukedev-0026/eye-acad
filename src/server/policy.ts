@@ -1,7 +1,7 @@
 import type { Catalogue } from './catalogue'
 import type { PublicCase } from './case-schema'
 import { LINES } from './lines'
-import { composeSpeech, renderFinding, renderHistory } from './render'
+import { composeSpeechParts, renderFinding, renderHistory } from './render'
 import type { RenderedItem } from './render'
 import type { SelectorOutput } from './selector'
 
@@ -77,6 +77,9 @@ export type ExaminerReply = {
   lines: Array<string>
   // What is said. Built from the same items, so it cannot differ in substance.
   speech: string
+  // The same words, one sentence group per item. Each is synthesised (and
+  // kept) on its own, so a reply about two eyes does not wait twice as long.
+  speechParts: Array<string>
   items: Array<RenderedItem>
 }
 
@@ -84,14 +87,18 @@ export function replyFor(decision: TurnDecision): ExaminerReply {
   switch (decision.kind) {
     case 'reveal': {
       const tail = decision.alsoNotRecorded ? [LINES.alsoNotRecorded] : []
-      const spoken = composeSpeech(
-        decision.items.map((i) => i.speech),
-        LINES.restOnScreen,
-      )
+      const speechParts = [
+        ...composeSpeechParts(
+          decision.items.map((i) => i.speech),
+          LINES.restOnScreen,
+        ),
+        ...tail,
+      ]
       return {
         kind: 'reveal',
         lines: [...decision.items.map((i) => i.display), ...tail],
-        speech: [spoken, ...tail].join(' '),
+        speech: speechParts.join(' '),
+        speechParts,
         items: decision.items,
       }
     }
@@ -110,5 +117,5 @@ export function fixedReply(
   kind: ExaminerReply['kind'],
   line: string,
 ): ExaminerReply {
-  return { kind, lines: [line], speech: line, items: [] }
+  return { kind, lines: [line], speech: line, speechParts: [line], items: [] }
 }

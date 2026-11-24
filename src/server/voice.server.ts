@@ -107,3 +107,75 @@ export async function synthesise(text: string): Promise<Speech | null> {
 
 // Why the most recent speech request failed, for the command-line checks.
 export let lastSpeechError: string | null = null
+
+export type SpokenReply = {
+  // One clip per sentence group, in order. They travel together in one reply
+  // and are played back to back.
+  clips: Array<{ audioBase64: string; mimeType: 'audio/mpeg' }>
+  // Time this reply spent waiting for synthesis. Zero when every clip was
+  // already held.
+  ms: number
+  fromCache: number
+  voice: string
+}
+
+// Audio already made, by voice and exact text. The examiner's sentences about
+// a case are a small fixed set, so most replies are served from here. The key
+// is the text itself: edit a value in the case file and the old clip is
+// simply never asked for again.
+const held = new Map<string, Speech>()
+const MAX_HELD = 600
+
+async function clipFor(text: string): Promise<{ speech: Speech; cached: boolean } | null> {
+  const key = `${TTS_VOICE()}|${text}`
+  const have = held.get(key)
+  if (have) return { speech: have, cached: true }
+  const made = await synthesise(text)
+  if (!made) return null
+  if (held.size >= MAX_HELD) held.delete(held.keys().next().value as string)
+  held.set(key, made)
+  return { speech: made, cached: false }
+}
+
+// Speaks a reply made of several sentence groups. They are synthesised at the
+// same time, so the wait is the slowest one, not the sum. If any part fails,
+// nothing is spoken at all: saying only some of what is on screen would be
+// worse than saying none of it.
+export async function speakParts(parts: Array<string>): Promise<SpokenReply | null> {
+  const wanted = parts.map((p) => p.trim()).filter(Boolean)
+  if (!wanted.length || !voiceAvailable()) return null
+  const started = performance.now()
+  // VIVA_SPEECH_MODE=single restores the first version (one request for the
+  // whole reply, nothing kept), so the two can be timed side by side.
+  if (process.env.VIVA_SPEECH_MODE === 'single') {
+    const whole = await synthesise(wanted.join(' '))
+    return whole
+      ? { clips: [{ audioBase64: whole.audioBase64, mimeType: whole.mimeType }], ms: whole.ms, fromCache: 0, voice: whole.voice }
+      : null
+  }
+  const clips = await Promise.all(wanted.map(clipFor))
+  if (clips.some((c) => c === null)) return null
+  const ok = clips as Array<{ speech: Speech; cached: boolean }>
+  return {
+    clips: ok.map((c) => ({ audioBase64: c.speech.audioBase64, mimeType: c.speech.mimeType })),
+    ms: Math.round(performance.now() - started),
+    fromCache: ok.filter((c) => c.cached).length,
+    voice: TTS_VOICE(),
+  }
+}
+
+// Makes the audio for a set of sentences ahead of time, a few at a time, and
+// never throws. Called when an attempt starts, with every sentence the
+// examiner could say about the case.
+export function prepareSpeech(parts: Array<string>): void {
+  if (!voiceAvailable() || process.env.VIVA_SPEECH_MODE === 'single') return
+  const queue = parts.map((p) => p.trim()).filter((p) => p && !held.has(`${TTS_VOICE()}|${p}`))
+  const worker = async () => {
+    for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
+      await clipFor(next).catch(() => null)
+    }
+  }
+  void Promise.all([worker(), worker(), worker()])
+}
+
+export const heldSpeechCount = () => held.size

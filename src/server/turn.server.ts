@@ -14,8 +14,9 @@ import { LINES } from './lines'
 import { fixedReply, replyFor } from './policy'
 import type { ExaminerReply } from './policy'
 import { MAX_UTTERANCE_CHARS, runSelector } from './selector.server'
-import { synthesise, transcribe } from './voice.server'
-import type { Speech } from './voice.server'
+import { renderFinding, renderHistory } from './render'
+import { prepareSpeech, speakParts, transcribe } from './voice.server'
+import type { SpokenReply } from './voice.server'
 
 export type TurnTimings = {
   speechToTextMs: number | null
@@ -27,7 +28,7 @@ export type TurnTimings = {
 export type TurnResult = {
   reply: ExaminerReply
   heard: string
-  speech: Speech | null
+  speech: SpokenReply | null
   timings: TurnTimings
 }
 
@@ -97,8 +98,8 @@ export async function handleRequest(
     }
   }
 
-  // The spoken words are the same string code built for the screen.
-  const speech = await synthesise(reply.speech)
+  // The spoken words are the same sentences code built for the screen.
+  const speech = await speakParts(reply.speechParts)
   const timings: TurnTimings = {
     speechToTextMs,
     modelMs,
@@ -126,8 +127,17 @@ export async function handleRequest(
 // The opening words of an attempt, read aloud. The text comes from the saved
 // attempt, not from the request, so this cannot be used to speak arbitrary
 // text at the project's expense.
-export async function openingSpeech(uid: string, attemptId: string): Promise<Speech | null> {
+export async function openingSpeech(uid: string, attemptId: string): Promise<SpokenReply | null> {
   const attempt = await readAttempt(uid, attemptId)
   const opening = attempt.turns.find((t) => t.kind === 'opening')
-  return opening ? synthesise(opening.text) : null
+  if (!opening) return null
+  // While the opening is being read, make the audio for every sentence the
+  // examiner could say about this case, so later replies do not wait for it.
+  const c = await loadCase()
+  prepareSpeech([
+    ...c.findings.map((f) => renderFinding(f).speech),
+    ...Object.entries(c.patient).map(([key, value]) => renderHistory(key, value).speech),
+    ...Object.values(LINES),
+  ])
+  return speakParts([opening.text])
 }

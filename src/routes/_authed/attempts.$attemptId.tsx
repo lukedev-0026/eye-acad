@@ -90,8 +90,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
 
   // Plays a reply and holds the "Examiner is speaking" state for as long as it
   // lasts. With no audio, the turn simply passes back.
-  async function speak(audio: ReplyAudio | null): Promise<number | null> {
-    if (!audio) {
+  async function speak(audio: Array<ReplyAudio> | null): Promise<number | null> {
+    if (!audio || audio.length === 0) {
       send({ type: 'REPLY_SILENT' })
       return null
     }
@@ -125,7 +125,7 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
   async function finishTurn(
     releasedAt: number,
     via: 'voice' | 'typed',
-    reply: { audio: ReplyAudio | null; timings: TurnTiming['server'] },
+    reply: { audio: Array<ReplyAudio> | null; timings: TurnTiming['server'] },
   ) {
     const toResponseMs = Math.round(performance.now() - releasedAt)
     const playingAt = await speak(reply.audio)

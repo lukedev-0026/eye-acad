@@ -25,8 +25,9 @@ const AskInput = z.object({
   text: z.string().max(2000),
 })
 
-const audioOut = (speech: { audioBase64: string; mimeType: string } | null) =>
-  speech ? { base64: speech.audioBase64, mimeType: speech.mimeType } : null
+// One or more clips, played back to back by the browser.
+const audioOut = (speech: { clips: Array<{ audioBase64: string; mimeType: string }> } | null) =>
+  speech ? speech.clips.map((c) => ({ base64: c.audioBase64, mimeType: c.mimeType })) : null
 
 export const askTyped = createServerFn({ method: 'POST' })
   .middleware([requireUser])
@@ -106,9 +107,9 @@ export const giveAnswer = createServerFn({ method: 'POST' })
   .validator(TextInput)
   .handler(async ({ context, data }) => {
     const { handleAnswer } = await import('./answer.server')
-    const { synthesise } = await import('./voice.server')
+    const { speakParts } = await import('./voice.server')
     const followUp = await handleAnswer(context.uid, data.attemptId, data.text, data.via)
-    return { ...followUp, audio: audioOut(await synthesise(followUp.speech)) }
+    return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) }
   })
 
 export const retryFollowUp = createServerFn({ method: 'POST' })
@@ -116,9 +117,9 @@ export const retryFollowUp = createServerFn({ method: 'POST' })
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
     const { ensureFollowUp } = await import('./answer.server')
-    const { synthesise } = await import('./voice.server')
+    const { speakParts } = await import('./voice.server')
     const followUp = await ensureFollowUp(context.uid, data.attemptId)
-    return { ...followUp, audio: audioOut(await synthesise(followUp.speech)) }
+    return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) }
   })
 
 export const replyToFollowUp = createServerFn({ method: 'POST' })

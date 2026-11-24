@@ -5,6 +5,7 @@ import type { Finding } from '../src/server/case-schema'
 import {
   MAX_SPEECH_CHARS,
   composeSpeech,
+  composeSpeechParts,
   formatValue,
   renderFinding,
   renderHistory,
@@ -132,5 +133,12 @@ describe('speech cap', () => {
   })
   it('leaves a short reply alone', () => {
     expect(composeSpeech(['One.', 'Two.'], 'x')).toBe('One. Two.')
+  })
+  it('keeps the sentences separate, so each can be spoken on its own, and says the same words', () => {
+    const parts = Array.from({ length: 12 }, (_, i) => `Item ${i}: ${'x'.repeat(90)}.`)
+    const kept = composeSpeechParts(parts, 'The rest is on screen.')
+    expect(kept.at(-1)).toBe('The rest is on screen.')
+    expect(kept.slice(0, -1)).toEqual(parts.slice(0, kept.length - 1))
+    expect(kept.join(' ')).toBe(composeSpeech(parts, 'The rest is on screen.'))
   })
 })

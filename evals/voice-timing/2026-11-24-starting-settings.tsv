@@ -1,0 +1,16 @@
+# Ten spoken turns in Chrome on the starting settings (medium model for the picker), 24 Nov 2026, High Power mode.
+# The "trainee" was a synthetic voice: the recorded questions in evals/voice-clips, sent through the page's "No microphone?" option,
+# which takes the same path as a held-button recording. Timer starts when the clip is handed over (the end of speech) and stops
+# when the browser reports the reply audio playing. Turn 1 is the cold first turn (the model was not loaded) and is reported separately.
+turn	via	release_to_response_ms	release_to_playback_ms	speech_to_text_ms	model_ms	text_to_speech_ms	server_total_ms	question
+1	voice	7195	7199	1738	3484	1839	7133	What is the intraocular pressure in the right eye? (cold)
+2	voice	4598	4603	1085	1359	2032	4550	Can I have gonioscopy of the right eye?
+3	voice	3956	3960	1265	577	1997	3905	What is the visual acuity in both eyes?
+4	voice	3956	3961	1466	578	1808	3908	What does the cornea look like in the right eye?
+5	voice	8496	8503	993	499	6921	8455	What are the pupils doing?
+6	voice	4209	4215	1415	557	2136	4164	Does she have any allergies?
+7	voice	7240	7245	1055	556	5524	7196	What medications is she taking?
+8	voice	6466	6471	1388	591	4375	6413	Is there a relative afferent pupillary defect?
+9	voice	10797	10805	959	563	9149	10735	What is the anterior chamber depth?
+10	voice	6535	6541	1582	575	4298	6494	What is the central corneal thickness?
+11	voice	5058	5063	1538	529	2928	5029	What is the blood pressure?

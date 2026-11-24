@@ -107,6 +107,15 @@ describe('what the examiner does', () => {
     const reply = replyFor(decide(c, catalogue, pick([{ item: 'Allergies', eye: 'unspecified' }])))
     expect(reply.lines).toEqual([`Allergies: ${String(c.patient.allergies)}`])
   })
+  it('speaks one sentence group per item, and exactly the words of the whole reply', () => {
+    const reply = replyFor(
+      decide(c, catalogue, pick([{ item: 'Pupil', eye: 'unspecified' }], { not_in_catalogue: true })),
+    )
+    expect(reply.speechParts).toHaveLength(3)
+    expect(reply.speechParts.join(' ')).toBe(reply.speech)
+    expect(reply.speechParts[0].startsWith('Right eye. Pupil:')).toBe(true)
+    expect(reply.speechParts[2]).toBe(LINES.alsoNotRecorded)
+  })
   it('keeps case-file order whatever order was asked', () => {
     expect(
       ids(

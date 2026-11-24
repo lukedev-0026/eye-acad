@@ -7,9 +7,9 @@ import {
   handleFollowUpReply,
   prepareRevision,
 } from '@/application/answer/answer.use-case';
+import { startAttempt as startAttemptUseCase } from '@/application/attempt/start-attempt.use-case';
+import { getContainer } from '@/application/container';
 import { handleRequest, openingSpeech } from '@/application/turn/turn.use-case';
-import { loadCase } from '@/infrastructure/files/case-file.loader';
-import { createAttempt } from '@/infrastructure/firestore/firestore-attempt.repository';
 import { speakParts, transcribe } from '@/infrastructure/speech/deepgram-speech.service';
 import { requireUser } from '@/server/middleware/auth.middleware';
 
@@ -27,7 +27,7 @@ export const whoAmI = createServerFn({ method: 'POST' })
 export const startAttempt = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .handler(async ({ context }) => {
-    const attemptId = await createAttempt(context.uid, await loadCase());
+    const attemptId = await startAttemptUseCase(getContainer(), context.uid);
     return { attemptId };
   });
 
@@ -44,7 +44,7 @@ export const askTyped = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AskInput)
   .handler(async ({ context, data }) => {
-    const result = await handleRequest(context.uid, data.attemptId, { text: data.text });
+    const result = await handleRequest(getContainer(), context.uid, data.attemptId, { text: data.text });
     return {
       kind: result.reply.kind,
       heard: result.heard,
@@ -67,7 +67,7 @@ export const askSpoken = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AudioInput)
   .handler(async ({ context, data }) => {
-    const result = await handleRequest(context.uid, data.attemptId, {
+    const result = await handleRequest(getContainer(), context.uid, data.attemptId, {
       audio: Buffer.from(data.audioBase64, 'base64'),
       mimeType: data.mimeType,
     });
@@ -86,7 +86,7 @@ export const speakOpening = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptOnly)
   .handler(async ({ context, data }) => {
-    return { audio: audioOut(await openingSpeech(context.uid, data.attemptId)) };
+    return { audio: audioOut(await openingSpeech(getContainer(), context.uid, data.attemptId)) };
   });
 
 // Turns a recording into text and nothing else, for the spoken answer and the
@@ -113,7 +113,7 @@ export const giveAnswer = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(TextInput)
   .handler(async ({ context, data }) => {
-    const followUp = await handleAnswer(context.uid, data.attemptId, data.text, data.via);
+    const followUp = await handleAnswer(getContainer(), context.uid, data.attemptId, data.text, data.via);
     return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
   });
 
@@ -121,7 +121,7 @@ export const retryFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
-    const followUp = await ensureFollowUp(context.uid, data.attemptId);
+    const followUp = await ensureFollowUp(getContainer(), context.uid, data.attemptId);
     return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
   });
 
@@ -129,7 +129,7 @@ export const replyToFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(TextInput)
   .handler(async ({ context, data }) => {
-    const card = await handleFollowUpReply(context.uid, data.attemptId, data.text, data.via);
+    const card = await handleFollowUpReply(getContainer(), context.uid, data.attemptId, data.text, data.via);
     return { outcome: card.outcome };
   });
 
@@ -137,6 +137,6 @@ export const retryRevision = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
-    const card = await prepareRevision(context.uid, data.attemptId);
+    const card = await prepareRevision(getContainer(), context.uid, data.attemptId);
     return { outcome: card.outcome };
   });

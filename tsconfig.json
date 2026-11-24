@@ -10,7 +10,8 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
     },
     /* verbatimModuleSyntax stays off: with it on, TanStack Start leaks server
        modules into the browser bundle. Lint keeps `import type` in use. */

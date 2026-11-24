@@ -20,7 +20,7 @@ export default defineConfig([
   {
     settings: {
       'import-x/resolver-next': [createTypeScriptImportResolver({ alwaysTryTypes: true }), createNodeResolver()],
-      'import-x/internal-regex': '^@/',
+      'import-x/internal-regex': '^@(tests)?/',
     },
     rules: {
       // Imports: one order everywhere, and types imported as types.

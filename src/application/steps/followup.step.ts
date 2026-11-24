@@ -1,14 +1,13 @@
 import { z } from 'zod';
 
 import { followUpPrompt } from '@/application/prompts/followup.prompt';
+import { MAX_ANSWER_CHARS } from '@/domain/attempt/attempt';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
 import { LINES } from '@/domain/examiner/lines';
 import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
 import { checkAnchor, checkFollowUpQuestion, closestIdea } from '@/domain/text/text-checks';
 import type { CheckResult } from '@/domain/text/text-checks';
 import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
-
-export const MAX_ANSWER_CHARS = 4000;
 
 function followUpSchema(ideaCount: number) {
   const ids = Array.from({ length: ideaCount }, (_, i) => `idea_${i + 1}`);

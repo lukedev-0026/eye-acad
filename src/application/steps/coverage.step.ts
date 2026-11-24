@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
 import { coveragePrompt } from '@/application/prompts/coverage.prompt';
+import { MAX_ANSWER_CHARS } from '@/domain/attempt/attempt';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
 import type { CallResult, StepSettings } from '@/domain/llm/step-settings.schema';
 import { isQuoteFrom } from '@/domain/text/text-checks';
 import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
-
-import { MAX_ANSWER_CHARS } from './followup.step';
 
 export const STATUSES = ['covered', 'partial', 'not_covered'] as const;
 export type Status = (typeof STATUSES)[number];

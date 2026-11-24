@@ -1,4 +1,7 @@
+import type { VivaDeps } from '@/application/deps';
 import { MAX_UTTERANCE_CHARS, runSelector } from '@/application/steps/selector.step';
+import { MAX_TURNS, pushTurn, reveal } from '@/domain/attempt/attempt';
+import { AttemptPhaseError } from '@/domain/attempt/attempt.error';
 import { buildCatalogue } from '@/domain/examiner/catalogue';
 import { LINES } from '@/domain/examiner/lines';
 import { fixedReply, replyFor } from '@/domain/examiner/policy';
@@ -6,15 +9,6 @@ import type { ExaminerReply } from '@/domain/examiner/policy';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
-import {
-  AttemptError,
-  MAX_TURNS,
-  pushTurn,
-  readAttempt,
-  reveal,
-  trace,
-  updateAttempt,
-} from '@/infrastructure/firestore/firestore-attempt.repository';
 import { prepareSpeech, speakParts, transcribe } from '@/infrastructure/speech/deepgram-speech.service';
 import type { SpokenReply } from '@/infrastructure/speech/deepgram-speech.service';
 
@@ -35,6 +29,7 @@ export type TurnResult = {
 // One request for findings. A spoken request is turned into text first; from
 // then on typed and spoken requests take exactly the same path.
 export async function handleRequest(
+  deps: Pick<VivaDeps, 'attempts'>,
   uid: string,
   attemptId: string,
   input: { text: string } | { audio: Buffer; mimeType: string },
@@ -42,9 +37,10 @@ export async function handleRequest(
   const started = performance.now();
   const via = 'audio' in input ? 'voice' : 'typed';
 
-  const attempt = await readAttempt(uid, attemptId);
+  const { attempts } = deps;
+  const attempt = await attempts.read(uid, attemptId);
   if (attempt.phase !== 'asking') {
-    throw new AttemptError('This attempt is no longer taking questions.');
+    throw new AttemptPhaseError('This attempt is no longer taking questions.');
   }
   // The case and the settings are read fresh on every request.
   const [c, config] = await Promise.all([loadCase(), loadStepsConfig()]);
@@ -57,7 +53,7 @@ export async function handleRequest(
     speechToTextMs = stt.ms;
     if (stt.ok) heard = stt.text.slice(0, MAX_UTTERANCE_CHARS);
     else reply = fixedReply('error', LINES.somethingWentWrong);
-    await trace(uid, attemptId, {
+    await attempts.appendWorkingNote(uid, attemptId, {
       step: 'speech_to_text',
       ok: stt.ok,
       ms: stt.ms,
@@ -87,7 +83,7 @@ export async function handleRequest(
     // Refusal, truncation, an unusable reply or a provider error all end the
     // same way: a fixed line, nothing revealed, and the trainee's turn again.
     reply = run.decision ? replyFor(run.decision) : fixedReply('error', LINES.somethingWentWrong);
-    await trace(uid, attemptId, {
+    await attempts.appendWorkingNote(uid, attemptId, {
       step: 'selector',
       heard,
       outcome: run.call.outcome,
@@ -98,7 +94,7 @@ export async function handleRequest(
     });
     const requests = run.call.value?.requests ?? [];
     if (requests.length) {
-      await updateAttempt(uid, attemptId, (a) => {
+      await attempts.update(uid, attemptId, (a) => {
         a.lastRequests = requests;
       });
     }
@@ -114,7 +110,7 @@ export async function handleRequest(
   };
 
   const final = reply;
-  await updateAttempt(uid, attemptId, (a) => {
+  await attempts.update(uid, attemptId, (a) => {
     if (a.phase !== 'asking') return;
     pushTurn(a, { speaker: 'trainee', text: heard || '(nothing heard)', via });
     const said = pushTurn(a, {
@@ -133,8 +129,12 @@ export async function handleRequest(
 // The opening words of an attempt, read aloud. The text comes from the saved
 // attempt, not from the request, so this cannot be used to speak arbitrary
 // text at the project's expense.
-export async function openingSpeech(uid: string, attemptId: string): Promise<SpokenReply | null> {
-  const attempt = await readAttempt(uid, attemptId);
+export async function openingSpeech(
+  deps: Pick<VivaDeps, 'attempts'>,
+  uid: string,
+  attemptId: string,
+): Promise<SpokenReply | null> {
+  const attempt = await deps.attempts.read(uid, attemptId);
   const opening = attempt.turns.find((t) => t.kind === 'opening');
   if (!opening) return null;
   // While the opening is being read, make the audio for every sentence the

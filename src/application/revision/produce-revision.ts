@@ -1,3 +1,4 @@
+import { RevisionUnavailableError } from '@/application/revision/revision.error';
 import { runCoverage } from '@/application/steps/coverage.step';
 import type { CoverageResult } from '@/application/steps/coverage.step';
 import { runRevision } from '@/application/steps/revision.step';
@@ -12,11 +13,6 @@ import type { NoteIndex } from '@/domain/note/note.types';
 import { retrieve } from '@/domain/note/retrieve';
 import type { Retrieval } from '@/domain/note/retrieve';
 import { embed } from '@/infrastructure/llm/ollama-embedding';
-
-// Thrown when a step could not run at all (model unreachable, unusable reply).
-// The attempt stays where it is and the trainee can try again; they are never
-// told "no support" for what was really a technical failure.
-export class RevisionUnavailable extends Error {}
 
 export type RevisionTrace = {
   coverage: CoverageResult | null;
@@ -75,7 +71,7 @@ export async function produceRevision(
     const coverage = await runCoverage(input.notes, input.answer, config.steps.coverage);
     trace.coverage = coverage;
     if (coverage.call.outcome !== 'ok') {
-      throw new RevisionUnavailable(`coverage: ${coverage.call.outcome} ${coverage.call.error ?? ''}`);
+      throw new RevisionUnavailableError('coverage', coverage.call.outcome, coverage.call.error);
     }
     if (coverage.target) {
       target = coverage.target;
@@ -129,7 +125,7 @@ export async function produceRevision(
   );
   trace.revision = revision;
   if (revision.outcome === 'unusable') {
-    throw new RevisionUnavailable(`revision: ${revision.call.outcome} ${revision.call.error ?? ''}`);
+    throw new RevisionUnavailableError('revision', revision.call.outcome, revision.call.error);
   }
   if (revision.outcome === 'no_support' || !revision.citation || !revision.point) {
     return { card: noSupport(), trace };
@@ -143,7 +139,7 @@ export async function produceRevision(
   );
   trace.verifier = verifier;
   if (verifier.call.outcome !== 'ok') {
-    throw new RevisionUnavailable(`verifier: ${verifier.call.outcome} ${verifier.call.error ?? ''}`);
+    throw new RevisionUnavailableError('verifier', verifier.call.outcome, verifier.call.error);
   }
   // No second attempt with other passages: in the walk-through, retrying after
   // a rejection led straight to the wrong-section quote.
@@ -168,7 +164,7 @@ export async function produceRevision(
     );
     trace.keyPointCheck = keyPointCheck;
     if (keyPointCheck.call.outcome !== 'ok') {
-      throw new RevisionUnavailable(`key point check: ${keyPointCheck.call.outcome} ${keyPointCheck.call.error ?? ''}`);
+      throw new RevisionUnavailableError('key point check', keyPointCheck.call.outcome, keyPointCheck.call.error);
     }
     if (!keyPointCheck.supported) return { card: noSupport(), trace };
   }

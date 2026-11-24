@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-24T07:06:37.879Z",
+  "at": "2026-11-24T07:38:52.696Z",
   "graders": {
     "selector": {
       "cases": 72,
@@ -47,10 +47,10 @@
     "memoryGb": 48,
     "powerMode": "high power",
     "onMains": true,
-    "swapUsedMb": 16994,
+    "swapUsedMb": 17158,
     "ollamaVersion": "0.40.5",
     "node": "v22.23.3",
-    "commit": "21af330",
+    "commit": "f59efaa",
     "dirty": true
   },
   "models": {
@@ -85,7 +85,7 @@
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 308,
+          "ms": 1408,
           "outputTokens": 9
         },
         "thinking off, format not forced": {
@@ -95,28 +95,28 @@
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 109,
+          "ms": 110,
           "outputTokens": 9
         },
         "thinking on, format forced": {
           "outcome": "ok",
-          "thinkingChars": 2285,
+          "thinkingChars": 3745,
           "value": {
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 6016,
-          "outputTokens": 632
+          "ms": 8978,
+          "outputTokens": 1012
         },
         "thinking on, format not forced": {
           "outcome": "ok",
-          "thinkingChars": 2285,
+          "thinkingChars": 3745,
           "value": {
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 5914,
-          "outputTokens": 633
+          "ms": 8913,
+          "outputTokens": 1013
         }
       },
       "forcedEnum": [
@@ -152,8 +152,8 @@
       },
       "temperatureZeroRepeats": "10 of 10 requests gave the identical reply three times",
       "selectorMedianMs": {
-        "thinkingOff": 521,
-        "thinkingOn": 9385
+        "thinkingOff": 537,
+        "thinkingOn": 8839
       }
     },
     "qwen3.5:9b": {
@@ -188,7 +188,7 @@
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 3040,
+          "ms": 4100,
           "outputTokens": 19
         },
         "thinking off, format not forced": {
@@ -198,33 +198,33 @@
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 193,
+          "ms": 189,
           "outputTokens": 19
         },
         "thinking on, format forced": {
           "outcome": "ok",
-          "thinkingChars": 858,
+          "thinkingChars": 672,
           "value": {
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 1964,
-          "outputTokens": 205
+          "ms": 1596,
+          "outputTokens": 171
         },
         "thinking on, format not forced": {
           "outcome": "ok",
-          "thinkingChars": 686,
+          "thinkingChars": 797,
           "value": {
             "animal": "dog",
             "legs": "four"
           },
-          "ms": 1712,
-          "outputTokens": 176
+          "ms": 2028,
+          "outputTokens": 211
         }
       },
       "forcedEnum": [
         "ok",
-        "ok"
+        "truncated"
       ],
       "contextFit": {
         "selector": {
@@ -255,13 +255,115 @@
       },
       "temperatureZeroRepeats": "10 of 10 requests gave the identical reply three times",
       "selectorMedianMs": {
-        "thinkingOff": 482,
-        "thinkingOn": 7123
+        "thinkingOff": 590,
+        "thinkingOn": 6442
+      }
+    },
+    "qwen3.5:27b": {
+      "info": {
+        "name": "qwen3.5:27b",
+        "digest": "2d2e4b8fc7c0",
+        "engine": "mlx",
+        "quantisation": "nvfp4",
+        "sizeGb": 19.8
+      },
+      "shipped": {
+        "top_p": 0.95,
+        "min_p": 0,
+        "presence_penalty": 1.5,
+        "repeat_penalty": 1,
+        "temperature": 1,
+        "top_k": 20
+      },
+      "thinking": {
+        "values": [
+          false,
+          true
+        ],
+        "default": true
+      },
+      "canaries": {
+        "thinking off, format forced": {
+          "outcome": "ok",
+          "thinkingChars": 0,
+          "value": {
+            "animal": "dog",
+            "legs": "four"
+          },
+          "ms": 9147,
+          "outputTokens": 9
+        },
+        "thinking off, format not forced": {
+          "outcome": "ok",
+          "thinkingChars": 0,
+          "value": {
+            "animal": "dog",
+            "legs": "four"
+          },
+          "ms": 463,
+          "outputTokens": 9
+        },
+        "thinking on, format forced": {
+          "outcome": "ok",
+          "thinkingChars": 1739,
+          "value": {
+            "animal": "dog",
+            "legs": "four"
+          },
+          "ms": 19096,
+          "outputTokens": 489
+        },
+        "thinking on, format not forced": {
+          "outcome": "ok",
+          "thinkingChars": 1739,
+          "value": {
+            "animal": "dog",
+            "legs": "four"
+          },
+          "ms": 18940,
+          "outputTokens": 480
+        }
+      },
+      "forcedEnum": [
+        "ok",
+        "truncated"
+      ],
+      "contextFit": {
+        "selector": {
+          "case": "sel-inject-3",
+          "promptTokens": 683,
+          "roomLeftWithThinking": 4109
+        },
+        "followup": {
+          "case": "fu-complete",
+          "promptTokens": 718,
+          "roomLeftWithThinking": 3874
+        },
+        "coverage": {
+          "case": "cov-all-covered",
+          "promptTokens": 1053,
+          "roomLeftWithThinking": 2639
+        },
+        "revision": {
+          "case": "rev-invented-canthotomy",
+          "promptTokens": 865,
+          "roomLeftWithThinking": 3527
+        },
+        "verifier": {
+          "case": "ver-context-iridoplasty",
+          "promptTokens": 337,
+          "roomLeftWithThinking": 4555
+        }
+      },
+      "temperatureZeroRepeats": "10 of 10 requests gave the identical reply three times",
+      "selectorMedianMs": {
+        "thinkingOff": 2245,
+        "thinkingOn": 30003
       }
     }
   },
   "engine": "mlx",
   "problems": [
-    "Swap in use is 16994 MB: a large model may be pushed into swap. A restart is advised before the timed run."
+    "Swap in use is 17158 MB: a large model may be pushed into swap. A restart is advised before the timed run."
   ]
 }

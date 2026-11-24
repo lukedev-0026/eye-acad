@@ -7,12 +7,13 @@
 //   pnpm sweep --budget-minutes 480   stop cleanly at a time budget
 //   pnpm sweep --steps selector,verifier --sizes small,medium
 //   pnpm sweep --holdout              (later) the held-back cases, once only
+import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 import { loadContext } from '../src/eval/context'
 import { captureEnv, modelInfo, swapUsedMb } from '../src/eval/env'
-import { CEILING_MS, NUM_CTX, SIZES, block1, block2, describe, sizeOf, startSettings, withoutPenalty } from '../src/eval/grid'
+import { CEILING_MS, NUM_CTX, SIZES, block1, block2, describe, settingsFor, sizeOf, startSettings, withoutPenalty } from '../src/eval/grid'
 import type { Size } from '../src/eval/grid'
 import { STEP_EVALS } from '../src/eval/registry'
 import { rank } from '../src/eval/rule'
@@ -36,6 +37,9 @@ const { values: args } = parseArgs({
     holdout: { type: 'boolean', default: false },
     'skip-block2': { type: 'boolean', default: false },
     'skip-confirm': { type: 'boolean', default: false },
+    // The short sweep: see the comment where it runs.
+    short: { type: 'boolean', default: false },
+    'min-battery': { type: 'string', default: '12' },
   },
 })
 const runId = args['run-id']!
@@ -60,6 +64,19 @@ for (const step of steps) {
 }
 
 class OutOfTime extends Error {}
+class LowBattery extends Error {}
+
+// The sweep can draw more power than a small charger supplies. It stops
+// cleanly, between configurations, before the battery gets low.
+function batteryPercent(): { percent: number | null; onMains: boolean } {
+  try {
+    const out = execFileSync('pmset', ['-g', 'batt'], { encoding: 'utf8' })
+    const m = /(\d+)%/.exec(out)
+    return { percent: m ? Number(m[1]) : null, onMains: /AC Power/.test(out) }
+  } catch {
+    return { percent: null, onMains: true }
+  }
+}
 const log = (line: string) => console.log(`${new Date().toISOString().slice(11, 19)} ${line}`)
 
 // ---------- models ----------
@@ -128,6 +145,8 @@ async function runConfig(o: {
   })
   if (!todo) return
   if (Date.now() > deadline) throw new OutOfTime()
+  const battery = batteryPercent()
+  if (battery.percent !== null && battery.percent < Number(args['min-battery'])) throw new LowBattery(`battery at ${battery.percent}%`)
 
   await useModel(o.settings.model)
   const evalDef = STEP_EVALS[o.step]
@@ -163,7 +182,7 @@ async function runConfig(o: {
   const s = summarise(rows)
   log(
     `${o.step} [${o.stage}] ${describe(o.settings)}: ${s.casesAllPass}/${s.cases} cases, costly ${s.costly}, fallback ${s.fallbacks}, ` +
-      `unusable ${s.truncated + s.schemaInvalid}, median ${s.medianMs} ms${stopped ? ' — STOPPED (too slow)' : ''} (${Math.round((Date.now() - started) / 1000)} s)`,
+      `unusable ${s.truncated + s.schemaInvalid}, median ${s.medianMs} ms${stopped ? ' — STOPPED (too slow)' : ''} (${Math.round((Date.now() - started) / 1000)} s; battery ${batteryPercent().percent}%)`,
   )
 }
 
@@ -253,6 +272,35 @@ try {
         }
       }
     }
+  } else if (args.short) {
+    // The short sweep, run after the full plan proved too heavy for the
+    // machine's charger. One run per tuning case, thinking off throughout
+    // (every thinking-on configuration already recorded was far over its
+    // ceiling):
+    //   medium: format forced and not forced; then, one change at a time from
+    //           the starting configuration, the two other prompts and
+    //           temperature 0
+    //   large:  format forced, minimal prompt
+    // The small model's block 1 was recorded in full before the cut.
+    const planned: Array<{ step: StepId; settings: StepSettings; block: string }> = []
+    for (const step of steps) {
+      const at = (o: Partial<Parameters<typeof settingsFor>[1]>) =>
+        settingsFor(step, { size: 'medium', thinking: false, forceFormat: true, ...o })
+      planned.push({ step, settings: at({}), block: 'start' })
+      planned.push({ step, settings: at({ forceFormat: false }), block: 'block1' })
+      planned.push({ step, settings: at({ prompt: 'rules' }), block: 'block2' })
+      planned.push({ step, settings: at({ prompt: 'examples' }), block: 'block2' })
+      planned.push({ step, settings: at({ temperature: 0 }), block: 'block2' })
+    }
+    for (const step of steps) planned.push({ step, settings: settingsFor(step, { size: 'large', thinking: false, forceFormat: true }), block: 'block1' })
+    for (const size of sizes) {
+      if (size === 'medium') await sentinel('A')
+      for (const p of planned) {
+        if (sizeOf(p.settings.model) !== size) continue
+        await runConfig({ step: p.step, settings: p.settings, block: p.block, stage: 'screen', cases: tune[p.step], trials: 1 })
+      }
+      if (size === 'medium') await sentinel('B')
+    }
   } else {
     // Screen, block 1: size x thinking x forced format.
     for (const size of sizes) {
@@ -294,6 +342,7 @@ try {
   log('Finished.')
 } catch (e) {
   if (e instanceof OutOfTime) log('Time budget reached. Run the same command again to carry on.')
+  else if (e instanceof LowBattery) log(`Stopped: ${e.message}. Let it charge, then run the same command again to carry on.`)
   else throw e
 } finally {
   data = await loadSweep(runId)

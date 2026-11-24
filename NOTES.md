@@ -17,6 +17,9 @@ Planning and research happened before this and are described in
 | 24 Nov 07:14 | Deepgram key in place. Voice works end to end; `pnpm readback` written and run. |
 | 24 Nov 07:25 | Choosing rule's tie-break amended (speeds within 10% count as equal). See `evals/sweep/RULE.md`. Sweep restarted; finished work is skipped. |
 | 24 Nov 07:29 | Fault found and fixed: a model call that ran out of time was recorded as a machine error (`infra_error`), which would have left it out of the counts. It is now recorded as a failed run (`truncated`). Two rows from one far-too-slow configuration (follow-up writer, small model, thinking on, format not forced) were recorded the old way and are left as they are. |
+| 24 Nov 07:40 | Ten spoken turns timed in the browser on the starting settings (`evals/voice-timing/`). Speech synthesis changed to one clip per sentence, made in parallel and kept. |
+| 24 Nov 08:17 | Sweep paused. The Mac was on a 55 W charger and the sweep drew about twice that, so the battery had fallen from 100% to 16% while plugged in. 373 calls and 28 configurations were recorded by then: the whole first block for the small model, and the menu-picker and follow-up writer for the medium one. |
+| 24 Nov 08:20 | Sweep cut down at Luke's request to a short version (about 20 minutes of running): the rest of the medium model with thinking off, the other prompts and temperature 0 one change at a time from the starting settings, and the large model once per step. Dropped: thinking-on runs not yet made, the per-size second block, the repetition-penalty probes, and the separate three-run confirmation of the top three. A battery guard was added. Also decided: local models only; the Claude route stays written but not run. |
 
 ## Things seen before the sweep
 

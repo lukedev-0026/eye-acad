@@ -1,38 +1,38 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { auth } from '../../lib/firebase'
-import type { Phase } from '../../lib/attempt-types'
-import { useAttemptList } from '../../lib/use-attempt'
-import { startAttempt } from '../../server/functions'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { auth } from '../../lib/firebase';
+import type { Phase } from '../../lib/attempt-types';
+import { useAttemptList } from '../../lib/use-attempt';
+import { startAttempt } from '../../server/functions';
 
 export const Route = createFileRoute('/_authed/attempts/')({
   component: Attempts,
-})
+});
 
 const PHASE_LABEL: Record<Phase, string> = {
   asking: 'In progress: asking for findings',
   follow_up: 'In progress: follow-up question',
   revising: 'Preparing the revision point',
   complete: 'Finished',
-}
+};
 
 function Attempts() {
   // The layout above only renders this once a user is signed in.
-  const uid = auth.currentUser?.uid ?? ''
-  const list = useAttemptList(uid)
-  const navigate = useNavigate()
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const uid = auth.currentUser?.uid ?? '';
+  const list = useAttemptList(uid);
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function begin() {
-    setBusy(true)
-    setError(null)
+    setBusy(true);
+    setError(null);
     try {
-      const { attemptId } = await startAttempt()
-      await navigate({ to: '/attempts/$attemptId', params: { attemptId } })
+      const { attemptId } = await startAttempt();
+      await navigate({ to: '/attempts/$attemptId', params: { attemptId } });
     } catch {
-      setError('Could not start an attempt. Please try again.')
-      setBusy(false)
+      setError('Could not start an attempt. Please try again.');
+      setBusy(false);
     }
   }
 
@@ -65,8 +65,7 @@ function Attempts() {
                   })}
                 </span>
                 <span className="muted small">
-                  {PHASE_LABEL[attempt.phase]} · {attempt.revealed.length} revealed ·{' '}
-                  {attempt.turns.length} turns
+                  {PHASE_LABEL[attempt.phase]} · {attempt.revealed.length} revealed · {attempt.turns.length} turns
                 </span>
               </Link>
             </li>
@@ -74,5 +73,5 @@ function Attempts() {
         </ul>
       )}
     </main>
-  )
+  );
 }

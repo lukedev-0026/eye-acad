@@ -1,17 +1,17 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useReducer, useRef, useState } from 'react'
-import { RevisionCardView } from '../../components/RevisionCardView'
-import { TalkButton } from '../../components/TalkButton'
-import type { PublicAttempt, RevealedItem, Turn } from '../../lib/attempt-types'
-import { playReply } from '../../lib/audio'
-import type { ReplyAudio } from '../../lib/audio'
-import { auth } from '../../lib/firebase'
-import { asTsv, summarise } from '../../lib/latency'
-import type { TurnTiming } from '../../lib/latency'
-import { recordingSupported, useRecorder } from '../../lib/recorder'
-import { TURN_LABEL, canTraineeAct, nextTurnState } from '../../lib/turn-machine'
-import type { TurnState } from '../../lib/turn-machine'
-import { useAttempt } from '../../lib/use-attempt'
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { RevisionCardView } from '../../components/RevisionCardView';
+import { TalkButton } from '../../components/TalkButton';
+import type { PublicAttempt, RevealedItem, Turn } from '../../lib/attempt-types';
+import { playReply } from '../../lib/audio';
+import type { ReplyAudio } from '../../lib/audio';
+import { auth } from '../../lib/firebase';
+import { asTsv, summarise } from '../../lib/latency';
+import type { TurnTiming } from '../../lib/latency';
+import { recordingSupported, useRecorder } from '../../lib/recorder';
+import { TURN_LABEL, canTraineeAct, nextTurnState } from '../../lib/turn-machine';
+import type { TurnState } from '../../lib/turn-machine';
+import { useAttempt } from '../../lib/use-attempt';
 import {
   askSpoken,
   askTyped,
@@ -21,18 +21,18 @@ import {
   retryRevision,
   speakOpening,
   transcribeOnly,
-} from '../../server/functions'
+} from '../../server/functions';
 
 export const Route = createFileRoute('/_authed/attempts/$attemptId')({
   component: AttemptPage,
-})
+});
 
 function AttemptPage() {
-  const { attemptId } = Route.useParams()
-  const uid = auth.currentUser?.uid ?? ''
-  const state = useAttempt(uid, attemptId)
+  const { attemptId } = Route.useParams();
+  const uid = auth.currentUser?.uid ?? '';
+  const state = useAttempt(uid, attemptId);
 
-  if (state.status === 'loading') return <p className="page muted">Loading…</p>
+  if (state.status === 'loading') return <p className="page muted">Loading…</p>;
   if (state.status === 'unavailable') {
     return (
       <main className="page narrow">
@@ -42,9 +42,9 @@ function AttemptPage() {
           Back to your attempts
         </Link>
       </main>
-    )
+    );
   }
-  return <Viva attemptId={attemptId} attempt={state.attempt} />
+  return <Viva attemptId={attemptId} attempt={state.attempt} />;
 }
 
 const HINT: Record<'asking' | 'answering' | 'follow_up', Record<TurnState, string>> = {
@@ -66,60 +66,60 @@ const HINT: Record<'asking' | 'answering' | 'follow_up', Record<TurnState, strin
     thinking: 'Please wait.',
     speaking: 'Please wait until the examiner has finished.',
   },
-}
+};
 
 function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttempt }) {
-  const [turn, send] = useReducer(nextTurnState, 'your_turn' as TurnState)
-  const [request, setRequest] = useState('')
-  const [answering, setAnswering] = useState(false)
-  const [draft, setDraft] = useState('')
-  const [dictated, setDictated] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
-  const [revisionFailed, setRevisionFailed] = useState(false)
-  const [timings, setTimings] = useState<Array<TurnTiming>>([])
-  const recorder = useRecorder()
-  const player = useRef<{ stop: () => void } | null>(null)
-  const openingTried = useRef(false)
+  const [turn, send] = useReducer(nextTurnState, 'your_turn' as TurnState);
+  const [request, setRequest] = useState('');
+  const [answering, setAnswering] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [dictated, setDictated] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [revisionFailed, setRevisionFailed] = useState(false);
+  const [timings, setTimings] = useState<Array<TurnTiming>>([]);
+  const recorder = useRecorder();
+  const player = useRef<{ stop: () => void } | null>(null);
+  const openingTried = useRef(false);
 
-  const phase = attempt.phase
-  const mode = phase === 'asking' ? (answering ? 'answering' : 'asking') : phase === 'follow_up' ? 'follow_up' : null
-  const canAct = canTraineeAct(turn)
-  const micOk = recordingSupported()
+  const phase = attempt.phase;
+  const mode = phase === 'asking' ? (answering ? 'answering' : 'asking') : phase === 'follow_up' ? 'follow_up' : null;
+  const canAct = canTraineeAct(turn);
+  const micOk = recordingSupported();
 
-  useEffect(() => () => player.current?.stop(), [])
+  useEffect(() => () => player.current?.stop(), []);
 
   // Plays a reply and holds the "Examiner is speaking" state for as long as it
   // lasts. With no audio, the turn simply passes back.
   async function speak(audio: Array<ReplyAudio> | null): Promise<number | null> {
     if (!audio || audio.length === 0) {
-      send({ type: 'REPLY_SILENT' })
-      return null
+      send({ type: 'REPLY_SILENT' });
+      return null;
     }
-    send({ type: 'REPLY_SPEAKING' })
-    const playback = playReply(audio)
-    player.current = playback
-    const startedAt = await playback.started
-    await playback.ended
-    send({ type: 'SPEECH_ENDED' })
-    return startedAt
+    send({ type: 'REPLY_SPEAKING' });
+    const playback = playReply(audio);
+    player.current = playback;
+    const startedAt = await playback.started;
+    await playback.ended;
+    send({ type: 'SPEECH_ENDED' });
+    return startedAt;
   }
 
   // The examiner reads the opening aloud once, on a brand-new attempt.
   useEffect(() => {
-    if (openingTried.current || phase !== 'asking' || attempt.turns.length !== 1) return
-    openingTried.current = true
+    if (openingTried.current || phase !== 'asking' || attempt.turns.length !== 1) return;
+    openingTried.current = true;
     // The turn is the examiner's from the start, so the trainee is not
     // invited to speak and then talked over when the audio arrives.
-    send({ type: 'SUBMIT_TEXT' })
+    send({ type: 'SUBMIT_TEXT' });
     speakOpening({ data: { attemptId } })
       .then(({ audio }) => speak(audio))
-      .catch(() => send({ type: 'FAILED' }))
+      .catch(() => send({ type: 'FAILED' }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attemptId])
+  }, [attemptId]);
 
   function fail(message: string) {
-    setProblem(message)
-    send({ type: 'FAILED' })
+    setProblem(message);
+    send({ type: 'FAILED' });
   }
 
   async function finishTurn(
@@ -127,8 +127,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     via: 'voice' | 'typed',
     reply: { audio: Array<ReplyAudio> | null; timings: TurnTiming['server'] },
   ) {
-    const toResponseMs = Math.round(performance.now() - releasedAt)
-    const playingAt = await speak(reply.audio)
+    const toResponseMs = Math.round(performance.now() - releasedAt);
+    const playingAt = await speak(reply.audio);
     setTimings((list) => [
       ...list,
       {
@@ -138,52 +138,52 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
         toPlaybackMs: playingAt === null ? null : Math.round(playingAt - releasedAt),
         server: reply.timings,
       },
-    ])
+    ]);
   }
 
   async function askText() {
-    const text = request.trim()
-    if (!text || !canAct) return
-    const releasedAt = performance.now()
-    send({ type: 'SUBMIT_TEXT' })
-    setProblem(null)
-    setRequest('')
+    const text = request.trim();
+    if (!text || !canAct) return;
+    const releasedAt = performance.now();
+    send({ type: 'SUBMIT_TEXT' });
+    setProblem(null);
+    setRequest('');
     try {
-      await finishTurn(releasedAt, 'typed', await askTyped({ data: { attemptId, text } }))
+      await finishTurn(releasedAt, 'typed', await askTyped({ data: { attemptId, text } }));
     } catch {
-      fail('That request did not go through. Please ask again.')
+      fail('That request did not go through. Please ask again.');
     }
   }
 
   async function startListening() {
-    if (!canAct) return
-    setProblem(null)
+    if (!canAct) return;
+    setProblem(null);
     try {
-      await recorder.start()
-      send({ type: 'START_LISTENING' })
+      await recorder.start();
+      send({ type: 'START_LISTENING' });
     } catch {
-      fail('The microphone is not available. You can type instead.')
+      fail('The microphone is not available. You can type instead.');
     }
   }
 
   async function stopAndAsk() {
     // The voice-turn timer starts here: the trainee has finished speaking.
-    const releasedAt = performance.now()
-    const clip = await recorder.stop()
+    const releasedAt = performance.now();
+    const clip = await recorder.stop();
     if (!clip) {
-      send({ type: 'CANCEL_LISTENING' })
-      return
+      send({ type: 'CANCEL_LISTENING' });
+      return;
     }
-    send({ type: 'STOP_LISTENING' })
-    await sendSpoken(clip, releasedAt)
+    send({ type: 'STOP_LISTENING' });
+    await sendSpoken(clip, releasedAt);
   }
 
   async function sendSpoken(clip: { base64: string; mimeType: string }, releasedAt: number) {
     try {
-      const reply = await askSpoken({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } })
-      await finishTurn(releasedAt, 'voice', reply)
+      const reply = await askSpoken({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } });
+      await finishTurn(releasedAt, 'voice', reply);
     } catch {
-      fail('That did not go through. Please try again, or type your request.')
+      fail('That did not go through. Please try again, or type your request.');
     }
   }
 
@@ -191,95 +191,95 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
   // the same path as a held-button recording; the timer starts when the file
   // is handed over.
   async function askWithFile(file: File) {
-    if (!canAct) return
-    const releasedAt = performance.now()
-    setProblem(null)
-    send({ type: 'START_LISTENING' })
-    send({ type: 'STOP_LISTENING' })
+    if (!canAct) return;
+    const releasedAt = performance.now();
+    setProblem(null);
+    send({ type: 'START_LISTENING' });
+    send({ type: 'STOP_LISTENING' });
     const base64 = await new Promise<string>((resolve) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
-      reader.onerror = () => resolve('')
-      reader.readAsDataURL(file)
-    })
-    if (!base64) return fail('That file could not be read.')
-    await sendSpoken({ base64, mimeType: file.type || 'audio/mpeg' }, releasedAt)
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+    if (!base64) return fail('That file could not be read.');
+    await sendSpoken({ base64, mimeType: file.type || 'audio/mpeg' }, releasedAt);
   }
 
   // For the answer and the reply, speech is turned into text and shown first,
   // so the trainee can see and correct it before it is submitted.
   async function stopAndDictate() {
-    const clip = await recorder.stop()
+    const clip = await recorder.stop();
     if (!clip) {
-      send({ type: 'CANCEL_LISTENING' })
-      return
+      send({ type: 'CANCEL_LISTENING' });
+      return;
     }
-    send({ type: 'STOP_LISTENING' })
+    send({ type: 'STOP_LISTENING' });
     try {
-      const heard = await transcribeOnly({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } })
+      const heard = await transcribeOnly({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } });
       if (heard.ok && heard.text) {
-        setDraft((d) => (d ? `${d} ${heard.text}` : heard.text))
-        setDictated(true)
+        setDraft((d) => (d ? `${d} ${heard.text}` : heard.text));
+        setDictated(true);
       } else {
-        setProblem("Sorry, I didn't catch that. Please try again, or type.")
+        setProblem("Sorry, I didn't catch that. Please try again, or type.");
       }
-      send({ type: 'REPLY_SILENT' })
+      send({ type: 'REPLY_SILENT' });
     } catch {
-      fail('That did not go through. Please try again, or type.')
+      fail('That did not go through. Please try again, or type.');
     }
   }
 
   async function submitAnswer() {
-    const text = draft.trim()
-    if (!text || !canAct) return
-    send({ type: 'SUBMIT_TEXT' })
-    setProblem(null)
+    const text = draft.trim();
+    if (!text || !canAct) return;
+    send({ type: 'SUBMIT_TEXT' });
+    setProblem(null);
     try {
-      const followUp = await giveAnswer({ data: { attemptId, text, via: dictated ? 'voice' : 'typed' } })
-      setDraft('')
-      setDictated(false)
-      setAnswering(false)
-      await speak(followUp.audio)
+      const followUp = await giveAnswer({ data: { attemptId, text, via: dictated ? 'voice' : 'typed' } });
+      setDraft('');
+      setDictated(false);
+      setAnswering(false);
+      await speak(followUp.audio);
     } catch {
-      fail('Your answer was not saved. Please try again.')
+      fail('Your answer was not saved. Please try again.');
     }
   }
 
   async function submitReply() {
-    if (!canAct) return
-    send({ type: 'SUBMIT_TEXT' })
-    setProblem(null)
-    setRevisionFailed(false)
+    if (!canAct) return;
+    send({ type: 'SUBMIT_TEXT' });
+    setProblem(null);
+    setRevisionFailed(false);
     try {
-      await replyToFollowUp({ data: { attemptId, text: draft.trim(), via: dictated ? 'voice' : 'typed' } })
-      setDraft('')
+      await replyToFollowUp({ data: { attemptId, text: draft.trim(), via: dictated ? 'voice' : 'typed' } });
+      setDraft('');
     } catch {
       // The reply itself is saved first; what can fail is preparing the card.
-      setRevisionFailed(true)
+      setRevisionFailed(true);
     }
-    send({ type: 'REPLY_SILENT' })
+    send({ type: 'REPLY_SILENT' });
   }
 
   async function tryRevisionAgain() {
-    setRevisionFailed(false)
+    setRevisionFailed(false);
     try {
-      await retryRevision({ data: { attemptId } })
+      await retryRevision({ data: { attemptId } });
     } catch {
-      setRevisionFailed(true)
+      setRevisionFailed(true);
     }
   }
 
   async function tryFollowUpAgain() {
-    send({ type: 'SUBMIT_TEXT' })
+    send({ type: 'SUBMIT_TEXT' });
     try {
-      const followUp = await retryFollowUp({ data: { attemptId } })
-      await speak(followUp.audio)
+      const followUp = await retryFollowUp({ data: { attemptId } });
+      await speak(followUp.audio);
     } catch {
-      fail('The follow-up question could not be prepared. Please try again.')
+      fail('The follow-up question could not be prepared. Please try again.');
     }
   }
 
-  const summary = summarise(timings)
+  const summary = summarise(timings);
 
   return (
     <main className="page viva">
@@ -338,8 +338,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
               <form
                 className="row"
                 onSubmit={(e) => {
-                  e.preventDefault()
-                  void askText()
+                  e.preventDefault();
+                  void askText();
                 }}
               >
                 <label htmlFor="request" className="visually-hidden">
@@ -369,9 +369,9 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                       accept="audio/*"
                       disabled={!canAct}
                       onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        e.target.value = ''
-                        if (file) void askWithFile(file)
+                        const file = e.target.files?.[0];
+                        e.target.value = '';
+                        if (file) void askWithFile(file);
                       }}
                     />
                   </label>
@@ -441,9 +441,7 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                     </span>
                   </div>
                   {mode === 'answering' ? (
-                    <p className="muted small">
-                      Submitting ends the questions. The examiner then asks one follow-up.
-                    </p>
+                    <p className="muted small">Submitting ends the questions. The examiner then asks one follow-up.</p>
                   ) : null}
                 </>
               )}
@@ -472,13 +470,13 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
         </details>
       ) : null}
     </main>
-  )
+  );
 }
 
 // The label is text, with a symbol and a border style to match, so it reads
 // the same in greyscale and to a screen reader.
 function TurnBanner({ state, hint }: { state: TurnState; hint: string }) {
-  const mark = { your_turn: '●', listening: '◉', thinking: '…', speaking: '♪' }[state]
+  const mark = { your_turn: '●', listening: '◉', thinking: '…', speaking: '♪' }[state];
   return (
     <div className={`turn-banner turn-${state}`} role="status" aria-live="polite">
       <span className="turn-mark" aria-hidden="true">
@@ -487,14 +485,14 @@ function TurnBanner({ state, hint }: { state: TurnState; hint: string }) {
       <span className="turn-label">{TURN_LABEL[state]}</span>
       <span className="turn-hint">{hint}</span>
     </div>
-  )
+  );
 }
 
 function Transcript({ turns, followUp }: { turns: Array<Turn>; followUp: PublicAttempt['followUp'] }) {
-  const end = useRef<HTMLLIElement>(null)
+  const end = useRef<HTMLLIElement>(null);
   useEffect(() => {
-    end.current?.scrollIntoView({ block: 'nearest' })
-  }, [turns.length])
+    end.current?.scrollIntoView({ block: 'nearest' });
+  }, [turns.length]);
   return (
     <ol className="transcript">
       {turns.map((t) => (
@@ -515,12 +513,12 @@ function Transcript({ turns, followUp }: { turns: Array<Turn>; followUp: PublicA
       ))}
       <li ref={end} aria-hidden="true" />
     </ol>
-  )
+  );
 }
 
 function Revealed({ items }: { items: Array<RevealedItem> }) {
   if (items.length === 0) {
-    return <p className="muted small">Nothing yet. Ask the examiner for a finding.</p>
+    return <p className="muted small">Nothing yet. Ask the examiner for a finding.</p>;
   }
   return (
     <ul className="revealed">
@@ -535,5 +533,5 @@ function Revealed({ items }: { items: Array<RevealedItem> }) {
         </li>
       ))}
     </ul>
-  )
+  );
 }

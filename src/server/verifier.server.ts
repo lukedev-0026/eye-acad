@@ -1,30 +1,30 @@
-import { z } from 'zod'
-import { callStep, describeJsonShape } from './llm/call-step.server'
-import type { CallResult, StepSettings } from './llm/types'
-import { headingPath } from './note-types'
-import type { NoteChunk } from './note-types'
-import { verifierPrompt } from './prompts/verifier'
+import { z } from 'zod';
+import { callStep, describeJsonShape } from './llm/call-step.server';
+import type { CallResult, StepSettings } from './llm/types';
+import { headingPath } from './note-types';
+import type { NoteChunk } from './note-types';
+import { verifierPrompt } from './prompts/verifier';
 
 const VerifierSchema = z.object({
   reason: z.string().max(400),
   verdict: z.enum(['supported', 'not_supported']),
-})
-export type VerifierOutput = z.infer<typeof VerifierSchema>
+});
+export type VerifierOutput = z.infer<typeof VerifierSchema>;
 
 export type VerifierResult = {
-  call: CallResult<VerifierOutput>
+  call: CallResult<VerifierOutput>;
   // Anything other than a clear "supported" counts as not supported.
-  supported: boolean
-}
+  supported: boolean;
+};
 
 // The passage as the verifier sees it, with the quoted sentences marked.
 export function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
   return chunk.sentences
     .map((s) => {
-      const text = s.column ? `${s.column}: ${s.text}` : s.text
-      return sentenceIds.includes(s.id) ? `>>>${text}<<<` : text
+      const text = s.column ? `${s.column}: ${s.text}` : s.text;
+      return sentenceIds.includes(s.id) ? `>>>${text}<<<` : text;
     })
-    .join(' ')
+    .join(' ');
 }
 
 // A separate, fresh call that has seen none of the conversation. A quotation
@@ -48,6 +48,6 @@ export async function runVerifier(
       describeJsonShape(VerifierSchema),
     ),
     VerifierSchema,
-  )
-  return { call, supported: call.outcome === 'ok' && call.value?.verdict === 'supported' }
+  );
+  return { call, supported: call.outcome === 'ok' && call.value?.verdict === 'supported' };
 }

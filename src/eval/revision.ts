@@ -1,30 +1,32 @@
-import { retrieve } from '../server/retrieve'
-import { runRevision } from '../server/revision.server'
-import { findSentence, queryVector, readCases, resolveTarget, sentenceIds } from './context'
-import { asRun } from './selector'
-import type { EvalContext, RetrievalTarget, StepEval, StepRun } from './types'
+import { retrieve } from '../server/retrieve';
+import { runRevision } from '../server/revision.server';
+import { findSentence, queryVector, readCases, resolveTarget, sentenceIds } from './context';
+import { asRun } from './selector';
+import type { EvalContext, RetrievalTarget, StepEval, StepRun } from './types';
 
-type Input = { target: string; exclude: 'none' | 'all_support' }
-type Expect = { support: boolean; targetId?: string }
+type Input = { target: string; exclude: 'none' | 'all_support' };
+type Expect = { support: boolean; targetId?: string };
 type Observed = {
-  outcome: 'supported' | 'no_support' | 'unusable'
-  cited: Array<string>
-  citedText: string
-  page: string | null
-  pointSource: 'written' | 'supplied' | null
-  point: string | null
-  wording: string | null
-  retrievedPages: Array<number>
+  outcome: 'supported' | 'no_support' | 'unusable';
+  cited: Array<string>;
+  citedText: string;
+  page: string | null;
+  pointSource: 'written' | 'supplied' | null;
+  point: string | null;
+  wording: string | null;
+  retrievedPages: Array<number>;
   // True when the code floor refused before any model was called.
-  refusedByFloor: boolean
-}
+  refusedByFloor: boolean;
+};
 
 function spec(ctx: EvalContext, id: string | undefined): RetrievalTarget | undefined {
-  return ctx.targets.find((t) => t.id === id)
+  return ctx.targets.find((t) => t.id === id);
 }
 
 function supportChunks(ctx: EvalContext, t: RetrievalTarget): Array<string> {
-  return [...new Set([...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map((p) => findSentence(ctx.index, p).chunk.id))]
+  return [
+    ...new Set([...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map((p) => findSentence(ctx.index, p).chunk.id)),
+  ];
 }
 
 const NONE: Omit<Observed, 'outcome' | 'retrievedPages' | 'refusedByFloor'> = {
@@ -34,7 +36,7 @@ const NONE: Omit<Observed, 'outcome' | 'retrievedPages' | 'refusedByFloor'> = {
   pointSource: null,
   point: null,
   wording: null,
-}
+};
 
 export const revisionEval: StepEval<Input, Expect, Observed> = {
   step: 'revision',
@@ -43,11 +45,11 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
   // The search is run first, exactly as the app runs it. It involves no model,
   // so every configuration is shown the same six passages for a given case.
   async run(c, settings, ctx): Promise<StepRun<Observed>> {
-    const target = resolveTarget(ctx, c.input.target)
-    const t = spec(ctx, c.expect.targetId)
-    const exclude = c.input.exclude === 'all_support' && t ? supportChunks(ctx, t) : []
-    const found = retrieve(ctx.index, { target, vector: await queryVector(ctx, target) }, { exclude })
-    const retrievedPages = [...new Set(found.results.flatMap((r) => r.chunk.pages))].sort((a, b) => a - b)
+    const target = resolveTarget(ctx, c.input.target);
+    const t = spec(ctx, c.expect.targetId);
+    const exclude = c.input.exclude === 'all_support' && t ? supportChunks(ctx, t) : [];
+    const found = retrieve(ctx.index, { target, vector: await queryVector(ctx, target) }, { exclude });
+    const retrievedPages = [...new Set(found.results.flatMap((r) => r.chunk.pages))].sort((a, b) => a - b);
     if (found.noSupport) {
       return {
         outcome: 'ok',
@@ -60,9 +62,14 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
         thinkingChars: 0,
         model: settings.model,
         raw: '',
-      }
+      };
     }
-    const result = await runRevision(target, ctx.guidance, found.results.map((r) => r.chunk), settings)
+    const result = await runRevision(
+      target,
+      ctx.guidance,
+      found.results.map((r) => r.chunk),
+      settings,
+    );
     return asRun(result.call, {
       outcome: result.outcome,
       cited: result.citation?.sentences.map((s) => s.id) ?? [],
@@ -73,12 +80,12 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       wording: result.wordingCheck && !result.wordingCheck.ok ? result.wordingCheck.reason : null,
       retrievedPages,
       refusedByFloor: false,
-    })
+    });
   },
 
   grade(c, observed, ctx) {
     if (!c.expect.support) {
-      const pass = observed.outcome === 'no_support'
+      const pass = observed.outcome === 'no_support';
       return {
         pass,
         // Quoting the note for a point it does not back.
@@ -89,16 +96,16 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
           : observed.outcome === 'supported'
             ? `cited ${observed.page}: "${observed.citedText}" for a point the note does not back`
             : 'unusable reply',
-      }
+      };
     }
-    const t = spec(ctx, c.expect.targetId)
-    if (!t) throw new Error(`${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`)
-    const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports])
-    const off = sentenceIds(ctx.index, t.offSection ?? [])
-    const wrong = sentenceIds(ctx.index, t.distractor)
-    const citedGood = observed.cited.length > 0 && observed.cited.every((id) => good.has(id))
-    const citedWrong = observed.cited.some((id) => wrong.has(id))
-    const written = observed.pointSource === 'written'
+    const t = spec(ctx, c.expect.targetId);
+    if (!t) throw new Error(`${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`);
+    const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports]);
+    const off = sentenceIds(ctx.index, t.offSection ?? []);
+    const wrong = sentenceIds(ctx.index, t.distractor);
+    const citedGood = observed.cited.length > 0 && observed.cited.every((id) => good.has(id));
+    const citedWrong = observed.cited.some((id) => wrong.has(id));
+    const written = observed.pointSource === 'written';
     return {
       pass: observed.outcome === 'supported' && citedGood && written,
       // A quotation about a different condition.
@@ -117,13 +124,13 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
                   ? ' — backs the point, but from outside the main section'
                   : ' — not a sentence that backs this point') +
             (written ? '' : `; own sentence rejected (${observed.wording})`),
-    }
+    };
   },
 
   ideal(c, ctx) {
-    if (!c.expect.support) return { ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false }
-    const t = spec(ctx, c.expect.targetId)!
-    const { sentence } = findSentence(ctx.index, t.gold[0])
+    if (!c.expect.support) return { ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false };
+    const t = spec(ctx, c.expect.targetId)!;
+    const { sentence } = findSentence(ctx.index, t.gold[0]);
     return {
       outcome: 'supported',
       cited: [sentence.id],
@@ -134,11 +141,11 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       wording: null,
       retrievedPages: [],
       refusedByFloor: false,
-    }
+    };
   },
 
   constant: {
     name: 'always "no support"',
     observe: () => ({ ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false }),
   },
-}
+};

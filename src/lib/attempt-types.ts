@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 // The saved attempt, exactly as the trainee's browser may read it. The server
 // passes every write through this schema, and zod drops any field not listed
@@ -6,8 +6,8 @@ import { z } from 'zod'
 // mistake. Hidden working (what was judged missing, search details, raw model
 // output) lives in a separate server-only record.
 
-export const PHASES = ['asking', 'follow_up', 'revising', 'complete'] as const
-export type Phase = (typeof PHASES)[number]
+export const PHASES = ['asking', 'follow_up', 'revising', 'complete'] as const;
+export type Phase = (typeof PHASES)[number];
 
 export const RevealedItemSchema = z.object({
   id: z.string(),
@@ -21,8 +21,8 @@ export const RevealedItemSchema = z.object({
   // When it was first revealed. The wording is a snapshot: a later edit to the
   // case file does not rewrite an old attempt.
   atMs: z.number(),
-})
-export type RevealedItem = z.infer<typeof RevealedItemSchema>
+});
+export type RevealedItem = z.infer<typeof RevealedItemSchema>;
 
 export const TurnSchema = z.object({
   n: z.number().int(),
@@ -32,10 +32,10 @@ export const TurnSchema = z.object({
   via: z.enum(['typed', 'voice']).optional(),
   kind: z.string().optional(),
   itemIds: z.array(z.string()).optional(),
-})
-export type Turn = z.infer<typeof TurnSchema>
+});
+export type Turn = z.infer<typeof TurnSchema>;
 
-export const RequestSchema = z.object({ item: z.string(), eye: z.string() })
+export const RequestSchema = z.object({ item: z.string(), eye: z.string() });
 
 export const FollowUpSchema = z.object({
   question: z.string(),
@@ -43,7 +43,7 @@ export const FollowUpSchema = z.object({
   respondingTo: z.string().nullable(),
   path: z.enum(['written', 'supplied', 'fixed']),
   atMs: z.number(),
-})
+});
 
 export const RevisionCardSchema = z.object({
   outcome: z.enum(['supported', 'no_support']),
@@ -60,8 +60,8 @@ export const RevisionCardSchema = z.object({
   // The reference note's own statement of what it is.
   noteLine: z.string().nullable().default(null),
   atMs: z.number(),
-})
-export type RevisionCard = z.infer<typeof RevisionCardSchema>
+});
+export type RevisionCard = z.infer<typeof RevisionCardSchema>;
 
 export const TimingSchema = z.object({
   turn: z.number().int(),
@@ -70,7 +70,7 @@ export const TimingSchema = z.object({
   modelMs: z.number().nullable(),
   textToSpeechMs: z.number().nullable(),
   serverTotalMs: z.number(),
-})
+});
 
 export const PublicAttemptSchema = z.object({
   caseId: z.string(),
@@ -87,5 +87,5 @@ export const PublicAttemptSchema = z.object({
   followUpReply: z.object({ text: z.string(), atMs: z.number() }).nullable(),
   revision: RevisionCardSchema.nullable(),
   timings: z.array(TimingSchema),
-})
-export type PublicAttempt = z.infer<typeof PublicAttemptSchema>
+});
+export type PublicAttempt = z.infer<typeof PublicAttemptSchema>;

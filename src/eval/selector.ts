@@ -1,13 +1,13 @@
-import { historyLabel } from '../server/render'
-import type { CallResult } from '../server/llm/types'
-import { runSelector } from '../server/selector.server'
-import type { SelectorRequest } from '../server/selector'
-import { readCases } from './context'
-import type { EvalCase, StepEval, StepRun } from './types'
+import { historyLabel } from '../server/render';
+import type { CallResult } from '../server/llm/types';
+import { runSelector } from '../server/selector.server';
+import type { SelectorRequest } from '../server/selector';
+import { readCases } from './context';
+import type { EvalCase, StepEval, StepRun } from './types';
 
-type Input = { utterance: string; previous?: Array<SelectorRequest> }
-type Expect = { kind: string; ids?: Array<string>; acceptKinds?: Array<string>; alsoNotRecorded?: boolean }
-type Observed = { kind: string; ids: Array<string>; alsoNotRecorded: boolean }
+type Input = { utterance: string; previous?: Array<SelectorRequest> };
+type Expect = { kind: string; ids?: Array<string>; acceptKinds?: Array<string>; alsoNotRecorded?: boolean };
+type Observed = { kind: string; ids: Array<string>; alsoNotRecorded: boolean };
 
 export function asRun<O>(call: CallResult<unknown>, observed: O): StepRun<O> {
   return {
@@ -21,10 +21,10 @@ export function asRun<O>(call: CallResult<unknown>, observed: O): StepRun<O> {
     thinkingChars: call.thinkingChars,
     model: call.model,
     raw: call.rawText,
-  }
+  };
 }
 
-const EYE_WORDS = { right: 'in the right eye', left: 'in the left eye' } as const
+const EYE_WORDS = { right: 'in the right eye', left: 'in the left eye' } as const;
 
 export const selectorEval: StepEval<Input, Expect, Observed> = {
   step: 'selector',
@@ -51,27 +51,27 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
         input: { utterance: `What is the patient's ${historyLabel(key).toLowerCase()}?`, previous: [] },
         expect: { kind: 'reveal', ids: [`history:${key}`] },
       })),
-    ]
-    return [...canonical, ...(await readCases<Input, Expect>('selector.jsonl'))]
+    ];
+    return [...canonical, ...(await readCases<Input, Expect>('selector.jsonl'))];
   },
 
   async run(c, settings, ctx) {
-    const run = await runSelector(ctx.publicCase, c.input.utterance, c.input.previous ?? [], settings)
-    const d = run.decision
+    const run = await runSelector(ctx.publicCase, c.input.utterance, c.input.previous ?? [], settings);
+    const d = run.decision;
     return asRun(run.call, {
       kind: d ? d.kind : 'error',
       ids: d?.kind === 'reveal' ? d.items.map((i) => i.id) : [],
       alsoNotRecorded: d?.kind === 'reveal' ? d.alsoNotRecorded : false,
-    })
+    });
   },
 
   grade(c, observed) {
-    const wanted = new Set(c.expect.kind === 'reveal' ? (c.expect.ids ?? []) : [])
-    const extra = observed.ids.filter((id) => !wanted.has(id))
-    const missing = [...wanted].filter((id) => !observed.ids.includes(id))
-    const kindOk = [c.expect.kind, ...(c.expect.acceptKinds ?? [])].includes(observed.kind)
-    const flagOk = !c.expect.alsoNotRecorded || observed.alsoNotRecorded
-    const pass = kindOk && extra.length === 0 && missing.length === 0 && flagOk
+    const wanted = new Set(c.expect.kind === 'reveal' ? (c.expect.ids ?? []) : []);
+    const extra = observed.ids.filter((id) => !wanted.has(id));
+    const missing = [...wanted].filter((id) => !observed.ids.includes(id));
+    const kindOk = [c.expect.kind, ...(c.expect.acceptKinds ?? [])].includes(observed.kind);
+    const flagOk = !c.expect.alsoNotRecorded || observed.alsoNotRecorded;
+    const pass = kindOk && extra.length === 0 && missing.length === 0 && flagOk;
     return {
       pass,
       // Showing a row that was not asked for, or the other eye.
@@ -83,7 +83,7 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
           (extra.length ? `; revealed without being asked: ${extra.join(', ')}` : '') +
           (missing.length ? `; not revealed: ${missing.join(', ')}` : '') +
           (flagOk ? '' : '; did not say something was not recorded'),
-    }
+    };
   },
 
   ideal: (c) => ({
@@ -96,4 +96,4 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
     name: 'never reveal anything',
     observe: () => ({ kind: 'not_recorded', ids: [], alsoNotRecorded: false }),
   },
-}
+};

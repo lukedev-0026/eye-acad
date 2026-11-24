@@ -11,4 +11,4 @@ export const LINES = {
   restOnScreen: 'The rest is on screen.',
   noFollowUpIdeas: 'Can you take me through your reasoning for that plan?',
   noSupport: "I couldn't find support for this in the reference note.",
-} as const
+} as const;

@@ -2,96 +2,109 @@
 // diagnosis, the six key points and the three follow-up topics, and writes
 // evals/retrieval-table.md. No language model is involved.
 //   pnpm retrieval-table
-import { readFile, writeFile } from 'node:fs/promises'
-import { loadExaminerNotes } from '../src/server/case.server'
-import { embed } from '../src/server/embed.server'
-import { loadNoteIndex } from '../src/server/note-index.server'
-import { pageLabel } from '../src/server/note-types'
-import type { NoteChunk, NoteIndex } from '../src/server/note-types'
-import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '../src/server/retrieve'
+import { readFile, writeFile } from 'node:fs/promises';
+import { loadExaminerNotes } from '../src/server/case.server';
+import { embed } from '../src/server/embed.server';
+import { loadNoteIndex } from '../src/server/note-index.server';
+import { pageLabel } from '../src/server/note-types';
+import type { NoteChunk, NoteIndex } from '../src/server/note-types';
+import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '../src/server/retrieve';
 
-type Target = { id: string; source: string; gold: Array<string>; alsoSupports: Array<string>; distractor: Array<string> }
+type Target = {
+  id: string;
+  source: string;
+  gold: Array<string>;
+  alsoSupports: Array<string>;
+  distractor: Array<string>;
+};
 const spec = JSON.parse(await readFile('evals/cases/retrieval.json', 'utf8')) as {
-  targets: Array<Target>
-  unsupported: Array<string>
-  quotes: Record<string, string>
-}
-const notes = await loadExaminerNotes()
-const index = await loadNoteIndex()
+  targets: Array<Target>;
+  unsupported: Array<string>;
+  quotes: Record<string, string>;
+};
+const notes = await loadExaminerNotes();
+const index = await loadNoteIndex();
 
 function targetText(source: string): string {
-  const m = /^examiner_notes\.(\w+)(?:\[(\d+)\])?$/.exec(source)
-  if (!m) throw new Error(`Bad source: ${source}`)
-  const value = (notes as Record<string, unknown>)[m[1]]
-  const text = m[2] === undefined ? value : (value as Array<unknown>)[Number(m[2])]
-  if (typeof text !== 'string') throw new Error(`Nothing at ${source}`)
-  return text
+  const m = /^examiner_notes\.(\w+)(?:\[(\d+)\])?$/.exec(source);
+  if (!m) throw new Error(`Bad source: ${source}`);
+  const value = (notes as Record<string, unknown>)[m[1]];
+  const text = m[2] === undefined ? value : (value as Array<unknown>)[Number(m[2])];
+  if (typeof text !== 'string') throw new Error(`Nothing at ${source}`);
+  return text;
 }
 
 function chunksContaining(idx: NoteIndex, phrases: Array<string>): Array<NoteChunk> {
   return phrases.map((phrase) => {
-    const hit = idx.chunks.find((c) => c.sentences.some((s) => s.text.includes(phrase)))
-    if (!hit) throw new Error(`No sentence in the index contains: "${phrase}"`)
-    return hit
-  })
+    const hit = idx.chunks.find((c) => c.sentences.some((s) => s.text.includes(phrase)));
+    if (!hit) throw new Error(`No sentence in the index contains: "${phrase}"`);
+    return hit;
+  });
 }
 
 const best = (ranks: Array<number | null>) => {
-  const real = ranks.filter((r): r is number => r !== null)
-  return real.length ? Math.min(...real) : null
-}
-const show = (r: number | null) => (r === null ? '–' : String(r))
+  const real = ranks.filter((r): r is number => r !== null);
+  return real.length ? Math.min(...real) : null;
+};
+const show = (r: number | null) => (r === null ? '–' : String(r));
 
-const rows: Array<string> = []
-const summary = { goldInTop: 0, total: 0, distractorAboveGold: 0, fusedBeatsBoth: 0 }
-const withoutQuote = new Map<string, number | null>()
-const quoteEffect = { better: 0, worse: 0, same: 0 }
-const floorData: Array<{ what: string; shared: number; cosine: number | null; noSupport: boolean }> = []
+const rows: Array<string> = [];
+const summary = { goldInTop: 0, total: 0, distractorAboveGold: 0, fusedBeatsBoth: 0 };
+const withoutQuote = new Map<string, number | null>();
+const quoteEffect = { better: 0, worse: 0, same: 0 };
+const floorData: Array<{ what: string; shared: number; cosine: number | null; noSupport: boolean }> = [];
 
 for (const withQuote of [false, true]) {
   for (const t of spec.targets) {
-    const target = targetText(t.source)
-    const extra = withQuote ? spec.quotes[t.id] : undefined
-    const vector = (await embed([`${target} ${extra ?? ''}`.trim()], 'query'))?.[0] ?? null
-    const run = retrieve(index, { target, extra, vector })
+    const target = targetText(t.source);
+    const extra = withQuote ? spec.quotes[t.id] : undefined;
+    const vector = (await embed([`${target} ${extra ?? ''}`.trim()], 'query'))?.[0] ?? null;
+    const run = retrieve(index, { target, extra, vector });
     const rank = (chunks: Array<NoteChunk>, key: 'keywordRank' | 'meaningRank' | 'fusedRank') =>
-      best(chunks.map((c) => run.ranking.find((r) => r.chunk.id === c.id)?.[key] ?? null))
-    const gold = chunksContaining(index, t.gold)
-    const distractors = chunksContaining(index, t.distractor)
-    const goldFused = rank(gold, 'fusedRank')
-    const distractorFused = distractors.length ? rank(distractors, 'fusedRank') : null
+      best(chunks.map((c) => run.ranking.find((r) => r.chunk.id === c.id)?.[key] ?? null));
+    const gold = chunksContaining(index, t.gold);
+    const distractors = chunksContaining(index, t.distractor);
+    const goldFused = rank(gold, 'fusedRank');
+    const distractorFused = distractors.length ? rank(distractors, 'fusedRank') : null;
     if (withQuote) {
-      const before = withoutQuote.get(t.id) ?? null
+      const before = withoutQuote.get(t.id) ?? null;
       if (before !== null && goldFused !== null) {
-        if (goldFused < before) quoteEffect.better++
-        else if (goldFused > before) quoteEffect.worse++
-        else quoteEffect.same++
+        if (goldFused < before) quoteEffect.better++;
+        else if (goldFused > before) quoteEffect.worse++;
+        else quoteEffect.same++;
       }
     } else {
-      withoutQuote.set(t.id, goldFused)
-      const k = rank(gold, 'keywordRank')
-      const m = rank(gold, 'meaningRank')
-      if (goldFused !== null && k !== null && m !== null && goldFused < Math.min(k, m)) summary.fusedBeatsBoth++
-      summary.total++
-      if (goldFused !== null && goldFused <= TOP_K) summary.goldInTop++
-      if (distractorFused !== null && goldFused !== null && distractorFused < goldFused) summary.distractorAboveGold++
-      floorData.push({ what: t.id, shared: run.best.sharedWords, cosine: run.best.cosine, noSupport: run.noSupport })
+      withoutQuote.set(t.id, goldFused);
+      const k = rank(gold, 'keywordRank');
+      const m = rank(gold, 'meaningRank');
+      if (goldFused !== null && k !== null && m !== null && goldFused < Math.min(k, m)) summary.fusedBeatsBoth++;
+      summary.total++;
+      if (goldFused !== null && goldFused <= TOP_K) summary.goldInTop++;
+      if (distractorFused !== null && goldFused !== null && distractorFused < goldFused) summary.distractorAboveGold++;
+      floorData.push({ what: t.id, shared: run.best.sharedWords, cosine: run.best.cosine, noSupport: run.noSupport });
     }
     rows.push(
       `| ${t.id} | ${withQuote ? 'yes' : 'no'} | ${show(rank(gold, 'keywordRank'))} | ${show(rank(gold, 'meaningRank'))} | **${show(goldFused)}** | ${
-        distractors.length ? `${show(rank(distractors, 'keywordRank'))} / ${show(rank(distractors, 'meaningRank'))} / ${show(distractorFused)}` : '–'
+        distractors.length
+          ? `${show(rank(distractors, 'keywordRank'))} / ${show(rank(distractors, 'meaningRank'))} / ${show(distractorFused)}`
+          : '–'
       } | ${[...new Set(run.results.flatMap((r) => r.chunk.pages))].sort((a, b) => a - b).join(', ')} | ${pageLabel(gold[0].pages)} |`,
-    )
+    );
   }
 }
 
 for (const text of spec.unsupported) {
-  const vector = (await embed([text], 'query'))?.[0] ?? null
-  const run = retrieve(index, { target: text, vector })
-  floorData.push({ what: `unsupported: "${text}"`, shared: run.best.sharedWords, cosine: run.best.cosine, noSupport: run.noSupport })
+  const vector = (await embed([text], 'query'))?.[0] ?? null;
+  const run = retrieve(index, { target: text, vector });
+  floorData.push({
+    what: `unsupported: "${text}"`,
+    shared: run.best.sharedWords,
+    cosine: run.best.cosine,
+    noSupport: run.noSupport,
+  });
 }
 
-const mode = index.embedding ? `keyword + ${index.embedding.model}` : 'keyword only (no embeddings in the index)'
+const mode = index.embedding ? `keyword + ${index.embedding.model}` : 'keyword only (no embeddings in the index)';
 const out = `# Retrieval comparison
 
 Generated by \`pnpm retrieval-table\` on ${new Date().toISOString().slice(0, 10)} from the committed index
@@ -127,6 +140,6 @@ scores overlap the real ones, so no cut-off on these two numbers separates "cove
 covered" on this note. The floor is therefore kept only as a guard against a target that is wholly
 off-topic. The decision "no support" is made later, by the step that picks the supporting sentence
 and by the separate support check, and how reliably they make it is measured in the checks.
-`
-await writeFile('evals/retrieval-table.md', out)
-console.log(out)
+`;
+await writeFile('evals/retrieval-table.md', out);
+console.log(out);

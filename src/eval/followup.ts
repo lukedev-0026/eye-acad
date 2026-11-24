@@ -1,24 +1,24 @@
-import { runFollowUp } from '../server/followup.server'
-import { readCases } from './context'
-import type { StepEval } from './types'
+import { runFollowUp } from '../server/followup.server';
+import { readCases } from './context';
+import type { StepEval } from './types';
 
-type Input = { answer: string }
+type Input = { answer: string };
 type Observed = {
-  path: 'written' | 'supplied' | 'fixed'
-  question: string
-  respondingTo: string | null
-  firstAttemptOk: boolean
-  reasons: Array<string>
-}
+  path: 'written' | 'supplied' | 'fixed';
+  question: string;
+  respondingTo: string | null;
+  firstAttemptOk: boolean;
+  reasons: Array<string>;
+};
 
 export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
   step: 'followup',
   cases: () => readCases<Input, Record<string, never>>('followup.jsonl'),
 
   async run(c, settings, ctx) {
-    const result = await runFollowUp(ctx.notes, c.input.answer, settings)
-    const calls = result.attempts.map((a) => a.call)
-    const last = calls.at(-1)
+    const result = await runFollowUp(ctx.notes, c.input.answer, settings);
+    const calls = result.attempts.map((a) => a.call);
+    const last = calls.at(-1);
     return {
       // A step that fell back to a supplied question still completed.
       outcome: calls.some((x) => x.outcome === 'ok') ? 'ok' : (last?.outcome ?? 'ok'),
@@ -40,14 +40,14 @@ export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
       thinkingChars: calls.reduce((n, x) => n + x.thinkingChars, 0),
       model: last?.model ?? settings.model,
       raw: calls.map((x) => x.rawText).join('\n---\n'),
-    }
+    };
   },
 
   // The automatic pass means a model-written question survived every check
   // within the app's two attempts. Whether it is a GOOD question is read by a
   // person, for the finalist settings only.
   grade(_c, observed) {
-    const written = observed.path === 'written'
+    const written = observed.path === 'written';
     return {
       pass: written,
       costly: false,
@@ -55,7 +55,7 @@ export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
       detail: written
         ? `"${observed.question}"`
         : `fell back to a supplied question (${observed.reasons.join('; ') || 'no usable reply'})`,
-    }
+    };
   },
 
   ideal: () => ({ path: 'written', question: '', respondingTo: null, firstAttemptOk: true, reasons: [] }),
@@ -63,4 +63,4 @@ export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
     name: 'always use a supplied question',
     observe: () => ({ path: 'supplied', question: '', respondingTo: null, firstAttemptOk: false, reasons: [] }),
   },
-}
+};

@@ -1,0 +1,15 @@
+# Generated, vendored or measured files. Reformatting any of these would change
+# a hash that something else records (the case file, the prepared note, the
+# saved results, the settings files the scripts write).
+node_modules
+dist
+.output
+.tanstack
+pnpm-lock.yaml
+src/routeTree.gen.ts
+data/
+evals/
+config/
+docs/
+tests/golden/
+*.md

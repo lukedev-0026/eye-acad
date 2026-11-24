@@ -1,7 +1,7 @@
-import { Link, Navigate, Outlet, createFileRoute } from '@tanstack/react-router'
-import { signOut } from 'firebase/auth'
-import { auth } from '../lib/firebase'
-import { useAuthUser } from '../lib/use-auth'
+import { Link, Navigate, Outlet, createFileRoute } from '@tanstack/react-router';
+import { signOut } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { useAuthUser } from '../lib/use-auth';
 
 // Everything under this layout needs a signed-in trainee. It is rendered in
 // the browser only, so a signed-out request receives no case content at all.
@@ -10,12 +10,12 @@ import { useAuthUser } from '../lib/use-auth'
 export const Route = createFileRoute('/_authed')({
   ssr: false,
   component: AuthedLayout,
-})
+});
 
 function AuthedLayout() {
-  const user = useAuthUser()
-  if (user === undefined) return <p className="page muted">Loading…</p>
-  if (user === null) return <Navigate to="/" />
+  const user = useAuthUser();
+  if (user === undefined) return <p className="page muted">Loading…</p>;
+  if (user === null) return <Navigate to="/" />;
   return (
     <>
       <header className="topbar">
@@ -31,5 +31,5 @@ function AuthedLayout() {
       </header>
       <Outlet />
     </>
-  )
+  );
 }

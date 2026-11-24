@@ -1,10 +1,10 @@
-import type { RevisionCard } from '../lib/attempt-types'
+import type { RevisionCard } from '../lib/attempt-types';
 
 export function RevisionCardView({ card }: { card: RevisionCard }) {
   const searched = card.retrievedPages.length
     ? `Pages searched: ${card.retrievedPages.join(', ')}`
-    : 'No pages were retrieved'
-  const how = card.retrievalMode === 'hybrid' ? 'by matching words and by meaning' : 'by matching words only'
+    : 'No pages were retrieved';
+  const how = card.retrievalMode === 'hybrid' ? 'by matching words and by meaning' : 'by matching words only';
 
   return (
     <section className="panel revision" aria-label="Revision point">
@@ -19,9 +19,7 @@ export function RevisionCardView({ card }: { card: RevisionCard }) {
       {card.outcome === 'supported' && card.point ? (
         <>
           <p className="revision-point">
-            <span className="label">
-              {card.pointSource === 'written' ? 'To revise' : 'Key point for this case'}
-            </span>
+            <span className="label">{card.pointSource === 'written' ? 'To revise' : 'Key point for this case'}</span>
             {card.point}
           </p>
           <figure className="excerpt">
@@ -38,5 +36,5 @@ export function RevisionCardView({ card }: { card: RevisionCard }) {
       </p>
       {card.noteLine ? <p className="muted small">The reference note says of itself: “{card.noteLine}”</p> : null}
     </section>
-  )
+  );
 }

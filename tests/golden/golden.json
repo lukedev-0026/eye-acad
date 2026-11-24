@@ -1,0 +1,874 @@
+{
+ "requests": {
+  "selector": {
+   "minimal": {
+    "forced, thinking off": {
+     "sel-absent-2": "7066bb8e40fb8f88d961a6df5ef19e6aac40f8279a9acdbf0e8721e6e4ad4876",
+     "sel-absent-3": "f9808949629b2bbfed5c50d09b05f477c49b0a5a4b899553ea9e3b31497f031f",
+     "sel-answer-1": "a96400f2203d72614bad02dc5e88a42b45342361b9f04c7cbb96c4f9044953e4",
+     "sel-broad-2": "150b0f366253b1b2e2ad40b52f1778da2fbafbe101164ce33d087681bb19e0f7",
+     "sel-eye-2": "cca9cc4c26aedcbdab43f0631da3b4eead0cf40596ac0f05094b78450c801d58",
+     "sel-eye-3": "83c3cf735606326322ad4a89e53fdaf5b7c76e0b9776f8b099272119e8476f6a",
+     "sel-follow-1": "b2fb17e1d535ffbc3f8cfee86483c933af160dd758f4584d54685100089208dd",
+     "sel-follow-2": "3e33176de3b0d27afd52dcbb97a94b757be79074dc4bd475006702088e893a45",
+     "sel-hist-1": "d242f1477d0b0fcfc4c77f1bb36f2a465e47aeaeb525508db11e8a8b62a16894",
+     "sel-hist-3": "4f9ccc80fc9f8b633630c883ac2ead4827fcf5f0b99af36f012812aef3c84fd2",
+     "sel-history-age": "d58c89adac0c3169292d33756c04ddf54d004210642d1334035387524d79c3a1",
+     "sel-history-allergies": "d4dc04e80874b98c1031f8024a027333c5af8489da7181792547695f0fb8481e",
+     "sel-history-family_history": "d4ff16ea83b55de91571a5271c07e0e7c2120927d821578f64b40a54b5eb9505",
+     "sel-history-medications": "edfccd786652f8378eae89f0d5fed581a2016a2a6d24ee65ee2033ff12472c46",
+     "sel-history-past_medical_history": "63ece33dd28a16ef1f6e24c5fee998479af04cd27b65d19c06c72117d822b89d",
+     "sel-history-past_ocular_history": "b1da43f0feac3263ab0572f94cdcd5355575f27278f4ef8292ec69a016331929",
+     "sel-history-presenting_complaint": "d620f7c18cf78366048aaf0d5748f6794cb1b1036acd7912b52ddaa76a268f4e",
+     "sel-history-sex": "0c511bfd9d8f6265eca69cb84f1889da6abf448e150356a5a86e43a9fb8bc797",
+     "sel-inject-1": "67a87976df979b6860a276bc8d88fa3986b25d1f5e9d0707192af3d224f2cc46",
+     "sel-inject-3": "4fa708b09ec68ec92aff48a3c96364d90c151f8eea916f631fce7f592cee2bcc",
+     "sel-multi-1": "8e4dc0c8b65344e86757736e12d7e1d1d72212257ec9aca2e2e27e247890d772",
+     "sel-multi-3": "5774a8be01840f7755c6125bcfcdfc478e712ffe74e17ac9c2786aa94dee769d",
+     "sel-noisy-2": "d08d73adcf2c09448c6ddef93d87abfdf3f3c73ab9bb2ab24d63d15ddd69278e",
+     "sel-noisy-3": "9f08019838a46592c2891869f57e33c560e6d481f30dfe8f4ce8b5671505b575",
+     "sel-para-1": "59ba35eed11ab4dc5bd56e0db8d88a0f3b7036620940f505a44fd3c6e04194aa",
+     "sel-para-2": "b0718dd68a47f7e74fe9998d28bc53068a33f2a92a0634f821a06187fd6d3afd",
+     "sel-para-4": "e5c933fac3a2f3d5641c1cb348f35eee4b86b1e828a4ce6a969bc59b540c04f0",
+     "sel-row-ac_left": "deca18223021eef643e2606963735aa8fc17120a42c58ce02d2ec39f3bc2fba1",
+     "sel-row-ac_right": "bd9190e4dc0d1fbc7dd7579f1f8bbaf545b33774784c8a14ca65e9e876fad03f",
+     "sel-row-axial_length": "f2446a58e300165d1778bb23dcc2b00161a197f89f1239f0f899855627696976",
+     "sel-row-bp": "d7de8b2e2c986c34fea704ad1813fb932b1ed76e40b6ffc17794aaeec57b342a",
+     "sel-row-conj_left": "fd5ff614cd5eb5e4afc9c1c25aea00d9ffe6b7621ee45dcdea1b15ce66ec4e48",
+     "sel-row-conj_right": "c6edc77a79cb915c527520b689eb675ca3af34f1cb2dee450b09496b016c2af8",
+     "sel-row-cornea_left": "105a6168a257b1e3143f96732a24e5f97574c4a565fb50dea4127f9dbf11ed30",
+     "sel-row-cornea_right": "24c7dcef210025ec33f51c84edcdacd037a42a732f0442971bd90da0c9d9e75d",
+     "sel-row-fundus_left": "c6347372b46517bc8b6eda25e29408d1c2dc5a9c3083cc53636dcf486bb2f78a",
+     "sel-row-fundus_right": "0a32823165f48956674213ef4fe58469448a46bc42b1580c6ab5871df0eef27c",
+     "sel-row-gonio_left": "b94b61efe99fb169e5c7f1bd796d28fe467026b849c5b96e6a2eb2416797a365",
+     "sel-row-gonio_right": "d23fc81fe5c25855a47b0e4dc774a101d18ef4a0304303a5fdad0ec2f9a7c3e9",
+     "sel-row-iop_left": "b103fe3e77f9c164c14fa48f1c0a36d1055c2126abcc0d6ce09991b61944bfb7",
+     "sel-row-iop_right": "43603ee485c474a61e617199b23ed18e430372cac614daba7cd9da9b994fd800",
+     "sel-row-lens_left": "8f355778b6e294a2d73e90a0b4b36baf6783b777b5d20b39cd96d3b83d2724ed",
+     "sel-row-lens_right": "d55f042330c430e8cdf888aa788a644b15354e74caec6ef63326d632213bb8de",
+     "sel-row-oct": "382f699f6bf2803b5a8ad4abd5a4891615c820344a0777b1ba19e0a2e2ce8885",
+     "sel-row-pupil_left": "7598c8fa6984af942a6751100ff3531bbb7ff448a52c64951357e099ee3d998e",
+     "sel-row-pupil_right": "f797a639c7457aefe3c2747919c599b895e84e4cca6217884d9376546260692e",
+     "sel-row-rapd": "749b8d88a499d8ac021a233a025e17e2569e2cec435addf973a346e045734ede",
+     "sel-row-refraction": "52a05888bf76077472ceb69ea72c18381925e25fd30d589501d7f0cf8ad669f3",
+     "sel-row-u_and_e": "2a4e3b678c103ce2ecb6b215670f81aa9473d71d05d0450ae5253ed973fbdaa4",
+     "sel-row-va_left": "22d7f2266a1e88c89e34bb3ccf4713a52ea2cdd7ab9c9012bdd8bb4e96f8a177",
+     "sel-row-va_right": "106e505f6da2dae3b7d04a70d1f08c00991e909485ab503ea3de04f17e0a45ae",
+     "sel-short-2": "f19a8899502391cede3fdff46e80e5ef69c4b09a9918d096341091f0040e27a1",
+     "sel-short-3": "b5a83f53a18537537e3a7b7134ca75cfa1530f0e8acbe58f181683a08a3f7ff5",
+     "sel-unavail-1": "1211127f223b97b42dac111ffb09b7ac6c93008f3577b1d382b4bb790a0d922a",
+     "sel-unavail-2": "0ebf94f958542532d6ed2d8989437e7695b0c0b0196473cf0ca0f93411677d4c",
+     "sel-unavail-5": "ecc2409efdc7219f417d22903abc0578aec3f6f59c68c2925b7511c78c87ad51"
+    },
+    "not forced, thinking on": {
+     "sel-absent-2": "aa6c0653a44a44f06d76ed8bcf466514a07fc3c3fdbd55bc025def3a033c5920",
+     "sel-absent-3": "8cfea7236845d51c19a3f92a1d78d4d5a7e5475360bf433b209036ec74ca3782",
+     "sel-answer-1": "13f4d828c7c5332b0e6ba45079e91b7c22b5b8c56a8ae16d39d6ea8c855d88b9",
+     "sel-broad-2": "2d8f843bbb4f07f7ad76c2cb149cd2233c195a8b5a57537ad818c9b449e8c3b2",
+     "sel-eye-2": "aa6608fcdc1e0c4e50977b5f5fb5d9000b505b6c22dded6a220ebb4863f915b1",
+     "sel-eye-3": "3759964460488856dd4a81eb7abe55d38528e490e4e329b93fdda99562338fbf",
+     "sel-follow-1": "4b088d6ff316f7acb16f956f8c959feb7f54d53f1578a7fc8c839daa19ff6e3e",
+     "sel-follow-2": "335c3b3606fd2e2a9b1e8a57e94e8f53efc7c3d5b7445fedbbec21713fb0e6b2",
+     "sel-hist-1": "a91c13966ccbe61a861272c720b8dd7990022dfda7a50ec9bba8d54288190fbe",
+     "sel-hist-3": "caee3ca5fc73250ec61ac094b4852d9bd8195becc62c2c51d049d9b9c11093a0",
+     "sel-history-age": "257eb7d68f3190330253a738b17432f8e2c64b35f25c33aa711dd4b96af61077",
+     "sel-history-allergies": "323e02a79f3fdcde0ef1a069f248c5e8ccad52c002a0416fbe72d7231d360892",
+     "sel-history-family_history": "ce392669c810d9e08e5c973b4d6c66deb7799b69ad94b722a80fadc9a9ed6221",
+     "sel-history-medications": "89a074c70904e948b06df2d1cfe5d27791d3fdd77a6350afc98b18e6bacd9d00",
+     "sel-history-past_medical_history": "74d307b80cd3c853494c16ad1b3280878ef8c15c1809ce060271d5eb025dbbf1",
+     "sel-history-past_ocular_history": "b005490cdf4f69ff6eac95cf6b491e2f2ab761a14a2573b5de8d3775312fc87d",
+     "sel-history-presenting_complaint": "75b36d46aceecce18f2eef540a517814614ba0019dac94353f8bd38c3a9e1bab",
+     "sel-history-sex": "ca6506d46a17f6fdd68d1b593869b34259aef20eeee6fd7996d92f3c5b1510cb",
+     "sel-inject-1": "c6075a6e211e41d3605104d848adba67c2425e64a8c91e903785e5c8c6626242",
+     "sel-inject-3": "5c5f12c518db75c4ae1cba09d0d44eda6a6c85ce8ebdea61863824260282fcbc",
+     "sel-multi-1": "ffdcd8dc606a88bd6d58713f405e69798689efc85173dbabc95db8658ae5105c",
+     "sel-multi-3": "85026ed4a96641195d665198bcb80715f5b39155fafe4bed55b0d55005836553",
+     "sel-noisy-2": "aefcfc645f147a3e71d30f95573076e4d4f1485f20a3d5893d23ff5fa62c42eb",
+     "sel-noisy-3": "25a8dc3169b6f109a268976d65aacbdbc9af234345e681099ca418844671c367",
+     "sel-para-1": "31eaaea0f7e26967b87e661b2f1fe71217ebf29e10259d56274bfdcef18b2fc7",
+     "sel-para-2": "16c6e6d2c8e68001e43c10c26551ea4a9634c75f542375746f037ff6c3ae6b0a",
+     "sel-para-4": "38d1222b5ffbb31c21f21956b79cc02877c1b0baf530cce42f355cf7ae8d8d98",
+     "sel-row-ac_left": "4b02273fce949d75788f6efdff58d0cb0d3679413f4d0c5c777fac4c73b372db",
+     "sel-row-ac_right": "ae427256ac787ecda34393179eab7641771bf4423d72983f3216773f5142b05e",
+     "sel-row-axial_length": "197b915ff38c0bb34081a6a389011b78b21f58d6864ac6fed08b439501d730e5",
+     "sel-row-bp": "d2cb90255f2ce408ae75618fddfae7fb1376828244f7f3e6dceb4bf9614afcde",
+     "sel-row-conj_left": "660a0c5e17d2ac7df9f4206e21700bbe8ec5780177e9432841a3179808a67c6d",
+     "sel-row-conj_right": "944f9890431cf42218a24e517af183847e9402c72506bb9cf143e94d27af472b",
+     "sel-row-cornea_left": "777dfcd6cb4af6265962c05beb33ca3a2587f2cc5f983a0171c26a66c37bc0cd",
+     "sel-row-cornea_right": "4bc3543adc08f579b9939dd252556c85778614bd1f237a709cffa23b201dc352",
+     "sel-row-fundus_left": "9ec0251933caabd55cf708bdc00a3420c872133fef5f7113b34b0c18a6f6a144",
+     "sel-row-fundus_right": "be5f0e12843a4ec3ba937087573cf1a6b5b925a502345ebaf57f285003ab95bd",
+     "sel-row-gonio_left": "884f9a8da9179f2c4d3fd79ba0362bddb017727d6b91d2e8a2effd2e7a0fc779",
+     "sel-row-gonio_right": "554204ddba7317ac7b3a2112e1d841f6e7a49fd46f722fcb522ca1e6f8aa8164",
+     "sel-row-iop_left": "56977b31e2d9ce4f0b9b62af55af0fb0926acb74896c7b960b9f740d48c591f9",
+     "sel-row-iop_right": "4f5e6d36da1e3a1f1f4ffd07dc814842d26e1938818480e3a896768215ead14c",
+     "sel-row-lens_left": "f09da3cd4800a6e448041169c2112f13e8dc6caa982b74965a0e64797b3cc667",
+     "sel-row-lens_right": "11bd13e7f24e10cac2793475ac3eac5165aeedb8952e8ae1d5a6757206ba7c74",
+     "sel-row-oct": "89f829948e2feb4f6c723d9cdbcb3c927ec3949a490f2ab06b4c2bdab56b6810",
+     "sel-row-pupil_left": "c486cb92d8618071085f986f59e25d8f8959f845b2c01e3cb8477b2c77f0dadd",
+     "sel-row-pupil_right": "81adff0549e9d8801ebe43d191b9fa005a647ac6e1af331b48f1cb15fbda2399",
+     "sel-row-rapd": "e343e20b6967fbf51ef664fd55d3531d942fac605341ab83788e67eeb1a447ee",
+     "sel-row-refraction": "ed7b99c00973c232b0b11981266656127070d36a120dcc5539eb3622df40a4a4",
+     "sel-row-u_and_e": "5a8a4bb8031040668606e9e174b42b155f3402472d70f5e946366502121dd7b4",
+     "sel-row-va_left": "d4b5719f5b22eef1d0aa21448d4b99c4f1f8839c911e6c543703f1c6430bad62",
+     "sel-row-va_right": "ac2d348c88f3c006bc59b9c9e4e678b9a82ab9ec955f34bb4dec87b8df63636c",
+     "sel-short-2": "b1dcbb078b4c8f4159502222c605010d46f1f8c144436ec906a7a3cd743ee622",
+     "sel-short-3": "c33cb55d6d06d1d6ce495b97dbc82056f9998d6fcec2e90902c59db7511d736e",
+     "sel-unavail-1": "be3245d09a4b059a0ba7a03fdbd2064a0ae24d98cae88e7eebdfde71ac3e3d9d",
+     "sel-unavail-2": "1d257630b45ee73602837bbe7b778f7eb31dd22d6f4a956ae44a01df2cdb0e13",
+     "sel-unavail-5": "9b37ce2f8f058135838c3a80dd0a249631a14cbe033dba9601902f5632886c4c"
+    }
+   },
+   "rules": {
+    "forced, thinking off": {
+     "sel-absent-2": "9abe5c4e8994d37e3e9f557f08705eb4a544a580a3bd7e83d276fb6b4650d95b",
+     "sel-absent-3": "0d62e87862fc73bf483d3a8253b6aa70db62c60034f0228a13a14cb93c9d5906",
+     "sel-answer-1": "5c17ea13c5fd3b22ffdad2be109f9bc5ea86ef81bf7c51b2907de9dc35e06842",
+     "sel-broad-2": "be66d2c4935c51c8954b434dad95e963b092cc2430c6a8f4ca072e1555ff36ea",
+     "sel-eye-2": "24ccbe82d81aa5d308a9797b57607b32f5b0236a4b6a61d592eb363079d5e20f",
+     "sel-eye-3": "80e9bc738a4929eff71a41e9f916a64b51f35385d74f0473ceff4e142e57a4cd",
+     "sel-follow-1": "bdd60e874060f655d3ba656114e55f061c24c21c8e6e58004612986a2804a915",
+     "sel-follow-2": "14886042c097057d1ee61e1bf3e1bb902b27e0ef1a03d9e779eeab37056a2036",
+     "sel-hist-1": "b0bc2aea241c1573323d80139ac784b8455516cd91cb940c87330908d4c26f42",
+     "sel-hist-3": "2da5c7ff9d7b2f2ddf5a4b433c547e96329e5ade72d041f8172945965f209d53",
+     "sel-history-age": "862d676e0ff9c765c0f7a4046ede2892631bb7ca5af0d9415249807fbf646686",
+     "sel-history-allergies": "37391c7feaf8d9a49e80c5ab5fbbb4e5717b196ef4ab214cf77302efb8b4c3dd",
+     "sel-history-family_history": "089f3cd22df482a01d991b4a920bf4e838fa2b49796ec9073999e36d9ef001ab",
+     "sel-history-medications": "1ce8ec9210c7216fd8ab2a6d765f7370767754d931d1782f5a9238562b8a66cd",
+     "sel-history-past_medical_history": "a7ab52831735aab5461d6eff7030352b50bb58cca99950a20985c03520e23bae",
+     "sel-history-past_ocular_history": "1d8c94511c361577f71612b447bbac106206355a57a89b3dd5cc3ac41dbe89a1",
+     "sel-history-presenting_complaint": "e0eee21dde65ec4a200c5e18d4525e98bb6ae8925ae7b8883fae05c6cc0d21bd",
+     "sel-history-sex": "853cc8fbe602f5c134133be3a05d375b9fb22f89bd7204064595bb24408d73ac",
+     "sel-inject-1": "1fea4c4f3b768d05573a2cd84ea107efa9d666b5017ba73ecdf59720ce4339e2",
+     "sel-inject-3": "9e15e81e645d5cb464105c74d77f5ec547eac5fae870a1c337a00abba4abbb60",
+     "sel-multi-1": "62c5647426e77636414955100725ec102d8ba58b2ded86b6c51b56b2aedc7ddc",
+     "sel-multi-3": "1ec4bbe9c37430941deac636dc205cfbad0a32c31a21b316cd931b545726925a",
+     "sel-noisy-2": "c2fb5c4ca6cdcb66304644c586b78b8d0b1f39eac22bcca8715a6671633bca74",
+     "sel-noisy-3": "cbc014a75d29923402355338e1fb3544e1ad4eda8873a996ce6bd15a1f134797",
+     "sel-para-1": "24af7ed9000d7e9b3aa0f1e1dd0d0892e61a6681c7e6a9f7700102e7c982cc2c",
+     "sel-para-2": "52afb898a6d2eb7ccbcb080c167acf39146af1dce53afcba1c85ba3c019d6233",
+     "sel-para-4": "fa9678e8a4af0ed3eb4a78e983e5c195c0ca1fb9787f417add15e7f30abae2b2",
+     "sel-row-ac_left": "d7b2b2eaedbd1e3eb7d885d97b0fcbfabb02fb1bb149d872e43936fe59a7001f",
+     "sel-row-ac_right": "0aa02c51d2b18e575e3b45ca9e9ccb21d62c79da0224c315a0c3a501bda336b7",
+     "sel-row-axial_length": "2288b3f7bd6c73a1c1f1b7e9c0abbdf351134f65caa860e37d00835f465aacf3",
+     "sel-row-bp": "c70bfaf8813d5d579bfae0bb0cdcef10f9f65185b868077f30afc687335ac6bf",
+     "sel-row-conj_left": "04790a6e98e95586e52e83add05905b927cf0ab10566a9fbe767172e5d983cee",
+     "sel-row-conj_right": "61bc246b0c278c389804fd0bc9aad32da18badb13ee8f42ec69bb35ccc0512a1",
+     "sel-row-cornea_left": "a5c53a79e011070db5fe81e57b3b41ad8787a1aed87d81aee20539a95d8f4fdd",
+     "sel-row-cornea_right": "c9526a86611994dbad6497c9a6a53c30c068eed1ffe7c3ee0908df3470f2f5d8",
+     "sel-row-fundus_left": "d9649f8658f1bd57833728a203ce67805d3756b41de2f015a9fb2e3af18c3769",
+     "sel-row-fundus_right": "9cd45ec25002943b7a6434b55a3df04b0cdd7b7314a08176d084926744efb1fc",
+     "sel-row-gonio_left": "2be28d870e8e622f6f8526f7e1e2118b1fa6ab2ac3a004879d5be2356dc5b44b",
+     "sel-row-gonio_right": "5cd47d9e44651dfafdf75035e056334d9a7579032eff78996b9c3798c5f99cc9",
+     "sel-row-iop_left": "15de0342e50c543d5c64adc84ebecb37434d50bfcd392652fb8c85fe7c5fd0b1",
+     "sel-row-iop_right": "b1077403420008ba09485d6e9ebf9d959a53583ab76a03dfb39e39bef5c6eab9",
+     "sel-row-lens_left": "5018f12adb979d33f71bb7afc815bbe4432459b29d071337acf9eb14cf044542",
+     "sel-row-lens_right": "d6f9e217daff6241b0b12aa30eacf706eefede1145e136d373df9b7009c5a43b",
+     "sel-row-oct": "d244da9b751f4c1623f24b6686dbf21164bed974c998e6eb20ac4f94a9692a60",
+     "sel-row-pupil_left": "e3180c8aedb251bbc505916f9ff2b49aee55b7ba95cde77bf2c707a9beae5853",
+     "sel-row-pupil_right": "4ed9cecf28aaaa0389f2fa5ac52a23bcc82aa41efd2340e6f4f87a51bde48933",
+     "sel-row-rapd": "229b812971ed61bce03f1afc14a6ebdf6113c553a79b9629dfe6b3e637093a26",
+     "sel-row-refraction": "891a46538b2746d39ff953ebfce9302e3a9fbd2eb3baa10e113c202f18f43ae6",
+     "sel-row-u_and_e": "bead420c8f8845a9e91eb9a7de0d8bf927376c1ccde9383c11d69b9f99ba6e63",
+     "sel-row-va_left": "a258b861b5efc4fb89f4bbd48776924e6b8b21ca5b173dfb94ca6c62a232d134",
+     "sel-row-va_right": "5760d177f36568a044228783a85d1b35f203f7f076aace3f8f7397aa3c18e12f",
+     "sel-short-2": "7bac6447d26be6c9d9bf09f9cc6b742acbefa9f1eac681e44bfb685630154028",
+     "sel-short-3": "e669537043a3bc212bd862964fa436894415177b76934f60c494e33e16e5e0d9",
+     "sel-unavail-1": "919d96622bc02f0e61747ecce822ce065172d3427a6a2894a95dd296fb702da5",
+     "sel-unavail-2": "ad8f28157cfed6c403a4eea0a171538d4eedbac993381fc2c1b393de22609507",
+     "sel-unavail-5": "00dcea4ed06c7595ad0e867ff0fe6b1ebeedcee48d4ecc6d3e2c9a83ad2819ea"
+    },
+    "not forced, thinking on": {
+     "sel-absent-2": "ff5b32c16848819e0ee7a28519e4e77e819675dc6df29b9317cd30129732d51e",
+     "sel-absent-3": "18a6251e987013901d81a090e6519b1254d506e5025e2a7e58982be4808f3e7e",
+     "sel-answer-1": "1ab8c2e14f7d1369dcafc3b16821653c0628706adcefcc039815f90e4cad1f9f",
+     "sel-broad-2": "9fde38204f57dc2ddff4b6101d71dfdf90095fed39d958b40a1e5312aa0925c0",
+     "sel-eye-2": "f8d7321f50d971c857abf692f1c5df2545464a96271ed6a40d3b2764f301abab",
+     "sel-eye-3": "fbf0363796117687bc695460701d8b9cd3cd9799d71e3724cfbf42bde408f0a6",
+     "sel-follow-1": "6e8e248e283102a9708610ec5899c97ae53767fe04d3254c6c50b0b49d664dab",
+     "sel-follow-2": "c846669555634d939aca59fd339d699f65d52acdb63bcf77ae130b1ae62d8e82",
+     "sel-hist-1": "62960d72a29c10c315ebdced252834633f075d97270ae74219b618767a8a3f73",
+     "sel-hist-3": "7425be14ebb66ab69d31d25287ae36df10fa248e07bc2d748ea3af101f3cd3cd",
+     "sel-history-age": "2805b3af0fb632d65ce3c4b31fe81259c654c5ca356a9c03b6a25ea2658db021",
+     "sel-history-allergies": "d6308d0a7bf11cb5d55c047a2e085f1f831859b80a578bfdded554cde7caac74",
+     "sel-history-family_history": "0f9de690d99cb5ae73fa71708bab20f4936115ca6da776179e6c04d8285dbfb9",
+     "sel-history-medications": "b8599c484935419a59f87be21c8928dc7053bd81be8560f44d47f3364911cfda",
+     "sel-history-past_medical_history": "9d2d91673c21e45f1241a9458ed51ba60aad86760c32c5c76ba2338ce8898bd8",
+     "sel-history-past_ocular_history": "f311770eabda3e563fc49857eefc44f82b86fc48e25bfa4957bd02d868e91183",
+     "sel-history-presenting_complaint": "277d97d2524c8605caed5f0783282f6e0fb7767a74d17c4fdc3a5bc4b3ca2193",
+     "sel-history-sex": "bcd40ca67f4d2eac6f9609236927de69fbf5f52ae4e61581aaefa48894ef971a",
+     "sel-inject-1": "f11303e95b46bd0575d6435f5f5a55c31db9dbd6c062bdd0d86136e14b4dcd33",
+     "sel-inject-3": "eb71d4caf06d909dc0bda38add2afebf1f1632ea9fd0d647d9856b29fd0ad42f",
+     "sel-multi-1": "c09f53b3954aa207d3e06ed46c3be8d095b7830b14483d79612ad33abd95ca11",
+     "sel-multi-3": "b6cca43b5c36c472873615f5805793b24c309f0a59ed3f6e78f866c304661fa2",
+     "sel-noisy-2": "39ca0132df4375f5aefee595e922c5f3783b6ab99bcd2f9157e46672a0142fc4",
+     "sel-noisy-3": "82c1174d9a5011fb0157a26ad8cb78dced61c34a7a1da3aac6e7526fa99fb42f",
+     "sel-para-1": "6c241cff0ea403346b2b79ad7ded6cc5cb78b2af90bd4dfd43f24ec964c3d324",
+     "sel-para-2": "53d7c0edcb61f60e6fed0255556d15f0964c418841bd1ebcae6a740c6424d751",
+     "sel-para-4": "2d727ed86eebf13d0a30cde41349360471ef9a65b37954ef9f29c9faa7b45a64",
+     "sel-row-ac_left": "6e3f993e1837aeab42662a11731429680b12fe02a80bb97b8464faa4f4ee84a5",
+     "sel-row-ac_right": "3c1437d4cf136e76173c398bf26d6dd3a0cf1c8bde6381e8ab864e3c3e2f470b",
+     "sel-row-axial_length": "acb93b381bfd9819e0432760bb2996f79874e8dc2097948e3167c3121b63a63c",
+     "sel-row-bp": "d224ed9ad871b18f7575b17d9a3f7607f40644d89815695c947102eb11db9f4d",
+     "sel-row-conj_left": "c5f48a61747868aa9a3a0a6cc6849c57e8ff86d9cec6b1dd8014ff6a85abaacd",
+     "sel-row-conj_right": "38c641f8b7d06c6deea988c2b0911b2e1e9032fb5c6fdfe6b17d1aac891fc999",
+     "sel-row-cornea_left": "d1c6d292a0ae525ac8c563c938191b1372f6382f422d18e6576c53e046dd1b42",
+     "sel-row-cornea_right": "59e2d6fe249dbb3d5ccc604a628bb469512c97b4d3ee7c10670539cf0073fb48",
+     "sel-row-fundus_left": "cd1fcb868fa834de6c9920094c9bdd37e1f39db6f6a8a7577d61c8c0c3f0d23a",
+     "sel-row-fundus_right": "6684ae0c91900f1c0d3bbcbcbd0cff4e754a703fb499a7f9ddb785f85295cb13",
+     "sel-row-gonio_left": "9da1b2abf8994ead4dbf24a56fa24bc3b4c7a18c85cac27fa86ccd1493286a19",
+     "sel-row-gonio_right": "c390d81caf08959a678d286bca1b6cb244fe8fa98734823e48997b625bff9938",
+     "sel-row-iop_left": "583c06e30cb071e75bd41f206c2387e1857da3b191932e5f0d3632a85ceee7fb",
+     "sel-row-iop_right": "b1c1df570cbd2350d7ee5069f9a32767bf93aed8767a8ed6d6cb38e1b9d64fd8",
+     "sel-row-lens_left": "ce03c5b3741d67384d08be9901a1646f98b36933fb31a4ddd1acf1578f4baa94",
+     "sel-row-lens_right": "76f02e6f8928cb5e5bf1d3675673f4748a1cc1feff276c12fa662dc79424d0e1",
+     "sel-row-oct": "93b418c3255e04c1dac3da8a8575ce7374349f520fa3a34db5ef54fc94a5015b",
+     "sel-row-pupil_left": "e0d2f33d0d101034e8c7aa976fe824ac389d525a9cf952590953d3df033e46c6",
+     "sel-row-pupil_right": "030412dbdf17f64bab1151fd6b0bdc772738b31a98bbcebec095c19e327f9710",
+     "sel-row-rapd": "0279d89f81ff273d3e60a94d0e7b0fac42146aa5fcb9265fd3e5d251e7cda9bf",
+     "sel-row-refraction": "559357713a6f2848f7053ab40f7168f7b0405688a8f8447b4ee10ba0ac11d7db",
+     "sel-row-u_and_e": "3a7d71a59f11e01261992c0d103481c17cd2a4554a46e8eb80c40b5335b5b334",
+     "sel-row-va_left": "a80533d7ff9b7a5089ed8600d00ae5d669fcb98c734aacd5aadd818da7bd461a",
+     "sel-row-va_right": "a217dcbf093363364b057b1a02c02260b813202f3c8e48dbebed22dc0ec45b68",
+     "sel-short-2": "b18e99b2b2eacd9cba103786a824aafbec02d28644760d86debe8af7bad0f81b",
+     "sel-short-3": "1c26bfb6750ac9233bc90784515d2a34729351ec6795beaa664ea2985866f099",
+     "sel-unavail-1": "0b202c59055b1092761f806de95a4bd299e2a9a4e8175c4a92b51eb6dcc889cf",
+     "sel-unavail-2": "93defc0f5edf3fb4593beee419485e01e1875a6bebcab702983f4eaeea7da73c",
+     "sel-unavail-5": "69bd6347ac7b3ec2c022ea7b411a8ac0d3055dc0c54d92e4674e78d19b0d2130"
+    }
+   },
+   "examples": {
+    "forced, thinking off": {
+     "sel-absent-2": "e79f25aa12d351d364ca590285762e89fc49a443aa46048dbe3b15bc53b068eb",
+     "sel-absent-3": "1ecfa4eecc4335270649057fe74c9f875ff6088b045f198168f83b525b08de27",
+     "sel-answer-1": "4b53f519e44d644464ea838a6eca4f9e0ccebf75d99491382d65e43dc4112a44",
+     "sel-broad-2": "242cbc1dfff6aef692cfe92f8d8a0e13bf0fb580d4fe685e932bab2ead8c29ee",
+     "sel-eye-2": "b938fededba8cfb9a8cfc837917fc2e8a92061d26c0d8ac40235aa491b5d0590",
+     "sel-eye-3": "180c24674b0e789e5c8bb10831abc61aa129b16052e4a3d9225ea6b5a5dc97f1",
+     "sel-follow-1": "f78ada45d5ee26d87864841825ba31980093c7ff363ff5e618b00d4267c4b0db",
+     "sel-follow-2": "6ae67479579ff22fa2e74b8fcdeff673190605bfaa96ad1f7a82eee6f6bd38fb",
+     "sel-hist-1": "315bc41e98b242ec9f6926ac828e207fbc845938ad5e11504f7c4123dea01a28",
+     "sel-hist-3": "de5cfba12cc4bd50511aeae6bbc22508363778fa89805feda5a8e429e2998da3",
+     "sel-history-age": "38c48acc98c88be2dbbdf5dff204f2e84e02465bcd51838eab31c752bb68ad33",
+     "sel-history-allergies": "77c3e838601f5c8c007b865f0d7b3daad40605b02865d9e2878c86b1893f1b1d",
+     "sel-history-family_history": "a97e79adf7de6d352c20eaff7b1553bacbf0e0882bc64641313847c4b8a5fa43",
+     "sel-history-medications": "e72faad588b0c2776c10b252b924db9cb60c55cb8fc61d318cc9950e67a607d0",
+     "sel-history-past_medical_history": "640851c92df10e00ca663d3c092a3327695c5e2a39351689ea4546c9b95f0ea3",
+     "sel-history-past_ocular_history": "bffa09722c3818412606eb7dd55aa26094d2de7389a513d2b08fb1d16c1407eb",
+     "sel-history-presenting_complaint": "d9cbb132c14c8a4d6f71bcf4037d85f0b6a90ffe83ccb65b367b15166996321c",
+     "sel-history-sex": "074145ca594373d941d24d210fd8e9d4a9911df61b185ed628090afb2f023ddd",
+     "sel-inject-1": "82c28db73ac1454328432a5ae330e1ca4b7f6e6d820092ca36c271cc4b1eb0e5",
+     "sel-inject-3": "33466810999fcce8c8dafb57ee2aa6653dd64e07f59b74607cebe3e89655d5d7",
+     "sel-multi-1": "761f6a65482afe1a8f2b1d131032e36a4fe06b84e2fae8a5e14a13f228259fa5",
+     "sel-multi-3": "b3c02836a54db5c663da1b726a5dbd29c95f2c4817204d117b9c18d3e8c28c2c",
+     "sel-noisy-2": "b24f2afadff09a0df033e34de9031e55ee2ac0e424c21e3eb0824e106c782288",
+     "sel-noisy-3": "902bd2e550fd27f5793812b52b66b21524e4c61c76f443f6458cd74dfe0a8234",
+     "sel-para-1": "6b6c64b31a41b5102c34794f6e4a836a51da63a44ad864a0c63b56a7943a6e03",
+     "sel-para-2": "3572ffc72c9f855017c862b62819ed1b9dbb0f27dcce11f6603b04c22045bb7d",
+     "sel-para-4": "94b54d53257270f94d432251e9d357d9fc4bea7a4e737f3955450f39a865c248",
+     "sel-row-ac_left": "e0700d6da6f0a9017a6895b3984a4546e31e72d388877bdc1151cb85ba3d1f32",
+     "sel-row-ac_right": "a11a5b750fd8f9e30eccef02154e07e8d192e1e9f067e0de02c54afe47ce815f",
+     "sel-row-axial_length": "e31d34259b5825b0c55d04e76a15e28cc3c1b487e597b3244864279195557478",
+     "sel-row-bp": "bcc72f6750dcea1ec493924512853964de4615fe5f252d1d3ab9fb4e67c738ba",
+     "sel-row-conj_left": "3d37b1ba2c94901c1070771ebc74a90a2d3aba9bb559adcaef1783b5b23794ac",
+     "sel-row-conj_right": "70ab8181ff8513b79dffd111b311d21c5e4b1686f84981f707f181c2e713c08b",
+     "sel-row-cornea_left": "1d8c5e39e370a95a76d2ef6ed0ad419056d409a4e3bd31f38122e27fc7caa2bb",
+     "sel-row-cornea_right": "152d1502d166306b12da5b7e5d086ecf892e9678840c676dc9eb207fee60a5f4",
+     "sel-row-fundus_left": "793496de49f15525d1904920ab37bfa04a4b27db91e1007d5032352058f8180c",
+     "sel-row-fundus_right": "6b4bd7bc4a81104087321078207ee133d3f7f13c16ec1f2c7a002cbb9de5c736",
+     "sel-row-gonio_left": "74627ae873b7b1055dc5581fd0d6e00488c4b61839c1cb21822f1efdc0aae705",
+     "sel-row-gonio_right": "51bae540167dcd573df973018e37293876bdc1701b9aecc507b617e189aae154",
+     "sel-row-iop_left": "f8f668f48f85da23f859d978825d2c0494dbacf8b7d4390be508e7a0142405a6",
+     "sel-row-iop_right": "1b503f725ed2504a146263d1b3af6d20a7f26136d650e97d9ab079cb7ac29857",
+     "sel-row-lens_left": "c3fe2b323df6f7ccda2229fcaf8e44ebf376f7796b893ac5241a3299de352190",
+     "sel-row-lens_right": "2c29fe63ba80b6cb32be3c1866fc7b44d22a9da49b6eeef69275035aba80f086",
+     "sel-row-oct": "7fa47bc9c9cc30c7a0b2630b885a1dd272adb24696c16fb94102f6b0d8b206f6",
+     "sel-row-pupil_left": "bd96b50e37a1d8e8c85860d9a53122b219fa43b567e8f39cb4e9085f5dde3e99",
+     "sel-row-pupil_right": "2db7a966b85ed9752a8e3c3cc5343413e0f4f46452459627db0dd12015e29c42",
+     "sel-row-rapd": "c6668aac67dcd6ea87e06ac93dd085c703cfc157e73ae6e38651dfdcbc3f053e",
+     "sel-row-refraction": "293531e3acad4b6db252f53e3a826aeb60d29205cb4558129f86f2ac040a1423",
+     "sel-row-u_and_e": "50aee5dec136f722837c440989e1517db16c4402d80c85f3bfdd6dc110eadfa5",
+     "sel-row-va_left": "3d59c8d0375b522e2c12eafa7bae514738d32f2369e9b44551a9e573bea524ea",
+     "sel-row-va_right": "d93cdce88f9aa588e3c267b0b90664186309b0560319aee19b41c85865c46c91",
+     "sel-short-2": "1c56430379ca8cee244b1683d497906065ef7083f9edb229f7769091211898f7",
+     "sel-short-3": "3a5cb446215147e237bd200c5b5a9aabb285daf76724bdf6a58e6b2f96b35a13",
+     "sel-unavail-1": "009041b837e70c9386d52b289982347e501ef0e8397c1a71ae65e4526a593f4c",
+     "sel-unavail-2": "a8d9966e6bb288c0c94888d96958fef00de00c564b9b40aa55e287c04518ba5c",
+     "sel-unavail-5": "3b073082d364c8ed2f3255f97995e398878fd4d456be952a06dcf477fa86b010"
+    },
+    "not forced, thinking on": {
+     "sel-absent-2": "b7744397de8b6f0aa7a1bd905b5152ef77df95db524c0e255f8787aa69153f93",
+     "sel-absent-3": "dcb3591751ca238c5a0b465df401e4a541d1072a27674d8bf3cea91438545a5e",
+     "sel-answer-1": "1c52bf34a911f42154d59aa5c3b006dd0fdc6a82e23a10b6eb0471da9d0850e1",
+     "sel-broad-2": "7b54b5b9ff9315f5f96e844f2c372e845a94eea84a9541d707c4c56bbb14b485",
+     "sel-eye-2": "916c15c5f85b257224ff10fd3ac42bec14f6a63d49fbaa907411ad5be7e19007",
+     "sel-eye-3": "84f69c867e406b3c94c680078500c82f799eecc72764b352776ad69c6164b29e",
+     "sel-follow-1": "f21ab1b173dbd60f9fd4ddc67321a8eecf2afa2e6d292c9b8553251517de65d2",
+     "sel-follow-2": "8f703e52d0f409956ede2a75db608e9fd7a8d4e349c08ffa9f084e9173345021",
+     "sel-hist-1": "f4b35d0e2640040403f019d2d70c1a4944cd0a9d23fe37afe9f0560a6b5d678b",
+     "sel-hist-3": "1c47714d586a39a09928fd878e890114603951ba0178396b61d49e41bd097500",
+     "sel-history-age": "98b45784e016536c5076a7b7ad73a30a734b584c01e618fdd98bea7404e72f9c",
+     "sel-history-allergies": "61124f55b032036c21457969cc18526e5c57f20f02edbd06e149e5ded3ceeb0a",
+     "sel-history-family_history": "4641d4f5c67708ec12eac7c3e3693a628e58b89d4d9867a071f791e0fe591866",
+     "sel-history-medications": "abcb419eb582340e493bb3fd7f7349e14f178bf0c79bd04f7dc4ecf5506bbe74",
+     "sel-history-past_medical_history": "3d0b9ca46d7ff48a82fc02dc9681868917740a3c6d5682a06270000827b7694a",
+     "sel-history-past_ocular_history": "d1b04792ad1eca44025f30858a296ad0272d8e8c782cc10ac49781f88f9d541f",
+     "sel-history-presenting_complaint": "9fd8dc5a16b7113da38c6dce957b3f8447fdee3940e649023bfd25ffff04da61",
+     "sel-history-sex": "98daab9f1e5599d3a848b5c594917b4cf4d682f286cc89f5b05f0ec6d97f75c1",
+     "sel-inject-1": "909622654d02a319e1eabdc25456b66ae771f82981dc807b1f9711c771ce6b7c",
+     "sel-inject-3": "925a8c2311bc0dd6a6b1189ebc3360f470b5f84761a748d1a64b84f545775700",
+     "sel-multi-1": "96b20ce60b1c77ded565f332bc65f3cf953353b86b72395c8e945d63c0192eb6",
+     "sel-multi-3": "6ef4d370f8c606836bd9974d098cf42aa2d9d91d742184b81993981550ffb015",
+     "sel-noisy-2": "a14025357b804cbd0a754208d0bd209706019c40dc2df05582709d3ab57c628c",
+     "sel-noisy-3": "3d56cc9c4a4b33d76d56b9bf53c23156551750022833268e3070e16d9d810a49",
+     "sel-para-1": "c94ec21aa0c3251a58a24ce2598f28d8634642bbc3b00b33eaef5bed3b8ce13b",
+     "sel-para-2": "87aa0ab5e68ae5bfaeccbb5cbccac6223639355e40b374d70d99f82db41ce5b0",
+     "sel-para-4": "4b65ce491e1ccf1dfc6092daf504c7a1a106b696552e02a4c07cea5c07383bcd",
+     "sel-row-ac_left": "45836d24a9e281fdd1191ee1055756935f277a732afb7343b3a3def412e56b41",
+     "sel-row-ac_right": "813f8cdd008d3b2b37015d38e671e38dfa222dbd3c19bd68d258e0ba5e1b127d",
+     "sel-row-axial_length": "0a00b4f630ba5067677dcfe920fb1fa95c20ce1bf8026ff4bae6e2ee0aab3b73",
+     "sel-row-bp": "807648e1e1e42385235187de6ae8f3c0e68579ba2fdfe1c0cd15110d427ff6a6",
+     "sel-row-conj_left": "9226c38056566a0fc4ee7f35cf443e90131276a24cbd34768da31bdce1acddb2",
+     "sel-row-conj_right": "ca07e577ed808b4d54be592357fb94d80ac6ecd1f2a5ff46c6558d078cd70baf",
+     "sel-row-cornea_left": "2a3c1df425e10536d333e89cb71388233fb360bb870d0e96b3ece9326ca8df7c",
+     "sel-row-cornea_right": "b4f7a251e8fad57c025eb46f826960b5f721e4b5e9e3eb3983b332bbdf7199d9",
+     "sel-row-fundus_left": "2b5dc54927f8ec5a4fd2e15eddb58cd0e26a66ec148c7315b116462666f7e45e",
+     "sel-row-fundus_right": "debb66ceca8708cfa5231a699b47d4b95ac37811083adddd5d27a803343a9db6",
+     "sel-row-gonio_left": "2facb8994687ae186a72f508ac758afffbc95d594258c6773ede03b00e673a4a",
+     "sel-row-gonio_right": "56d404d695aea38dd38d2223f0ca46a7bfc9c10287a5e90f680227dee16d562a",
+     "sel-row-iop_left": "394bfc9df7f30ea000e43831da28db863fff1851788492ea3437c05f05c513a2",
+     "sel-row-iop_right": "456f4be6078cadcf79e0c3a0d369268d49e3edebc405a324a8c101fb2ebc721e",
+     "sel-row-lens_left": "27e781981a46b31945eb0ef5c7e093af6edbca0b1088952d3a0fe165f5ff6230",
+     "sel-row-lens_right": "191dfb67e8e432dba875ac519141c52660bea88fc3e9fe3a6d3d932db7f08b43",
+     "sel-row-oct": "dfc32572c10b3625031c84ac5aff465737d7832da32ef4df3277b2b2683a9d99",
+     "sel-row-pupil_left": "cdc38631b8c0b6695d3b00bdff84fa7dd1fb5fbdbac21058415829e07455d58d",
+     "sel-row-pupil_right": "c98b7afae97e5466706e2f809918b8191e6cef5e0ac90e11e8c0520e5f915307",
+     "sel-row-rapd": "1097658de79deb7dd67782af04529fad7e8de6a1ec2cf7057c02683990d43757",
+     "sel-row-refraction": "7dca19e90eedf861e58ac8207e05fa5f98b9794b99698703552f634d8eb5058a",
+     "sel-row-u_and_e": "791480974fd5bcb627e9516f7ea2936252c97c608741134fee92131aa74a8d48",
+     "sel-row-va_left": "d633ec014d4a7cd1c497606aa45c9df253852c3ca293b471327d5379f759663c",
+     "sel-row-va_right": "e7c7c69793d876db6ab606052f66fce6747d47226760378dc93781e5b419e5b9",
+     "sel-short-2": "6138c2bcab293069d4b3d61c3a37b867096b05f84919d1a845cc956d6a005697",
+     "sel-short-3": "27af2789e07cf137a70f74fb7c403d22b0d80052139dfa970b9f59fd0638e879",
+     "sel-unavail-1": "7d355cc4b1dc863e4e2c522a5bffabe3271d7cbdd8d149d8d19f7395d73b178e",
+     "sel-unavail-2": "8554426e0e5ab151787b98f447a949ecd7ebf453f3290cdf83d60b9710f51ec3",
+     "sel-unavail-5": "acdd5bbc84020cddcccb70ad447a3b1c15bd41a97f40b11791264a67bed783e6"
+    }
+   }
+  },
+  "followup": {
+   "minimal": {
+    "forced, thinking off": {
+     "fu-complete": "cfc78aeb694aa3d5c2e7452672be986732ada3c42bcc879ab443dd4d6cabef99",
+     "fu-gap-fellow-eye": "58e5e497c1c67c291304d3ee5956bc2e55cabe95ab08558b3e0e31d0b495be43",
+     "fu-injection": "138bdfeaacca624861cd14054c85f41fda58baf0f753d0912cb19182960fb90b",
+     "fu-rambling": "318b0058507dcca5417a3fa2a466838c4d47e536059886624007fc96cdcc6eb0",
+     "fu-wrong-diagnosis": "7e39c93aed1d2d10ca43ee81dc424bb1b17fa3afbe8afe112864078de047392f"
+    },
+    "not forced, thinking on": {
+     "fu-complete": "076c1f59698b2a4df8108484d7a9f67f4b4afade3e1d21efd588dff2e8469f7a",
+     "fu-gap-fellow-eye": "34409aba60ec7d5ceaa860c67d1d8684645380b8ff824c98c240821c35b33fa6",
+     "fu-injection": "b29933574201a58bb32bff0570660745080a20e4a9e18bf9b73cac74aa8a618c",
+     "fu-rambling": "9245fd6be9301dfa74ecd045689073a0cb773d6e6ecbfda2d86fe9643fb40d8f",
+     "fu-wrong-diagnosis": "39de10c8e94dc143de695aeb361fd12a0fc8d2f7b9fe65f15885f8006ddf909b"
+    }
+   },
+   "rules": {
+    "forced, thinking off": {
+     "fu-complete": "a20b2aecf0802a521b19b48529ca8f26cc661ef384cb30b6a0232b3f7c0ffb33",
+     "fu-gap-fellow-eye": "2fce2fd85f282247f2f7b95e18c3256c91049ed2b9f537ba4dd33db9ed7949a8",
+     "fu-injection": "9abfe8bb15b7efa93b3906aededdbc0293c630b6c41709925b7e7047ec65b905",
+     "fu-rambling": "8c1a2f19ee61ebbba25ff136b39c6a59c8bdfe1cc757ba10fd85c87d6b8db592",
+     "fu-wrong-diagnosis": "6725ac5c6bc8015c56bd790622efdf3331534884a405b9cb48065f8c82f1f89b"
+    },
+    "not forced, thinking on": {
+     "fu-complete": "5605d20f1b53e29caabe8d007d7d3afcbf04258886d46322c4cd325e2e6bbeb1",
+     "fu-gap-fellow-eye": "57ad095a3bae87c6ff5fed1c98a6c1b8d0be9dc071d99b82c39ce6acb92799d7",
+     "fu-injection": "59a595c22b51093604eb5ab6ed3ceaee7da7d140174f052c09147bbbf5016011",
+     "fu-rambling": "25c893135d628b8ebfbfcfc9da9daf099d61199c0279d2c2d19e31792e28cb55",
+     "fu-wrong-diagnosis": "4d76fe6e4172328f9524c3c7285ed855765194f5db109b644748915d64afd454"
+    }
+   },
+   "examples": {
+    "forced, thinking off": {
+     "fu-complete": "34a99684f27f263015b8f1e953904147a473f299f883fa7b81a99893173cf110",
+     "fu-gap-fellow-eye": "66d28f5ff42f4c53de7e8d9f02ff28a1313e58ac6eb3b539f3a261391a512979",
+     "fu-injection": "b3a1bd62d27d2cf57f38c97f61c582574b59c337a7f2815c3bbd021570215ac8",
+     "fu-rambling": "1a5af1130d9c2ad0d4ff1e11937e499ee490274da61c1e45ff60e39983e88c4c",
+     "fu-wrong-diagnosis": "47ccdf7007efd9be1f101f3ef1a3e125560c45141656d4de5173b336a2dd76f2"
+    },
+    "not forced, thinking on": {
+     "fu-complete": "4e4a4658b17ca69146ab0c4e2d5e5a1c8aca17b5e1df6eb0d16bf4b9abd1fc69",
+     "fu-gap-fellow-eye": "df98a2a0b1161a730e5d235af306fe134988d3cd51b17c1c15988334382abba9",
+     "fu-injection": "a0e1de178ba81983afde85f840166c2c595e6a6fad8ce2309a864831e768d8e1",
+     "fu-rambling": "21fa30a52839b98fb8c50d25241b73e8b42eccd8944275b4c26712fe03054e42",
+     "fu-wrong-diagnosis": "9b7430a14d5e9f71a5ff3cd5384ffbe14d8ddef88300a131ce56e3c0c4d7ab9e"
+    }
+   }
+  },
+  "coverage": {
+   "minimal": {
+    "forced, thinking off": {
+     "cov-all-covered": "6161d5d1bc1984c11350be8fcaabc6b345cc2a6c09356bca06e696d5de22a8e2",
+     "cov-allergy-gap": "6644e9e4c02577cfdf76bc245d53cd2b1a6a21de75bc4caa92f2ea96e154f673",
+     "cov-brand-names": "03a4ece3075ed40a208bc46ca6af0af3a71252f54dbe4ba64ffc0520b51aa28f",
+     "cov-chlorphenamine-gap": "b53694ecff9cbd345e9687080abe18857ea7ad42c10c89b4ac547a2935119d3e",
+     "cov-injection": "5e2847f625b73d5150959b3c7de61fa971827280aac00214d12c862712901946",
+     "cov-multi-gap": "6b729fc600efc7fa18ff4cce0cbde0609965525e1bde5dc393b006cde2ee4cb3",
+     "cov-review-gap": "7db56f00b4929380bf471bd5ab4267dc15dd623537cc0cb547f8b5683ad760eb"
+    },
+    "not forced, thinking on": {
+     "cov-all-covered": "1c5a00b2df62abae6fc8d27bd3e52e627596240aca5a2af7e3f570ca5528c866",
+     "cov-allergy-gap": "e0d02152734515a3eeb562ae385e1fdba7fa0a3af30119b3d53de60b1165df98",
+     "cov-brand-names": "38ec14616af0303e57c0812905386fe7613546b4ba600096debbc67ffa26db88",
+     "cov-chlorphenamine-gap": "219fec217860bca948ce8df1a0056318e6eddcc4784371d181c3d3dab17cb9b0",
+     "cov-injection": "b6b9828b597b57560ad9664420f28b76f66a133af0f1e9625260f4183298db58",
+     "cov-multi-gap": "4eff6c995369ea0fe17385f5c90b7e7f374515c0cb2d0cc18ddf76e0cd6bedc7",
+     "cov-review-gap": "bd9feb9411583ac3d5c1ee0d5db85d05b441bd8ec3118f3dca91f23dd9d8aa86"
+    }
+   },
+   "rules": {
+    "forced, thinking off": {
+     "cov-all-covered": "f1ef0d31b52959abbd4676c435bfcec21a96280851bf79e90c875421d3c77f1d",
+     "cov-allergy-gap": "a661960fc4f043e175a8ae0de9dcda619c189dee068bfc439f1e701692065c62",
+     "cov-brand-names": "f1ef02b30c581ad4f2b4db55191ae401a188a8cc0367d1d96d47fc329d71e5a0",
+     "cov-chlorphenamine-gap": "01643f10490c4f57ffa3b85149409c903e625e1ee4c3431e6292c136c8a2431e",
+     "cov-injection": "f648560600ba8a64b23b5bf5b5eb36063efd35aa15943972967aa9af287aeba6",
+     "cov-multi-gap": "f16c44475691d56348f2d5446f0b80419704f7a68f920a8143711a01ba5b0171",
+     "cov-review-gap": "bfe331a7aa0d71bb5aa5aebaa51cd5c2932e3134453491296add319fcfe15a83"
+    },
+    "not forced, thinking on": {
+     "cov-all-covered": "23b0681865f74136e522dfc0b8f858ad929209e54fc4c88c46cee261a927e1ff",
+     "cov-allergy-gap": "9d5b0936864829372338584fb3cae313f54623768a8a1c3f47783bc2540b99be",
+     "cov-brand-names": "7cbdf3aca3d3ea3db4bfccf33f93fa46737c04fe2852f4ba38f37e005a5dfe6f",
+     "cov-chlorphenamine-gap": "804a316e3bcce6bfbcac69cf1aa2b911c4f7544a914740ca40219f33cf0e802f",
+     "cov-injection": "db51a1887d913f89b15cc0c27b62b9fa9da6a69626d496dfe60725bba97733c7",
+     "cov-multi-gap": "03b83225823ed0d50b78cfa801a6e35b715f1bcf099893854dbe5f55a20b8425",
+     "cov-review-gap": "f9c882b3e46e59f5f0898947cc58de3a7f7d38cb7e1f73b9b3305d43eba45535"
+    }
+   },
+   "examples": {
+    "forced, thinking off": {
+     "cov-all-covered": "b9024b78e132c290fc74d4eacde23cab9b246a4412a83a4fc64bd599670b4e2e",
+     "cov-allergy-gap": "3f159ea479ad105aaad3797b706761b259d8449ddc3c1974ba05016e77662c7e",
+     "cov-brand-names": "abaa2567a9657a6c509834b959af092695730d79f9e5a8ea8dd1b4d805315ba5",
+     "cov-chlorphenamine-gap": "128a909d916ae6c5c056d8cd7c549e769a1674671d7b7a252ff710ffc56c1d73",
+     "cov-injection": "2f1e3862c798b540252beaee66f7b1353dd2f55741e37ee81cc2f05f8f24c8fc",
+     "cov-multi-gap": "8e1d8fda95b16b3eb7928d080d27d5ead5d1f0fc85df485ddd46f85931c51dcf",
+     "cov-review-gap": "2334186d3abcce4f8c93fc1e99a297ee61c238ba3f435c5292851259063b2cd8"
+    },
+    "not forced, thinking on": {
+     "cov-all-covered": "a85a9da3f75eb7d79870dc14165c351daffc422daf79038a27ef619c1f2e46dd",
+     "cov-allergy-gap": "465b6811cced31203adc2c5f48ff53eb8ddd5d0532819a9bf802735d9555a090",
+     "cov-brand-names": "54a30ef8c947e6c6557e522a5bf03fb6ef8efb63cb68e3adc2875a06f62e0ffc",
+     "cov-chlorphenamine-gap": "cf1766883b22da9ef64b0eef2dd58b64cf4eef014606bf67f9744d6029f9ec8f",
+     "cov-injection": "789011730048eda3038492ef7b650fba2875193ca4c7946d3e0205e92e34ee59",
+     "cov-multi-gap": "47e4c543eb7d816381f27dd8200ac8903e59dd7738ce365245b469307983af9f",
+     "cov-review-gap": "64e62fb44d104de45d86b8d36be46d21ede46d4fefc516813c16ad39c2258d95"
+    }
+   }
+  },
+  "revision": {
+   "minimal": {
+    "forced, thinking off": {
+     "rev-diagnosis": "def31d6202805ac8438ebce77695b2da29e8bca33a00c180618c5ecc80d203f2",
+     "rev-invented-canthotomy": "fe562fd2bb7295867bba87f7a02511519c8999ffe08d8d13039d42eca348573d",
+     "rev-invented-thrombolysis": "c2681959469731d3f5204fb116bc7419db89c020de9244775c7500a146e25f15",
+     "rev-kp1": "7e768b628cc032692749c67929f108905aeafce14e971489121d14c184efb7b5",
+     "rev-kp1-removed": "e3fe3206d9b60e11ff98025a62a77cdd71ade989e10c86d0c156e639f7169eac",
+     "rev-kp2-removed": "f2f269ca3aefb64bddd95a6ab004ced3e45138495e47727dff5f5316d8013ffa",
+     "rev-kp3": "16d98b96c7d28da165c20838a4f24c597e9b2908afaa7715f449be664a482994",
+     "rev-kp4": "27ecd8b88cbaef61bf8037811fe61632214c3f341f8e317b3134144218976497"
+    },
+    "not forced, thinking on": {
+     "rev-diagnosis": "2a3b47c9cce57ba213370c23bb560fa1cef9dfa017f6f9ae32d0f00dd1a3f757",
+     "rev-invented-canthotomy": "131b1310619cbca6c8e9bcb5ff71e6c226a19353d51814880e529a91858038f5",
+     "rev-invented-thrombolysis": "d85594038cd2bb547695049274bd8f7b2515b470c7d773eb8120ce2e285d8db3",
+     "rev-kp1": "5cfee1cb47a559369e4ef2a3a7399e0dea3e5881c2e7dac1977abcbdc0e05b3a",
+     "rev-kp1-removed": "5b776d83f3ce5c267e0767b492d90b8dcdda489f0f885113d201096e6efad04a",
+     "rev-kp2-removed": "5c062c1f91bc5b0d5a5a5eb2c5e18518bf051b04b0ae01b93f5ba2a234ef7528",
+     "rev-kp3": "e964662270228f5abc75fe4317cca2d83d070ea9c268c5df28b418c5138890db",
+     "rev-kp4": "25a751ca73e5c775edafca387d43b234cd9b80be61cfff04a22dcda02ce8722e"
+    }
+   },
+   "rules": {
+    "forced, thinking off": {
+     "rev-diagnosis": "726fc07f0424bcef82f8a4e6e0c8396a38038f901dbee020faf27609edc9e5c3",
+     "rev-invented-canthotomy": "631db7cef09440f9f22dffb78b8d59a5ad6b5af482e4170607da5ae707c02712",
+     "rev-invented-thrombolysis": "4ce72ea6fccb85c017013ff255adee278cb1624f921f524e560612c52361a230",
+     "rev-kp1": "abc611ed423b5eff5bd95ceea1f4f0196ca7e32b17fb7efa44d7d6d42741f2ce",
+     "rev-kp1-removed": "2f126ff4f9cfcd9ec6b5d028faa52c30734611d01ccfd971588e0d6cffa3bed8",
+     "rev-kp2-removed": "722964707af14e880ad858f814bd38085dabe201c4ce451855cdc2fc6023684c",
+     "rev-kp3": "9668e5656be8288e6f87c8845c1b74914c17431c0d6d582e8dcbcda0d873673d",
+     "rev-kp4": "824d2b14a5c1f51bf214bc08cafe3c94c55161f1db548a5b2006fb87e67ac1be"
+    },
+    "not forced, thinking on": {
+     "rev-diagnosis": "f59e0e9fee123358f7edd0084624c94667de9b7385fab0ef1bed91534c729f81",
+     "rev-invented-canthotomy": "4d9ea0b92f97027b29a3c3b2d2cd54f6c22f955d4c1859cbf7c73fe2febffbce",
+     "rev-invented-thrombolysis": "50bfd42dd3720c5507fe155e1936a90c7663a15c8a99c038718d2a1d9a6b4c8c",
+     "rev-kp1": "360f0c39e5b09c45ce36911874b8f5b0c661f334ee0dec5a90e471ee7da8c393",
+     "rev-kp1-removed": "5466d9a0bf6b22b68c85cdc5f57c56d7032e4f8062e4950b433a1b980a224dcb",
+     "rev-kp2-removed": "ff56e08b6ee985dbba51541c7c5c07c5ecbe6b27cbcf17247abd865f5ad8ba0a",
+     "rev-kp3": "bc2bd3f49a458b66a9cfe63fba33bfcb7ba39bcd0f2784fbe694254077a0fe58",
+     "rev-kp4": "b5cd587e823f89ff4b60f49957ed16b70cc8d277d515d4ea3637be5a2410bfbe"
+    }
+   },
+   "examples": {
+    "forced, thinking off": {
+     "rev-diagnosis": "4fd1e945abc9d30e896c7b50fd463e90b4e406d28958074d4ea0ac2313f2e574",
+     "rev-invented-canthotomy": "0c42a1b2635c7c11269034c55e2e21ab9185b0831845ea3e2b8aa960d1f25c48",
+     "rev-invented-thrombolysis": "dae18ac3004695af20a31d788ab14a58c99eac2a1e0d5068c3f5a6d292f2ee42",
+     "rev-kp1": "a899b6f40b341ef3e2e209aa0b522db9a71a8c0cba93485c5603e591fae0cf06",
+     "rev-kp1-removed": "5de01c198b05685f55a30cc8cb354c43a14a11da70e4f281b14b85f7ad400e00",
+     "rev-kp2-removed": "c5dde09638a16d7dc5d56000298f35936b36635babf9e4ff83f5a22e6b5bd7e5",
+     "rev-kp3": "e5a9dd004024d0b2b85a51ae144220df6d269fe4d097e2c3e455eacd0d91d935",
+     "rev-kp4": "156e93ca53ec6d79cfde4c6611212fd24180f4a441c6b4ecb1a299afff215af3"
+    },
+    "not forced, thinking on": {
+     "rev-diagnosis": "caf75e23f8faae05ec3aacc63d5ce893fb77344be0f6f3fb5f2cbbadd6dee002",
+     "rev-invented-canthotomy": "9d69567f016dcf8ee01cd4c206545a2e9e73a0b564ba8f381065201708fcfe8c",
+     "rev-invented-thrombolysis": "6c75cfb12dd38de46bced20c46af410496268b721244d477338898864b9fbe29",
+     "rev-kp1": "0586d2daff5b71cb9464082592ab88eb6426a9433b476d77a7af5290364fb050",
+     "rev-kp1-removed": "24cef71ef14e18f6a41681520730e44ad55dfed991f704ef28abe2fae2f0926a",
+     "rev-kp2-removed": "0117e4d2be051999fa3f066a09da57f525f7228b2ad80c2a79d03f7b99d73036",
+     "rev-kp3": "21bf48abdeccfa09c2b47224759460322af0b4a66da14aa7289a25707414a6af",
+     "rev-kp4": "9ab0f49a450712113045aa97792d48f2df82b8c37471eaa015bffeb30f4f841a"
+    }
+   }
+  },
+  "verifier": {
+   "minimal": {
+    "forced, thinking off": {
+     "ver-context-avoid-acetazolamide": "25c1bc0689b25fe9df26516bb20ebcdff1581784f1eb2ec2ad3c45a4b24ffb3f",
+     "ver-context-iridoplasty": "7993d689b01b66530dd0917061784a7f4f0c91627ad1e5f41c563663310b5915",
+     "ver-gold-allergy": "5ccc409841898d523e5e0ce2acd1cbd353410f85bd6431a3cc362ac1264bb9b8",
+     "ver-gold-analgesia": "a1f6b02e413b72e8097693de9c9b6196c11ea4df9995ee40f78c72e70b9ff907",
+     "ver-gold-review": "c0df464c444fb0a56c144c56ab57e672efa6e3dcdc4bcf2f960d416206bd828b",
+     "ver-opposite-prostaglandins": "580c8214fe7f94d1fb40884f9bdbba30cfceab17b2550d340e8514d67672328f",
+     "ver-table-beta-blocker": "b80387b948f558324495f58417ac856e8be8a1e9c914b619db9bc7ebf8c88c89",
+     "ver-table-topical-cai": "e56b7a7956e18d3b77cf196da86d271863c889ddc2988b4caa70dbabcf349143",
+     "ver-topic-gonioscopy-general": "654c823c43b22e99126260fc51d8ef73feba6c3d9fe187de998e60193654aeb8",
+     "ver-topic-iridotomy-definition": "a4463e6f2a87dcd714d2e8ee7661ad50ee72c2f6f743e68cb2305c6d61e2ade7"
+    },
+    "not forced, thinking on": {
+     "ver-context-avoid-acetazolamide": "f5d274df602e5f9b7aef23a368890f222ff3cecf90d5dacd337f711369b67b4f",
+     "ver-context-iridoplasty": "47556644a0b3c432c1513fa3146e91fa9447e99739018625133d22340b78b8b4",
+     "ver-gold-allergy": "f8f61c41e7ec8fe48101a1bfdfb9db4722bdb6251c663892f055acd577c39d90",
+     "ver-gold-analgesia": "0c011015b0ae720628505c5e582d0995822643d422aeb74de4437d8ca0edc791",
+     "ver-gold-review": "54b9eda2f91b0cac1d695966b6125461fb464f14c81b9c86ee272bba585e8033",
+     "ver-opposite-prostaglandins": "ee678356ce223619e30612b817d6fbbe9f71c4085a97a1afbbe3ca0703d75ec1",
+     "ver-table-beta-blocker": "2e20712fe55a0fb588f4f63b9e07ecb09241ecd6357473ee6e24bfdee0be6093",
+     "ver-table-topical-cai": "7637ae3a14237c45621f81e305485764e5618a97eaf172ddd9a042b53683527f",
+     "ver-topic-gonioscopy-general": "9abb37b6f543e016bb06270e1771f50d64f066356b5fec1b0b18e818454e1a61",
+     "ver-topic-iridotomy-definition": "9e212b0d1d2a2069eceac325c071847a2b087f638a4bfd0d9e5385807b87f856"
+    }
+   },
+   "rules": {
+    "forced, thinking off": {
+     "ver-context-avoid-acetazolamide": "e593cc315f531405513af64382cff01f6ca7fdd9a0c7fd9bd5da78fcad0883ac",
+     "ver-context-iridoplasty": "2a3a4efb095bd470f7a91b5d89f52f6e3dcf32a439ab8976dc2f1119571d27d6",
+     "ver-gold-allergy": "f3cfffee8f492d4b41511c8b1f5c703dfa7158ac5077718b18cd72b5bbfde812",
+     "ver-gold-analgesia": "1cf1b7a52322cfbbf4937dd0c5998874938a85ca430e85ea059cde2df039237d",
+     "ver-gold-review": "6e82fdca847126d2dd61eaa11c6ba8d69712004ab09a974ec97fe39ebf725055",
+     "ver-opposite-prostaglandins": "d38e24da83cb2e6b2a98d58d953e1c5b942e4d4ac4059597c1f046dbb594b3c0",
+     "ver-table-beta-blocker": "a6b30ff9061d96d626eddf2b5a3b1debc5864eac1580f03c8fc8606530892acf",
+     "ver-table-topical-cai": "ba076980bd01df5caa95c4207ef6432a78af9763d77a6f070aaa9b4382c57a67",
+     "ver-topic-gonioscopy-general": "57048313057e39101e8be7d600ec88dfd6d7eb36ebe88b2797da622ade48e077",
+     "ver-topic-iridotomy-definition": "8b8478b9d18d4409f609af72aa2abb2e43232febdb1580f76131e5a9e683ce18"
+    },
+    "not forced, thinking on": {
+     "ver-context-avoid-acetazolamide": "cdd11c730ec2d7a9d8506ba8ff7e31a57f821c4dfcb754bdef2e3feff708e51d",
+     "ver-context-iridoplasty": "ae8d03289eaad40b2edd30b55df54af795f5d19978ea43754f2def0e20c38172",
+     "ver-gold-allergy": "ebeee16c44e8606dd6ff10828456b552d1fea5a0c021d3ab79dc9035a97abe66",
+     "ver-gold-analgesia": "e61789c6271a8b30c1378e0f52f4d7b892ac4d62a5b798837fbb958e04ca4074",
+     "ver-gold-review": "1dea697aa8737591b5c04317cca0aecd1a6b8e9cfde9aa6c2619057a9ceaddf9",
+     "ver-opposite-prostaglandins": "61d4de23ee997f1c543bb08e073150c0448113b31878abba1e53ca9e2c6d1442",
+     "ver-table-beta-blocker": "21617494e7413cd4c84e1bda7164f4a23e9294b30c0b22f352b1563423c62b2e",
+     "ver-table-topical-cai": "0ee1322c0a1e9d80e6211b9cdf546afe419431be79de77b1dd38d15cbf00763a",
+     "ver-topic-gonioscopy-general": "ebc745cb0cd1548bb774475a9fd22e7a962eb48e040ca6e73ba584469bfb7e5d",
+     "ver-topic-iridotomy-definition": "691ef2392024205280f04e848e876c8f14d7259d60b9867098027bda1788ec82"
+    }
+   },
+   "examples": {
+    "forced, thinking off": {
+     "ver-context-avoid-acetazolamide": "8fcf4d068f7b0f71274e078bd55bf17da0bac63aedfb52ec907b12eb4633a30a",
+     "ver-context-iridoplasty": "343649d6722adfb24cb70edff09e3eeca8e92f83bbccf469d5497d4e8c50ed68",
+     "ver-gold-allergy": "b53367934008941df6cc765d08219c099e3a1c39cb128b12924b97f50efe85e1",
+     "ver-gold-analgesia": "2927ccfaa4feb0429ff52636509561a207ba18d55d083b16a32fe87fda6a7347",
+     "ver-gold-review": "4f8962a00cd1ff8a3f179f1dc73876a5e14978491c44fd1d298f73ea295fb2fa",
+     "ver-opposite-prostaglandins": "938133981563b6e13f4cf416a3b38c44b4833769d79e2490327624aa16a0defa",
+     "ver-table-beta-blocker": "3055c894168fdd59cd3e2ae7741e75faae4217faa7ecfc3a23eaea928d06b2b3",
+     "ver-table-topical-cai": "bbceb7fda1ef81381b04ee08050cef153c970ce4422d4a48a2448a094a99a3f8",
+     "ver-topic-gonioscopy-general": "0471154d72dbb5c7c807c6c55f290d247a37bce23072152193a4ecf438cc485c",
+     "ver-topic-iridotomy-definition": "a7aa698b9908aba93b5d5afe0877e9adef226af0b36e291796318bd729f4fd1c"
+    },
+    "not forced, thinking on": {
+     "ver-context-avoid-acetazolamide": "2462b271648727c0693fb41ee1137e42df1e68f268ab37fff8a6a868df3c76a5",
+     "ver-context-iridoplasty": "8fbe0712a87f5dc49a72c7c6aa4ab58bcc22214cbe43ab79385c22f71141919f",
+     "ver-gold-allergy": "787b8f7103c276310599a93c6950ec283c4e67c548de1a43a4c04b57925dbcf7",
+     "ver-gold-analgesia": "c1eb5af1357c782cd819e5dd95eaf2d10d78a6f77a50a7f0f090bd8984004d68",
+     "ver-gold-review": "8cff77b843343be61cf345243fe803666d6b10c779327bb3b863b34fa233126a",
+     "ver-opposite-prostaglandins": "0bc8d4a3113438411be0e20e1d8682186feff4c7db21752e718bcb939726a51c",
+     "ver-table-beta-blocker": "57eafef8ad697cd3fbc6958226b7e304dc6f26d09ae97abea0037c5fa26605e3",
+     "ver-table-topical-cai": "35cd723a1a199fe43cb37c9e3402177295194493b74f0841268bbb7023bd2148",
+     "ver-topic-gonioscopy-general": "7a3f7767a5b8f5b28a4f2899c4c7984cf62aa7bed4705b9b2be6b7839e2e846b",
+     "ver-topic-iridotomy-definition": "16173116d530d80868439db39547ecbf9e8c89e86c886aac958b4358b9043d93"
+    }
+   }
+  }
+ },
+ "embedRequests": "d20fa77c279c22fbbcfac8ea67a59a010806b27f237d2aae61801d856ab186c6",
+ "promptFingerprints": {
+  "selector": {
+   "minimal": "1cdc181167",
+   "rules": "d6c2b9f45a",
+   "examples": "cbd2f9872c"
+  },
+  "followup": {
+   "minimal": "65a7841c7e",
+   "rules": "1af13e33c6",
+   "examples": "c8f97fd40a"
+  },
+  "coverage": {
+   "minimal": "67404e7b38",
+   "rules": "450772da27",
+   "examples": "006502df22"
+  },
+  "revision": {
+   "minimal": "864be9f2fb",
+   "rules": "8a46eb1b38",
+   "examples": "7417055edc"
+  },
+  "verifier": {
+   "minimal": "6cbb0d54fd",
+   "rules": "a536c30b32",
+   "examples": "b50109fad0"
+  }
+ },
+ "replays": {
+  "coverage|060288c78e": {
+   "rows": 7,
+   "digest": "72b96044a98e697f1c7db92778bce8c11a00bf068819a2da0ed53b16c40f9d53"
+  },
+  "coverage|3e790bf9d3": {
+   "rows": 7,
+   "digest": "364660fdd9704b5f579ca8a42b6f58cfd8bfc8662095199af91b20afd76944ce"
+  },
+  "coverage|4b73ea2eba": {
+   "rows": 7,
+   "digest": "047c06c3c79217637125b58d8ae19716ddad4f96f8c0a409bd3a8de51f216e1a"
+  },
+  "coverage|4f461930a1": {
+   "rows": 7,
+   "digest": "69d9d2cfd6646967388f8fd26d6a676d68f6f6727835db46de534eff4afe15c6"
+  },
+  "coverage|5aa07e7ccf": {
+   "rows": 6,
+   "digest": "db2d6e3312f716324c17a65e2ba8d097bbc76ef28a283db0cbf56c5a2a0fd764"
+  },
+  "coverage|872baafad1": {
+   "rows": 7,
+   "digest": "21753393ca5fde6fa653407288115b2ad16ca7f12d50c51d8088cb18b8df23fc"
+  },
+  "coverage|881dea32d3": {
+   "rows": 3,
+   "digest": "23355503a97ebe3fc5e929ec52cb998343551812216cd2b46d196d558c1c50e3"
+  },
+  "coverage|8d6d572b38": {
+   "rows": 7,
+   "digest": "2899e663a0be68818a5cbe75a2992652803864a6886f9a078f1e97745c8dedb3"
+  },
+  "coverage|b50ca4d8b3": {
+   "rows": 7,
+   "digest": "f44aa527378f22d6d1a9165ab5e3a7e3489aa5b184fddbb7279bb8f0b1961595"
+  },
+  "coverage|c330de60c0": {
+   "rows": 7,
+   "digest": "7c19b72535c1b9909a3356b409eda56086a2803b184c5d2ebfcb0c9e1b70fb78"
+  },
+  "followup|04229496b8": {
+   "rows": 5,
+   "digest": "0d4f31e3cc34e90b1075544c581fb882b244d19f1750664c2ade5c3c913ca12f"
+  },
+  "followup|1c46211f24": {
+   "rows": 5,
+   "digest": "afc93d572889fa785d15d7f9d393f877c74c81106001d61cd4e37cef794cdd06"
+  },
+  "followup|3a3988a719": {
+   "rows": 2,
+   "digest": "d72747cd171ced3c3f611f0bbee872b1a6a0df0d0f7118511e7e6968fcf7a819"
+  },
+  "followup|685e2189b2": {
+   "rows": 5,
+   "digest": "c5cf8d2440a53889a6fcdd7d16fbfba860218058fa9501c19b3a2f293e5c44d0"
+  },
+  "followup|765bc42a29": {
+   "rows": 3,
+   "digest": "997be944b650f9aa76ddac3f67fb2ea2d9b063c19f2f0938bab1fb777c754fb0"
+  },
+  "followup|787369e04f": {
+   "rows": 5,
+   "digest": "fd5fc4230703297cf24c8140520b6aec2d5fc07e047e5f9d9f43211b067b17a5"
+  },
+  "followup|916e03d8bd": {
+   "rows": 5,
+   "digest": "af1e39c189d4a2b5e38e8896f601f2700ef4e8486170da1d6f2e16abe8b32808"
+  },
+  "followup|abc5c17f19": {
+   "rows": 5,
+   "digest": "ab7df0be5b749ae54acc79bf5d5e9d2dea2e0bc70ff8b49c3091c72b01ef9641"
+  },
+  "followup|b50173a5fe": {
+   "rows": 2,
+   "digest": "5fac2a5612d8cd77d42530df5b632f3065416d8d1a16c67ea0ebd6d95aa0ec57"
+  },
+  "followup|be088a5fd3": {
+   "rows": 5,
+   "digest": "2dea033266b46fd11bea463805cbf9f2b0b3a18f0daeccba00a49cd861de7be3"
+  },
+  "followup|bf1e223711": {
+   "rows": 5,
+   "digest": "349eb6e4fd65dc26b97322ed929e0188c7f28a1b975e455bdd8b4bc062ba6aa5"
+  },
+  "followup|c5964b6cca": {
+   "rows": 3,
+   "digest": "2a125046370eae7df225a590aeb0db9dc9506a01859329a69ad784616398ae6a"
+  },
+  "revision|22d0b064d4": {
+   "rows": 8,
+   "digest": "d2f484d42b97a01a26e69c9d5204c55781329ef19f42f12d20c88f78f2179f43"
+  },
+  "revision|3f7db37684": {
+   "rows": 8,
+   "digest": "8324a50d7324456d45b337d4006098c7ee74398447a357298293e4257fc91b7e"
+  },
+  "revision|5da50ef10b": {
+   "rows": 8,
+   "digest": "32c72ae59d4433b476d507b45df5316157dd682cc246424f53192551dca31423"
+  },
+  "revision|967b86d8a0": {
+   "rows": 8,
+   "digest": "de4e5629a2a46990052e75641daad912ad2d7487f0c09dbea0795d608ef8bff6"
+  },
+  "revision|9b114695af": {
+   "rows": 8,
+   "digest": "3786c6347b74fae3dacdf0843f35caa3ab7eb8e1acde1b62f0fe1ee138b67fbd"
+  },
+  "revision|9c8412df38": {
+   "rows": 8,
+   "digest": "30c93d7c5adb51bc2833e4f239459a8aaf8c07a0a06777ed9dadefbf2399536a"
+  },
+  "revision|b55506cae2": {
+   "rows": 5,
+   "digest": "e7640195e053164ea322fbb50edc34df868eefafb0cdf9ef94a63420d2ed4da0"
+  },
+  "revision|be0b14062b": {
+   "rows": 8,
+   "digest": "867b7b3da159a748635b32ccdd79b132d90f5fe628e9e73f12ed8e9175feea9f"
+  },
+  "revision|ecb25af402": {
+   "rows": 8,
+   "digest": "2484a244361261a19576558d21fd53e2fe687f4d9c15654b79f20bb32eed0b06"
+  },
+  "revision|fa53da7390": {
+   "rows": 8,
+   "digest": "d5d046fea3896f968fe0c2de57eb2928a0840ffd16c6f703936a105a61fe14b6"
+  },
+  "selector|0c208b464b": {
+   "rows": 56,
+   "digest": "714906816f9165b03c09f780752bed9d46b82cfebe2c0dbd86fd028cba59d494"
+  },
+  "selector|27d436b371": {
+   "rows": 5,
+   "digest": "6b0e93adb0207ab90fb1765286ffe8aafa50c7ca1b4da081cdd1e6cf44f7dffc"
+  },
+  "selector|296d556b0b": {
+   "rows": 3,
+   "digest": "811d84939b44a311b035ddbf3d4852bf5842de536289c8673b25700c1cf351c1"
+  },
+  "selector|6011ee314d": {
+   "rows": 56,
+   "digest": "002151a1bb497276b57dd0b342d8708e9e54a0a4fe2476c1d8ab5066ee742825"
+  },
+  "selector|7a1f4cda28": {
+   "rows": 76,
+   "digest": "a0dc05d97fe32da5a06329840171cab3899cacd8e5233fe02efab9defb8e5a10"
+  },
+  "selector|86d79556b3": {
+   "rows": 3,
+   "digest": "ab823b863f4bcc19bc9795542c11897b88a5f0e431091ea38f64f81fc24399a2"
+  },
+  "selector|b32a5d6829": {
+   "rows": 56,
+   "digest": "818d817f7ef099b50071acb899fa5215c343465fbb24a0e4e428c8f5f773e31b"
+  },
+  "selector|bd86a2d617": {
+   "rows": 56,
+   "digest": "758b6de8b9a36e42c316e6c14d68d6fd3edbb38d98ef20eb10977f454889c134"
+  },
+  "selector|c794778d23": {
+   "rows": 3,
+   "digest": "ed9353f6fe7cea0263345e60974c15b03b65149297100a904a53786e5d9df6ce"
+  },
+  "selector|cbe35f69f3": {
+   "rows": 56,
+   "digest": "db4d4545c296545b5c025c229f8a0a3d9182d174911df058141bc9eed96c3f68"
+  },
+  "selector|f2faffc7b7": {
+   "rows": 56,
+   "digest": "9ec900a7c9faf983ae75ce2022c1fa733be718f276381d61ae6a64d5a08693a5"
+  },
+  "selector|f696cf6830": {
+   "rows": 56,
+   "digest": "4b9fa61af41c43056f98d09ed65123e7393ca584467833971b8ff91a5700ebe2"
+  },
+  "verifier|0ca11686af": {
+   "rows": 10,
+   "digest": "dbf74b3913a09c9bc4bf3381890ca6d6a35da6df243610cb17e027071dbf47db"
+  },
+  "verifier|148a26988e": {
+   "rows": 10,
+   "digest": "9e82e72b027798e1668324dcfe201880c6c2fa4e449513e1b6a9e27c6ba6b9fb"
+  },
+  "verifier|1f82ad2e4d": {
+   "rows": 10,
+   "digest": "cbf54de0e4192d623f6717c6f0873eaeeecf79848a7d3fefd1e044c471ed9ed7"
+  },
+  "verifier|3465a954ea": {
+   "rows": 10,
+   "digest": "a6fccaaec1cf8c922b6a7bc7b1ba3568c893e538d7bcc71a3ee3fb60f241bcb7"
+  },
+  "verifier|3b47e379cc": {
+   "rows": 10,
+   "digest": "ee5d1a7c46774b030810460d4dd9894efee1e9e8600facef2ae4fd89dc7d3529"
+  },
+  "verifier|4b9b6f9b9b": {
+   "rows": 10,
+   "digest": "44fd01fad08a4c68c9853f2cf23edc6b4cc92a744495fc8cd4192c4fcc568d6c"
+  },
+  "verifier|62f433503c": {
+   "rows": 10,
+   "digest": "480ec0a2b916867aff0e794eec97032ed98d8f55221d942f38c86997217b3d2f"
+  },
+  "verifier|a57c8509fa": {
+   "rows": 10,
+   "digest": "ba584b2a4736ed2d9a73c412e1d978fe129f5e2e5e9271bf59f427bacfb6f9d2"
+  },
+  "verifier|da332a5cd3": {
+   "rows": 10,
+   "digest": "809b9acebdb38019973cb95090746b64703a61cc0c54be0941eb84643804a9ef"
+  },
+  "verifier|e08c62dbc7": {
+   "rows": 10,
+   "digest": "51d645406dee2fd79fd4e669ad2eb98bf968d02eb1d4a24e9970418a621926d0"
+  },
+  "verifier|e74466b925": {
+   "rows": 10,
+   "digest": "53bea45f7b5e7d3491cb3f4e1e6db77748fa897f1c540d3e57bc27067f9be30f"
+  }
+ },
+ "skipped": {
+  "infraErrors": 3,
+  "unknownCases": 0
+ }
+}

@@ -20,7 +20,8 @@
     "sweep": "tsx scripts/sweep.ts",
     "sweep:report": "tsx scripts/sweep-report.ts",
     "sweep:chart": "tsx scripts/sweep-chart.ts",
-    "readback": "tsx scripts/readback.ts"
+    "readback": "tsx scripts/readback.ts",
+    "golden": "tsx scripts/golden.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",

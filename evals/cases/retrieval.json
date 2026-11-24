@@ -1,0 +1,94 @@
+{
+  "note": "Which sentences of the reference note support each target. Sentences are identified by a phrase they contain, so the file survives the note being re-prepared. 'gold' is the main source in the acute primary angle closure section; 'alsoSupports' is other text that backs the point; 'distractor' mentions the same words about something else.",
+  "targets": [
+    {
+      "id": "diagnosis",
+      "source": "examiner_notes.diagnosis",
+      "gold": ["a sudden symptomatic rise in IOP caused by angle closure", "A narrow angle in the other eye, which is an important diagnostic clue", "Shallow chamber, fixed mid-dilated pupil, narrow angle in the other eye"],
+      "alsoSupports": ["Dim light, such as a cinema or a dark room", "Drugs with anticholinergic effects, including some antihistamines", "A fixed, mid-dilated, often vertically oval pupil", "Very high IOP, usually 50 to 80 mmHg"],
+      "distractor": []
+    },
+    {
+      "id": "kp0",
+      "source": "examiner_notes.key_points[0]",
+      "gold": ["A beta-blocker such as timolol 0.5%", "so pilocarpine works better once the pressure has started to fall", "Acetazolamide 500 mg, given intravenously"],
+      "alsoSupports": ["The aims are to lower the IOP quickly", "Hyperosmotic agents if the pressure stays high"],
+      "distractor": []
+    },
+    {
+      "id": "kp1",
+      "source": "examiner_notes.key_points[1]",
+      "gold": ["Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it"],
+      "alsoSupports": [],
+      "distractor": ["Avoid acetazolamide, which is itself a sulfonamide", "Stevens–Johnson syndrome; sulfonamide allergy, kidney disease, sickle cell disease", "Stinging, bitter taste; sulfonamide allergy"]
+    },
+    {
+      "id": "kp2",
+      "source": "examiner_notes.key_points[2]",
+      "gold": ["Any trigger drug should be stopped and the patient warned about others", "Drugs with anticholinergic effects, including some antihistamines"],
+      "alsoSupports": [],
+      "distractor": ["Stop the drug (with the prescriber) and use cycloplegics"]
+    },
+    {
+      "id": "kp3",
+      "source": "examiner_notes.key_points[3]",
+      "gold": ["give analgesia and an antiemetic"],
+      "alsoSupports": [],
+      "distractor": []
+    },
+    {
+      "id": "kp4",
+      "source": "examiner_notes.key_points[4]",
+      "gold": ["Laser peripheral iridotomy (LPI) in the affected eye once the cornea has cleared", "Prophylactic LPI in the fellow eye, because without treatment"],
+      "alsoSupports": ["the priority is prompt iridotomy in both eyes", "After acute primary angle closure, in both eyes"],
+      "distractor": []
+    },
+    {
+      "id": "kp5",
+      "source": "examiner_notes.key_points[5]",
+      "gold": ["Once the eye has settled, repeat gonioscopy"],
+      "alsoSupports": [],
+      "distractor": []
+    },
+    {
+      "id": "fu0",
+      "source": "examiner_notes.follow_up_ideas[0]",
+      "gold": ["Prophylactic LPI in the fellow eye, because without treatment"],
+      "alsoSupports": ["the priority is prompt iridotomy in both eyes", "A narrow angle in the other eye, which is an important diagnostic clue"],
+      "distractor": []
+    },
+    {
+      "id": "fu1",
+      "source": "examiner_notes.follow_up_ideas[1]",
+      "gold": ["The iris sphincter is often ischaemic and does not respond while the IOP is very high"],
+      "alsoSupports": [],
+      "distractor": []
+    },
+    {
+      "id": "fu2",
+      "source": "examiner_notes.follow_up_ideas[2]",
+      "gold": ["Early laser iridotomy, after clearing the cornea with topical glycerol", "Laser peripheral iridoplasty to pull the peripheral iris away from the angle", "Hyperosmotic agents if the pressure stays high", "Review the diagnosis, for example aqueous misdirection"],
+      "alsoSupports": ["Anterior chamber paracentesis as a temporary measure", "Surgical peripheral iridectomy, early lens extraction"],
+      "distractor": []
+    }
+  ],
+  "unsupported": [
+    "Arrange an urgent MRI of the brain and orbits",
+    "Start high-dose oral prednisolone for giant cell arteritis",
+    "Refer for corneal cross-linking",
+    "Check the HbA1c and start metformin"
+  ],
+  "quotes": {
+    "note": "A plausible phrase from a trainee's answer for each target, to test whether adding the trainee's own words to the search helps or hurts. Brand names and lay wording on purpose.",
+    "diagnosis": "I think this is acute glaucoma in the right eye",
+    "kp0": "I would give drops to bring the pressure down",
+    "kp1": "I would give Diamox",
+    "kp2": "she has just started an antihistamine",
+    "kp3": "she has been vomiting",
+    "kp4": "laser to make a hole in the iris",
+    "kp5": "I would look at the angle again later",
+    "fu0": "the left eye is at risk too",
+    "fu1": "pilocarpine drops to constrict the pupil",
+    "fu2": "if the pressure stays high"
+  }
+}

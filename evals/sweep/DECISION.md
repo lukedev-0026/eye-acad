@@ -137,3 +137,38 @@ The held-back cases are opened once, for three runs in one sitting: the starting
 (`config/steps.start.json`), the chosen settings (`config/steps.chosen.json`), and the chosen
 settings with the improvement (`config/steps.improved.json`, the same as the app's own file).
 Nothing is re-chosen afterwards, whatever they show.
+
+## What the held-back cases showed
+
+Added on 24 November 2026 at 15:55 UTC, after they were opened (15:25 to 15:43 UTC, tag
+`held-back-opened`). Nothing above this heading was changed afterwards.
+
+One pointer above has moved: the report of run `check-2026-11-24T12-34-37`, called `CHECKS.md`
+when that section was written, is now `evals/checks/chosen.md`. `CHECKS.md` is now the report
+for the settings the app ships with.
+
+Cases passing every run, three runs per case. "Costly" is a count of runs.
+
+| | Start | Chosen | Chosen with the improvement |
+|---|---|---|---|
+| Menu-picker, 16 cases | 13, 4 costly | 12, 2 costly, 3 unusable replies | the same settings |
+| Follow-up writer, 3 cases | 2 | 3 | the same settings |
+| Coverage judge, 5 cases | 4 | 5 | the same settings |
+| Revision step alone, 6 cases | 4, 2 costly | 2, 4 costly | the same settings |
+| Support check alone, 6 cases | 6, 0 costly | 6, 0 costly | the same settings |
+| Revision step and support check together, 6 cases | 4, 2 costly | 4, 0 costly | 3, 0 costly |
+
+**The settings.** The gain the choice was made for held: a quotation that does not back the
+advice was shown in 2 of 18 runs on the starting settings and in none of 18 on the chosen ones.
+Nothing else did. The revision step alone was worse on the chosen settings, and the menu-picker
+no better.
+
+**The improvement.** It fixed no case and broke one. Its second check was asked five times, every
+time about a correct quotation: it agreed twice, refused twice and was cut off once. Without it,
+no wrong quotation had reached the trainee, so there was nothing for it to catch.
+
+**What is done about that.** Nothing. The decision above stands as it was written, because it was
+committed to before these cases were opened and they are not there to change it. If the decision
+were being made again on this evidence, the switch would be off. `SWEEP.md` and `HANDOVER.md` say
+so, and `config/steps.chosen.json` is the settings file without it.
+

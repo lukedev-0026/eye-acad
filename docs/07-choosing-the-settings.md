@@ -324,6 +324,12 @@ The brief asks for "one improvement of your choice" and why it was prioritised.
    broken, and the cost in time. If the held-back cases show no gain, the write-up says so. If
    nothing is weak, it says that too, and takes the item with the narrowest margin.
 
+**What happened.** The weakest area was the revision step, and the fix was a second support
+check against the key point itself. On the held-back cases it showed no gain: no case fixed, one
+broken, and nothing for it to catch, because the support check had already refused every wrong
+quotation. It was left switched on as frozen, and the write-up says the evidence is against it.
+`SWEEP.md` has the counts.
+
 ## The later Claude phase
 
 The app can switch any step to a Claude model by changing the settings file. That route is run

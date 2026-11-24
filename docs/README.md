@@ -13,7 +13,8 @@ Plain-language documentation for the voice viva take-home. Read in this order:
 | [07-choosing-the-settings.md](07-choosing-the-settings.md) | How the AI settings are compared and the final ones picked |
 | [glossary.md](glossary.md) | Every term used here, in one sentence each |
 
-**Status on 24 November 2026:** the app is built, measured and written up. These documents were
+**Status on 24 November 2026:** the app is built, measured and written up, and the held-back
+cases have been opened. These documents were
 written as the plan and kept up to date as building and measuring changed it; where they say
 "planned", the project's `README.md`, `SWEEP.md` and `CHECKS.md` say what happened. Where a
 statement comes from a source, a measurement or a judgement call, the documents say which.

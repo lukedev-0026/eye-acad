@@ -298,7 +298,12 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
 ### The case file is read fresh each time, and blocked from the browser
 - **Why:** an edit made during the walkthrough takes effect at once. Separately, the development
   server would otherwise hand the case file, hidden answers included, to anyone who asked for it.
-- **How sure:** Checked; the block will be confirmed by a direct test.
+- **How sure:** Checked. The running development server was asked for the case file directly, by
+  four different addresses, and for the prepared note, the settings file and the key file: every
+  request was refused (HTTP 403). For the built app, `pnpm leak-scan` searches the files a browser
+  downloads for any text from the case file and finds none. The development server does hand out
+  the app's own source files, prompts included, to anyone who asks; none of them holds anything
+  from the case.
 
 ### Specific tool versions are fixed
 - **Why:** the newest Firebase release and the test tool do not work with the version of Node

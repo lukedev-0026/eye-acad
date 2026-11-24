@@ -105,3 +105,35 @@ means one AI step with one value chosen for each setting.
 | 44 | The improvement targets the weakest measured area under the chosen settings. Before and after are run on the same held-back cases in one sitting, and the write-up gives both counts, the cases fixed and the cases broken. | The saved results for both runs. |
 | 45 | Every timing is saved with the computer's power mode and swap use, and the drift of the reference setting across the run is reported. | Columns in the results table; the drift figure in the write-up. |
 | 46 | No number is reported for a model service that was not run. If the Claude route was not run, the write-up says "written, not run". | Read the write-up. |
+
+## Where each criterion stood at hand-in
+
+Added on 24 November 2026, after the last measured run. "Met" means it was observed, by the check
+named in the tables above. The project's `README.md` and `CHECKS.md` hold the counts.
+
+| Criteria | Standing |
+|---|---|
+| 1 to 3 | Met. For 3, `pnpm leak-scan` searches the built browser files for every piece of text in the case file. |
+| 4 to 9 | Met: 10 of 10 typed runs for 4, 8 and 9; 4 and 8 also asked aloud once. For 6, all 24 values and methods match the text of the supplied case document; visual acuity also carries the case file's unit, "Snellen", which the document does not print. |
+| 10 | **Not met.** "What is the central corneal thickness?" got the right reply in 3 of 10 runs. In the others the cornea was read out instead. |
+| 11 | Met. |
+| 12 | Met as far as code can check it: every question spoken passes the allowed-words test or is one of the case file's own. The read by a person has not been done; the sheet is `evals/sweep/followup-read.md`. |
+| 13 to 18 | Met. 13 and 14 were looked at in greyscale on a live attempt: each label has its own symbol and words, and the talk button is disabled while the examiner is thinking or speaking. 18 is held by a test: after the case file is edited, an earlier attempt still shows the words it was given. |
+| 19 and 20 | Met: 5 of 5 runs. |
+| 21 | Met in part. Each key point, taken as the gap, gets advice about that key point and no other. For three of the seven possible gaps the trainee is usually told "no support" instead (see `README.md`). |
+| 22 | **Partly met.** A key point the note does not cover: 3 of 3. The supporting passage removed: 2 of 3. |
+| 23 | Met on the ten tuning pairs and the six held-back pairs: no wrong acceptance in 30 runs and in 18. The wrong-section quotation from page 8 was refused in 3 runs of 3. The thinking this needs is sometimes cut off; the trainee is then asked to try again. |
+| 24 | Met: 10 of 10 targets. |
+| 25 | Met, by a test with the meaning-based search unavailable (`tests/application/answer/`). Not run by hand in the browser. |
+| 26 | Met ([`evals/rehearsal/`](../evals/rehearsal/README.md)), and held by a test. In the rehearsal the finding marked unavailable was checked through `pnpm findings`, not asked ten times. |
+| 27 | Met for a note that has not been prepared (by hand: its own message, HTTP 503) and, by a test, for a PDF changed since it was prepared. |
+| 28 | Met in the sense written: 27 of 32 sentences on every run, and the five failures listed in `evals/readback.md`. |
+| 29 | Not yet checked from a fresh copy. |
+| 30 to 32, 34 | Met, in `README.md` and `HANDOVER.md`. |
+| 33 | Met except for the person's yes or no on the citation, which is Luke's to give. |
+| 35 to 41 | Met. For 39, the sweep was stopped and restarted several times for the battery, and finished work was skipped each time. |
+| 42 | Met, with one stated departure: the rule was applied to one run per case, not three, because the sweep was shortened. The report command prints the settings the app holds, and names the improvement switched on afterwards. |
+| 43 | Met, in `SWEEP.md`. |
+| 44 | Met as written: one sitting, the same held-back cases, both counts reported. They do not show a gain: 4 of 6 cases passing every run without the improvement and 3 of 6 with it, none fixed and one broken. |
+| 45 | Met. The drift of the reference setting was 12%. |
+| 46 | Met. The Claude route is described only as written, not run. |

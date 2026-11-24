@@ -47,7 +47,11 @@ All times are GMT. The deadline is 23:59 on Wednesday 25 November 2026.
 | 09:58 | The four-hour point. A marker is on the last piece of work saved before it. |
 | 10:36 | Step 9: the results table, the chart, the rule applied and the settings saved. |
 | 10:40 to 12:22 | A pass over the code itself, at Luke's request, before anything else is measured: the same app, reorganised and checked more strictly. File 03 ("How the code is organised") says what changed and how it was shown that nothing else did. |
-| From 12:23 | Steps 9 to 12 on the reorganised code: the full checks on the starting, all-small and chosen settings, the one improvement, the held-back cases, the timed spoken turns and the write-up. `NOTES.md` has the times. |
+| 12:23 to 13:09 | Step 9 on the reorganised code: every check run three times per case on the starting, all-small and chosen settings, and on the chosen settings with the improvement. |
+| 13:16 | Step 10: the improvement switched on and frozen, before the held-back cases were opened. |
+| 13:45 to 13:49 | Ten spoken turns timed on the final settings; the change rehearsal. |
+| 15:25 | Step 11: the held-back cases, opened once. The wait before it was for the laptop's battery. |
+| After that | Step 12: the final run of every check on the shipped settings, and the write-up. `NOTES.md` has the times. |
 
 ## If the build runs late
 
@@ -94,7 +98,9 @@ These are replacements for things that fail, not ways of saving time.
 | Command or action | What it shows |
 |---|---|
 | `pnpm findings` | Every finding as it will be shown and spoken, straight from the current case file. |
-| `pnpm test` | The fixed-logic tests and the privacy test. |
+| `pnpm test`, `pnpm test:integration` | The fixed-logic tests, and the privacy test against the local database. |
+| `pnpm verify` | Everything that needs no model: formatting, lint, types, tests, the golden check, a production build, and the leak scan. |
+| `pnpm leak-scan` | Searches the files a browser downloads for any text from the case file and for server-only code. |
 | `pnpm check` | All AI-backed checks, run through the app's real code on whatever settings are configured, with a results table written out. |
 | `pnpm ingest` | Re-prepares the reference note. Running it on the supplied PDF should change nothing. |
 | `pnpm readback` | The check on what is actually said aloud. |

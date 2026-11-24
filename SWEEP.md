@@ -17,7 +17,8 @@ weaker ones fail, and how far the comparison can be trusted.
 - The revision step is the weakest part of the app under every setting tried. No configuration
   was free of costly errors. That is where the one improvement went.
 - **On cases held back from all the choosing, one thing held and the rest did not.** With the
-  chosen settings no wrong quotation reached the trainee. But the improvement prevented nothing
+  chosen settings no wrong quotation reached the trainee there. (A later run on the tuning cases
+  showed one in 24.) But the improvement prevented nothing
   and cost correct answers, and the chosen revision step and menu-picker were no better than
   the starting ones.
 - One comparison is weaker than it looks: at temperature 0.7 the follow-up writer does not give
@@ -27,13 +28,15 @@ weaker ones fail, and how far the comparison can be trusted.
 
 | | Starting settings | Chosen settings | Chosen, with the improvement |
 |---|---|---|---|
-| Tuning cases: a quotation shown that does not back the advice | 5 of 24 | 1 of 24 | 0 of 24 |
+| Tuning cases: a quotation shown that does not back the advice | 5 of 24 | 1 of 24 | 0 of 24, then 1 of 24 in a second run |
 | **Held-back cases: the same** | **2 of 18** | **0 of 18** | **0 of 18** |
 | Held-back cases: runs with the right outcome, end to end | 14 of 18 | 14 of 18 | 12 of 18 |
 | Tuning cases: the support check alone accepting what it should refuse | 6 of 30 | 0 of 30 | the same settings |
 
 The held-back cases were opened once, after everything had been chosen. They bear out one thing:
-on the chosen settings no wrong quotation reached the trainee. They do not bear out the rest.
+on the chosen settings no wrong quotation reached the trainee in those 18 runs. That is not the
+same as never: a second run of the shipped settings on the tuning cases showed one in 24 (see
+"The one improvement", below). They do not bear out the rest.
 The chosen revision step is worse taken alone, the chosen menu-picker is no better, and the one
 improvement prevented nothing and cost correct answers. Each is set out below.
 
@@ -355,21 +358,21 @@ built on the tuning cases, switched on, and frozen before the held-back cases we
 
 End to end (the revision step and the support check together), three runs per case:
 
-| | Chosen | Chosen with the improvement |
-|---|---|---|
-| **Tuning cases: 8 cases, 24 runs** | | |
-| Runs that showed a quotation that does not back the advice | 1 | 0 |
-| Cases passing every run | 5 of 8 | 5 of 8 |
-| Runs with the right outcome | 16 of 24 | 17 of 24 |
-| Times the new check was asked | | 4: agreed every time |
-| Runs cut off, where the trainee is asked to try again | 2 | 2 |
-| **Held-back cases: 6 cases, 18 runs** | | |
-| Runs that showed a quotation that does not back the advice | 0 | 0 |
-| Cases passing every run | 4 of 6 | **3 of 6** |
-| Runs with the right outcome | 14 of 18 | 12 of 18 |
-| Cases fixed, cases broken | | none fixed, one broken (`rev-kp5`) |
-| Times the new check was asked | | 5: agreed twice, said no twice, cut off once |
-| Runs cut off | 1 | 2 |
+| | Chosen | Chosen with the improvement | The same, second run |
+|---|---|---|---|
+| **Tuning cases: 8 cases, 24 runs** | | | |
+| Runs that showed a quotation that does not back the advice | 1 | 0 | **1** |
+| Cases passing every run | 5 of 8 | 5 of 8 | 5 of 8 |
+| Runs with the right outcome | 16 of 24 | 17 of 24 | 15 of 24 |
+| Times the new check was asked | | 4: agreed every time | 4: agreed every time |
+| Runs that did not finish, where the trainee is asked to try again | 2 | 2 | 3 |
+| **Held-back cases: 6 cases, 18 runs** | | | |
+| Runs that showed a quotation that does not back the advice | 0 | 0 | |
+| Cases passing every run | 4 of 6 | **3 of 6** | |
+| Runs with the right outcome | 14 of 18 | 12 of 18 | |
+| Cases fixed, cases broken | | none fixed, one broken (`rev-kp5`) | |
+| Times the new check was asked | | 5: agreed twice, said no twice, cut off once | |
+| Runs cut off | 1 | 2 | |
 
 **The held-back cases do not support the improvement.**
 
@@ -409,6 +412,24 @@ check in `config/steps.json`. `config/steps.chosen.json` is exactly that.
 What still stands for it is narrow: with a stand-in for the model that reproduces the original
 fault exactly, the wrong quotation is shown without the change and refused with it
 (`tests/eval/checks/chain.check.test.ts`).
+
+**The second run on the tuning cases** (`check-2026-11-24T17-35-09`, 17:35, the last column above) was meant
+as the final run of every check on the shipped settings. The laptop had been put to sleep, so it
+was made in the spells when the laptop woke by itself, with each call to a model taking two to
+three times as long as usual (the menu-picker's middle time was 1.5 seconds against 0.5, the
+support check's 19.8 against 9.9). Its timings are not used
+anywhere, and seven calls in it that got no reply within their time limit are put down to the
+laptop: five in the brief's citation checks and two in the support check taken alone. No such
+call is among the end-to-end runs in the table, so those count as they stand.
+
+One of them matters. With the supporting passages removed, the revision step kept the key
+point's own wording ("Note the sulfonamide allergy before giving acetazolamide") and quoted the
+page 8 sentence "Avoid acetazolamide, which is itself a sulfonamide.", which is about a
+different condition. The support check accepted it. The new check was not asked: it puts that
+same question, and is used only when the model has written a sentence of its own. As a fixed
+pair, that sentence against that advice was refused in every run that finished (3 of 3, then
+2 of 2). So on the shipped settings a wrong quotation reached the trainee in 1 of 48 tuning
+runs, not in none, and the improvement as built could not have stopped that one.
 
 ## What was not run
 

@@ -172,3 +172,10 @@ committed to before these cases were opened and they are not there to change it.
 were being made again on this evidence, the switch would be off. `SWEEP.md` and `HANDOVER.md` say
 so, and `config/steps.chosen.json` is the settings file without it.
 
+## A later run on the tuning cases
+
+Added on 24 November 2026 at 18:55 UTC. A second run of the shipped settings on the tuning cases
+(`check-2026-11-24T17-35-09`, made with the laptop asleep for most of it) showed a quotation that
+does not back the advice in 1 of 24 end-to-end runs, where the first run had shown none. The
+second check was not asked in that run, because the revision step had kept the key point's own
+wording. Nothing is re-chosen on this either. `SWEEP.md` has the detail.

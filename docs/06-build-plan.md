@@ -51,7 +51,7 @@ All times are GMT. The deadline is 23:59 on Wednesday 25 November 2026.
 | 13:16 | Step 10: the improvement switched on and frozen, before the held-back cases were opened. |
 | 13:45 to 13:49 | Ten spoken turns timed on the final settings; the change rehearsal. |
 | 15:25 | Step 11: the held-back cases, opened once. The wait before it was for the laptop's battery. |
-| After that | Step 12: the final run of every check on the shipped settings, and the write-up. `NOTES.md` has the times. |
+| 17:35 to 18:43 | Step 12: a last run of every check on the shipped settings. The laptop was asleep for most of it, so it is reported beside the 12:49 run and not in place of it. Then the write-up was brought up to date. `NOTES.md` has the times. |
 
 ## If the build runs late
 

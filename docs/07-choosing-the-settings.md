@@ -328,7 +328,9 @@ The brief asks for "one improvement of your choice" and why it was prioritised.
 check against the key point itself. On the held-back cases it showed no gain: no case fixed, one
 broken, and nothing for it to catch, because the support check had already refused every wrong
 quotation. It was left switched on as frozen, and the write-up says the evidence is against it.
-`SWEEP.md` has the counts.
+A second run of the shipped settings on the tuning cases, made later with the laptop asleep for
+most of it, then showed a wrong quotation once in 24 runs, in a form the second check is never
+asked about. `SWEEP.md` has the counts.
 
 ## The later Claude phase
 

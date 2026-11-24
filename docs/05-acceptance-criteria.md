@@ -121,8 +121,8 @@ named in the tables above. The project's `README.md` and `CHECKS.md` hold the co
 | 13 to 18 | Met. 13 and 14 were looked at in greyscale on a live attempt: each label has its own symbol and words, and the talk button is disabled while the examiner is thinking or speaking. 18 is held by a test: after the case file is edited, an earlier attempt still shows the words it was given. |
 | 19 and 20 | Met: 5 of 5 runs. |
 | 21 | Met in part. Each key point, taken as the gap, gets advice about that key point and no other. For three of the seven possible gaps the trainee is usually told "no support" instead (see `README.md`). |
-| 22 | **Partly met.** A key point the note does not cover: 3 of 3. The supporting passage removed: 2 of 3. |
-| 23 | Met on the ten tuning pairs and the six held-back pairs: no wrong acceptance in 30 runs and in 18. The wrong-section quotation from page 8 was refused in 3 runs of 3. The thinking this needs is sometimes cut off; the trainee is then asked to try again. |
+| 22 | **Partly met.** A key point the note does not cover: 3 of 3. The supporting passage removed: 2 of 3. In a second run, made with the laptop asleep, the same check was stopped by the time limit 3 times in 3, and end to end the page 8 sentence was shown as support once in 3 runs. |
+| 23 | Met on the ten tuning pairs and the six held-back pairs: no wrong acceptance in 30 runs and in 18. The wrong-section quotation from page 8 was refused in 3 runs of 3 as a fixed pair. It was accepted once when it came up end to end (see 22), so this holds on the fixed pairs and not without exception in use. The thinking this needs is sometimes cut off; the trainee is then asked to try again. |
 | 24 | Met: 10 of 10 targets. |
 | 25 | Met, by a test with the meaning-based search unavailable (`tests/application/answer/`). Not run by hand in the browser. |
 | 26 | Met ([`evals/rehearsal/`](../evals/rehearsal/README.md)), and held by a test. In the rehearsal the finding marked unavailable was checked through `pnpm findings`, not asked ten times. |

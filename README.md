@@ -214,7 +214,7 @@ run**: no result in this repository comes from it, and it should be treated as a
 
 Run by `pnpm check --only required`, through the same code the app uses, with typed input, on
 the settings the app ships with. The full output, with the failing runs written out, is in
-[`CHECKS.md`](CHECKS.md). Date: 24 November 2026.
+[`CHECKS.md`](CHECKS.md): the run made at 12:49 on 24 November 2026.
 
 | Check | Input | Expected | Observed | Runs passed | Model |
 |---|---|---|---|---|---|
@@ -245,6 +245,16 @@ under "partly works" below.
 | The supporting passages removed from the search | "I couldn't find support for this in the reference note.", no page, no quotation | **2 of 3** |
 | A key point the note does not cover (an urgent MRI) | The same | 3 of 3 |
 
+**A second run, made with the laptop asleep.** The same command was run again at 17:35, as a last
+check on the shipped settings. The laptop had been put to sleep, so the run was made in the
+spells when it woke by itself: it slept three times part-way through, and between sleeps each
+call to the model took two to three times as long as usual. Checks 1 and 2 passed 10 of 10 and 10 of 10 again. Check 3 passed
+3 of 5: the other two got no reply within the 60-second limit, in calls that were open while the
+laptop slept. The four harder versions gave 10 of 10, 4 of 10, 0 of 3 (all three stopped by the
+same limit) and 3 of 3. The tables above are the run made with the laptop awake. The other is
+written out in [`evals/checks/improved-asleep.md`](evals/checks/improved-asleep.md), and one
+result in it had nothing to do with the laptop: see "No support" under "partly works", below.
+
 ## What works, what partly works, what does not
 
 Counts are runs that passed out of runs made, on the settings the app ships with, with typed
@@ -273,9 +283,9 @@ input unless it says spoken. They come from [`CHECKS.md`](CHECKS.md) unless anot
 | What | What was observed |
 |---|---|
 | A request for something that is not in the case | "What is the central corneal thickness?" should get "That isn't recorded for this case." It did in **3 of 10** runs. In the others the menu-picker chose the nearest thing it had, and the cornea was read out. Nothing false is said, but something is revealed that was not asked for. It is not the only such question: asked for blood glucose, the urea and electrolytes result was read out in 3 runs of 3 |
-| "No support" when the note's supporting passage is missing | With the two supporting passages taken out of the search, the right result is "no support". Observed in **2 of 3** runs: 1 was cut off, and the trainee is asked to try again. This is the fault the improvement goes after (`HANDOVER.md`) |
+| "No support" when the note's supporting passage is missing | With the two supporting passages taken out of the search, the right result is "no support". Observed in **2 of 3** runs: 1 was cut off, and the trainee is asked to try again. In the second run, made with the laptop asleep, all 3 were stopped by the time limit, and that run's end-to-end check of the same thing went wrong once in 3: the page 8 sentence, which is about a different condition, was shown as support for the advice. So the fault is still there. It is the one the improvement goes after (`HANDOVER.md`) |
 | The revision point, for three of the seven things it can be about | The diagnosis and two of the key points are compound statements ("lower the pressure: topical agents…, plus systemic treatment"). No single sentence of the note backs all of one, the support check is strict, and the trainee is usually told "no support" for something the note does cover. Safe, but unhelpful |
-| The support check, which thinks before it answers | In 2 of the 24 end-to-end runs in `CHECKS.md` it ran past its time limit. The trainee then sees that the revision point could not be prepared, with a button to try again |
+| The support check, which thinks before it answers | In 2 of the 24 end-to-end runs in `CHECKS.md`, and 2 of the 24 in the second run, it was cut off before it answered. The trainee then sees that the revision point could not be prepared, with a button to try again. The time limits suit this Mac at full speed: in the second run, with each call taking two to three times as long, the support check taken alone got no reply in time in 2 of 30 runs, where at full speed it always had |
 | A very broad request | "Tell me everything you've got" should get "Please ask for specific findings." On the held-back cases the menu-picker tried to list every finding, ran out of room, and the trainee got "Sorry, something went wrong. Please ask again." in 3 runs of 3. Nothing is revealed |
 | What is said aloud | Spoken, transcribed back and compared, 27 of 32 sentences kept their eye, numbers and unit on all three runs. The eye was never lost. The five failures are the clock time "23:55", "Snellen" and "dioptres" (`evals/readback.md`) |
 | The follow-up question's quality | That it is asked once, and uses no words it should not, is checked by code. Whether it is a good question for that answer is a person's judgement, and that read has not been done: the sheet is `evals/sweep/followup-read.md` |
@@ -298,12 +308,13 @@ the model cannot reword.
 
 | End to end, three runs per case | Without it | With it |
 |---|---|---|
-| Tuning cases: a quotation shown that does not back the advice | 1 of 24 runs | 0 of 24 |
+| Tuning cases: a quotation shown that does not back the advice | 1 of 24 runs | 0 of 24, then 1 of 24 in a second run |
 | Held-back cases: the same | 0 of 18 runs | 0 of 18 |
 | Held-back cases passing every run | 4 of 6 | 3 of 6 |
 
-On the cases it was built on, the fault went away, though the saved traces show the new check
-was not what removed it. On cases held back until everything was frozen, it had nothing to
+On the cases it was built on, the fault went away in the first run, though the saved traces show
+the new check was not what removed it, and it came back once in a second run, in a form the new
+check is never asked about. On cases held back until everything was frozen, it had nothing to
 catch, because the ordinary support check had already refused every wrong quotation, and it cost
 correct answers: it refused two correct quotations and was cut off once. It is still switched
 on, because the decision to ship it was recorded before the held-back cases were opened and
@@ -325,13 +336,14 @@ All times are GMT on 24 November 2026, and each is a commit time or a line in
 |---|---|
 | Build started | 05:58, from the planning documents alone |
 | The four-hour point | 09:58. The tag `four-hour-mark` is on commit `3b5ef30` (08:25), the last one saved before it |
-| Last change | 15:57 |
-| Start to finish by the clock | about 10 hours |
+| Last change | 18:57 |
+| Start to finish by the clock | about 13 hours |
 
 That clock time is not hands-on time. It includes about an hour and a quarter of the settings
-comparison running by itself, and about three and a half hours, in several stretches, when measuring had to
+comparison running by itself, and about four and three quarter hours, in several stretches, when measuring had to
 stop while the laptop's battery recharged: the model runs drew more than its 55 W charger
-supplies. **Luke's own time at the keyboard:** _to be filled in by Luke_.
+supplies. The last run of the checks took 68 minutes where 20 were expected, because the laptop
+was asleep for most of it. **Luke's own time at the keyboard:** _to be filled in by Luke_.
 
 **What existed at the four-hour point** (`git checkout four-hour-mark`):
 
@@ -355,7 +367,9 @@ supplies. **Luke's own time at the keyboard:** _to be filled in by Luke_.
 | 13:16 | The one improvement switched on and frozen |
 | 13:45 to 13:49 | Ten spoken turns timed on the final settings; the change rehearsal |
 | 15:25 to 15:43 | The held-back cases, opened once |
-| After 15:43 | This write-up, a run from a fresh copy of the project, and (once the battery has recharged) the final run of every check on the shipped settings |
+| 15:43 to 16:00 | This write-up, and a run from a fresh copy of the project |
+| 17:35 to 18:43 | A last run of every check on the shipped settings. The laptop was asleep for most of it, so it is reported beside the 12:49 run, not in place of it |
+| 18:45 to 18:57 | The write-ups brought up to date with what that run showed |
 
 Planning and research were done before the build, with an AI coding assistant, and are written
 up in [`docs/04-investigation.md`](docs/04-investigation.md). The build itself was done with the

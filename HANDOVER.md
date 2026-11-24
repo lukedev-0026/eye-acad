@@ -116,7 +116,7 @@ held-back cases took no part in building the change and were opened once, after 
 
 | | Without it | With it |
 |---|---|---|
-| **Tuning cases, 24 runs:** a quotation shown that does not back the advice | 1 | 0 |
+| **Tuning cases, 24 runs:** a quotation shown that does not back the advice | 1 | 0, then 1 in a second run |
 | Tuning cases passing every run | 5 of 8 | 5 of 8 |
 | **Held-back cases, 18 runs:** a quotation shown that does not back the advice | 0 | 0 |
 | Held-back cases passing every run | 4 of 6 | **3 of 6** |
@@ -126,7 +126,10 @@ held-back cases took no part in building the change and were opened once, after 
 
 **It did not earn its place.** On the tuning cases the one wrong quotation went away, but the
 saved traces show the new check was not the reason: it was asked four times, each time about a
-correct quotation, and agreed each time. On the held-back cases there was nothing for it to
+correct quotation, and agreed each time. A second run of the same settings then showed a wrong
+quotation again, in 1 run of 24: the revision step had kept the key point's own wording, the
+support check accepted the page 8 sentence against it, and the new check, which puts that same
+question, is not used then. On the held-back cases there was nothing for it to
 catch, because the support check had already refused all four wrong quotations the revision step
 produced. What it did there was cost: asked five times, always about a correct quotation, it
 agreed twice, refused twice and was cut off once. One of the refusals was plainly wrong (it
@@ -136,7 +139,8 @@ it accepted on the other two runs).
 The only evidence that it does what it was built for is narrow. In a test, a stand-in for the
 model reproduces the original fault exactly: the wrong quotation is shown without the change and
 refused with it (`tests/eval/checks/chain.check.test.ts`). And one fixed pair close to the
-question it asks, the page 8 sentence against the allergy advice, was refused in 3 runs of 3.
+question it asks, the page 8 sentence against the allergy advice, was refused in 3 runs of 3,
+and in the 2 that finished in the second run. The one time it was accepted was end to end.
 
 **Why it is still switched on.** The decision to ship it was written down before the held-back
 cases were opened, with the rule that they report on a choice and do not change it. Switching
@@ -148,7 +152,9 @@ the honest state of the evidence: I would switch it off, and it is one line to d
 about ten seconds with thinking on, and two or three times that on some runs. It comes after
 the viva has ended, not during a spoken turn.
 
-**What it does not fix.** The trainee is still usually told "no support" for three of the seven
+**What it does not fix.** The fault itself, when the revision step keeps the key point's own
+wording: the page 8 sentence was shown as support once in the 48 tuning runs made with it on.
+Nor the opposite fault. The trainee is still usually told "no support" for three of the seven
 things a revision point can be about, although the note covers them: the diagnosis, and the key
 points on lowering the pressure and on laser treatment to both eyes. Each is a compound
 statement, and no single sentence of the note backs all of one. And a support check that thinks

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import type { Phase } from '@/domain/attempt/attempt.schema';
 import { useAttemptList } from '@/features/attempts/hooks/use-attempt';
 import { auth } from '@/features/auth/lib/firebase';
-import { startAttempt } from '@/server/functions/viva.functions';
+import { messageFor } from '@/features/errors/lib/message-for';
+import { startAttempt } from '@/server/functions/attempt.functions';
 
 export const Route = createFileRoute('/_authed/attempts/')({
   component: Attempts,
@@ -31,8 +32,8 @@ function Attempts() {
     try {
       const { attemptId } = await startAttempt();
       await navigate({ to: '/attempts/$attemptId', params: { attemptId } });
-    } catch {
-      setError('Could not start an attempt. Please try again.');
+    } catch (thrown) {
+      setError(messageFor(thrown, 'Could not start an attempt. Please try again.'));
       setBusy(false);
     }
   }

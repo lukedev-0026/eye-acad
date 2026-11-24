@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import type { PublicAttempt, RevealedItem, Turn } from '@/domain/attempt/attempt.schema';
 import { useAttempt } from '@/features/attempts/hooks/use-attempt';
 import { auth } from '@/features/auth/lib/firebase';
+import { messageFor } from '@/features/errors/lib/message-for';
 import { RevisionCardView } from '@/features/viva/components/revision-card';
 import { TalkButton } from '@/features/viva/components/talk-button';
 import { recordingSupported, useRecorder } from '@/features/viva/hooks/use-recorder';
@@ -13,16 +14,8 @@ import { asTsv, summarise } from '@/features/viva/lib/latency';
 import type { TurnTiming } from '@/features/viva/lib/latency';
 import { TURN_LABEL, canTraineeAct, nextTurnState } from '@/features/viva/lib/turn-machine';
 import type { TurnState } from '@/features/viva/lib/turn-machine';
-import {
-  askSpoken,
-  askTyped,
-  giveAnswer,
-  replyToFollowUp,
-  retryFollowUp,
-  retryRevision,
-  speakOpening,
-  transcribeOnly,
-} from '@/server/functions/viva.functions';
+import { giveAnswer, replyToFollowUp, retryFollowUp, retryRevision } from '@/server/functions/answer.functions';
+import { askSpoken, askTyped, speakOpening, transcribeOnly } from '@/server/functions/turn.functions';
 
 export const Route = createFileRoute('/_authed/attempts/$attemptId')({
   component: AttemptPage,
@@ -47,6 +40,8 @@ function AttemptPage() {
   }
   return <Viva attemptId={attemptId} attempt={state.attempt} />;
 }
+
+const REVISION_PROBLEM = 'The revision point could not be prepared just now.';
 
 const HINT: Record<'asking' | 'answering' | 'follow_up', Record<TurnState, string>> = {
   asking: {
@@ -76,7 +71,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
   const [draft, setDraft] = useState('');
   const [dictated, setDictated] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const [revisionFailed, setRevisionFailed] = useState(false);
+  // Why the revision point could not be prepared, when it could not.
+  const [revisionProblem, setRevisionProblem] = useState<string | null>(null);
   const [timings, setTimings] = useState<Array<TurnTiming>>([]);
   const recorder = useRecorder();
   const player = useRef<{ stop: () => void } | null>(null);
@@ -151,8 +147,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     setRequest('');
     try {
       await finishTurn(releasedAt, 'typed', await askTyped({ data: { attemptId, text } }));
-    } catch {
-      fail('That request did not go through. Please ask again.');
+    } catch (error) {
+      fail(messageFor(error, 'That request did not go through. Please ask again.'));
     }
   }
 
@@ -183,8 +179,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     try {
       const reply = await askSpoken({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } });
       await finishTurn(releasedAt, 'voice', reply);
-    } catch {
-      fail('That did not go through. Please try again, or type your request.');
+    } catch (error) {
+      fail(messageFor(error, 'That did not go through. Please try again, or type your request.'));
     }
   }
 
@@ -225,8 +221,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
         setProblem("Sorry, I didn't catch that. Please try again, or type.");
       }
       send({ type: 'REPLY_SILENT' });
-    } catch {
-      fail('That did not go through. Please try again, or type.');
+    } catch (error) {
+      fail(messageFor(error, 'That did not go through. Please try again, or type.'));
     }
   }
 
@@ -241,8 +237,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
       setDictated(false);
       setAnswering(false);
       await speak(followUp.audio);
-    } catch {
-      fail('Your answer was not saved. Please try again.');
+    } catch (error) {
+      fail(messageFor(error, 'Your answer was not saved. Please try again.'));
     }
   }
 
@@ -250,23 +246,23 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     if (!canAct) return;
     send({ type: 'SUBMIT_TEXT' });
     setProblem(null);
-    setRevisionFailed(false);
+    setRevisionProblem(null);
     try {
       await replyToFollowUp({ data: { attemptId, text: draft.trim(), via: dictated ? 'voice' : 'typed' } });
       setDraft('');
-    } catch {
+    } catch (error) {
       // The reply itself is saved first; what can fail is preparing the card.
-      setRevisionFailed(true);
+      setRevisionProblem(messageFor(error, REVISION_PROBLEM));
     }
     send({ type: 'REPLY_SILENT' });
   }
 
   async function tryRevisionAgain() {
-    setRevisionFailed(false);
+    setRevisionProblem(null);
     try {
       await retryRevision({ data: { attemptId } });
-    } catch {
-      setRevisionFailed(true);
+    } catch (error) {
+      setRevisionProblem(messageFor(error, REVISION_PROBLEM));
     }
   }
 
@@ -275,8 +271,8 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
     try {
       const followUp = await retryFollowUp({ data: { attemptId } });
       await speak(followUp.audio);
-    } catch {
-      fail('The follow-up question could not be prepared. Please try again.');
+    } catch (error) {
+      fail(messageFor(error, 'The follow-up question could not be prepared. Please try again.'));
     }
   }
 
@@ -300,9 +296,9 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
       {phase === 'revising' ? (
         <section className="panel" role="status">
           <h2>Revision point</h2>
-          {revisionFailed ? (
+          {revisionProblem ? (
             <>
-              <p>The revision point could not be prepared just now.</p>
+              <p>{revisionProblem}</p>
               <button className="button" onClick={() => void tryRevisionAgain()}>
                 Try again
               </button>

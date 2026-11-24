@@ -1,15 +1,12 @@
 import { createMiddleware } from '@tanstack/react-start';
 import { getRequestHeader } from '@tanstack/react-start/server';
 
+import { UnauthenticatedError } from '@/common/errors/auth.error';
+import { annotateRequestContext } from '@/common/logging/request-context.server';
 import { getIdToken } from '@/features/auth/lib/id-token';
 import { getFirebaseAdmin } from '@/infrastructure/firestore/firebase-admin';
 
-export class UnauthenticatedError extends Error {
-  constructor() {
-    super('Please sign in.');
-    this.name = 'UnauthenticatedError';
-  }
-}
+const BEARER = 'Bearer ';
 
 // Every server function that touches the case or an attempt uses this.
 // Browser half: attach the signed-in user's Firebase ID token.
@@ -18,17 +15,19 @@ export class UnauthenticatedError extends Error {
 export const requireUser = createMiddleware({ type: 'function' })
   .client(async ({ next }) => {
     const token = await getIdToken();
-    return next({ headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    return next({ headers: token ? { Authorization: `${BEARER}${token}` } : {} });
   })
   .server(async ({ next }) => {
     const header = getRequestHeader('authorization') ?? '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    const token = header.startsWith(BEARER) ? header.slice(BEARER.length) : '';
     if (!token) throw new UnauthenticatedError();
     let uid: string;
     try {
       uid = (await getFirebaseAdmin().auth.verifyIdToken(token)).uid;
-    } catch {
-      throw new UnauthenticatedError();
+    } catch (error) {
+      // An expired, forged or foreign token. The reason is kept for the log.
+      throw new UnauthenticatedError({ cause: error });
     }
+    annotateRequestContext({ uid });
     return next({ context: { uid } });
   });

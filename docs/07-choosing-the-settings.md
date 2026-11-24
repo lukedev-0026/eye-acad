@@ -71,30 +71,46 @@ next. That is dealt with further down, under "Running the whole app on the resul
 ## Which configurations are run
 
 Even one step at a time, a complete comparison would be 108 configurations per step, 540 in
-all. That will not fit in one night. So about 130 are run, chosen as follows. **This is a
-comparison of the configurations that ran, not a complete grid**, and the write-up will say
-exactly which ran.
+all. **What ran is a comparison of some of those, not a complete grid**, and the write-up says
+exactly which.
 
-| Round | What is run, for each step | How many |
-|---|---|---|
-| Block 1 | Every combination of model size, thinking and forced format, with the shortest prompt and the temperature the model's maker recommends for that thinking mode (0.7 with thinking off, 1.0 with it on). The starting configuration is one of these. | 12 |
-| Block 2 | For each model size, starting from its best result in block 1: the two other temperatures, and the two other prompt wordings. | 12 |
-| Two probes | A test of one built-in setting, explained below. | 2 |
-| Block 3 | Only if time remains: prompt wording, forced format and thinking combined, on the two best sizes. This catches settings that only matter together. | extra |
+### The plan, and why it was cut
 
-That is 26 for each step, so about 130 across the five steps, before block 3.
+The plan was about 130 configurations: every combination of size, thinking and forced format
+(block 1); then, from each size's best result, the other temperatures and prompts (block 2); two
+probes of a built-in repetition penalty; and three-run confirmation of the best three per step.
 
-**The two probes.** These models come with a built-in penalty that discourages them from
-repeating themselves. (This was confirmed on a model of the same family already installed on
-this computer.) That could push the menu-picker away from naming the same finding twice, once
-for each eye, which is exactly what "what are the pressures?" needs. So two configurations
-(the starting one, and the best one from block 1) are re-run with the penalty switched off, to
-see whether it matters.
+It was cut on the morning of 24 November. The sweep was drawing about twice the power the
+laptop's 55-watt charger supplies, and had taken the battery from 100% to 16% while plugged in.
+By then all of block 1 for the small model was recorded, and the menu-picker and follow-up
+writer for the medium model. Luke asked for a shorter run: enough to show the combinations and
+find a roughly best configuration.
 
-**Screen first, then confirm.** Every configuration is first run once on each tuning case. With
-only tens of cases, running more different cases tells us more than repeating the same ones.
-Then the best three configurations for each step, plus the starting one, are run three times on
-each case. The choosing rule is applied to those confirmed results.
+### What ran
+
+| Model | What was run, for each step |
+|---|---|
+| Small | Thinking on and off, format forced and not forced (recorded in full before the cut) |
+| Medium | Thinking off, format forced and not forced. Then, one change at a time from the starting configuration: the two other prompt wordings, and temperature 0. Thinking on was run for the menu-picker and follow-up writer (before the cut) and for the support check |
+| Large | Thinking off, format forced, once per step |
+
+That is about 50 configurations. Between them they cover every setting on the list: three model
+sizes, two temperatures, thinking on and off, forced format on and off, and three prompt
+wordings.
+
+### What was dropped, and what that costs
+
+- **Thinking on, for the large model and for the medium model's coverage and revision steps.**
+  Every thinking-on run that was made for those kinds of step was far over its time limit. Whether
+  thinking would have made the larger models more accurate, had time been no object, is not known.
+- **Block 2 anchored on each size's best result.** The other prompts and temperature 0 were tried
+  from the starting configuration on the medium model only. A prompt that helps only the small or
+  the large model would have been missed.
+- **The repetition-penalty probes.** Not run.
+- **Three-run confirmation of the best three per step.** Each configuration was run once per case.
+  The chosen and starting configurations were then each run three times through the app's own
+  checks. So the choice rests on one run per case, and neighbouring configurations are even
+  harder to tell apart than planned.
 
 **Stopping early.** A configuration is stopped, and shown on the chart as "stopped: too slow",
 when its first three calls all take more than twice its time limit, or the middle value of its

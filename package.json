@@ -14,7 +14,12 @@
     "test": "vitest run",
     "findings": "tsx scripts/findings.ts",
     "ingest": "tsx scripts/ingest.ts",
-    "retrieval-table": "tsx scripts/retrieval-table.ts"
+    "retrieval-table": "tsx scripts/retrieval-table.ts",
+    "check": "tsx scripts/check.ts",
+    "sweep:preflight": "tsx scripts/sweep-preflight.ts",
+    "sweep": "tsx scripts/sweep.ts",
+    "sweep:report": "tsx scripts/sweep-report.ts",
+    "sweep:chart": "tsx scripts/sweep-chart.ts"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.46",

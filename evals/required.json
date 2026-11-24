@@ -1,0 +1,30 @@
+{
+  "note": "The brief's three required checks, with fixed inputs. Rows are named by id; what the app should say is worked out from the raw case file at run time, so the checks still mean something after a value is edited.",
+  "available": {
+    "utterance": "What is the intraocular pressure in the right eye?",
+    "row": "iop_right",
+    "otherEyeRow": "iop_left",
+    "trials": 10
+  },
+  "unavailable": {
+    "utterance": "Can I have gonioscopy of the right eye?",
+    "row": "gonio_right",
+    "otherEyeRow": "gonio_left",
+    "trials": 10
+  },
+  "controls": [
+    { "name": "unavailable, with left-over text in its value field", "utterance": "Is there a relative afferent pupillary defect?", "row": "rapd", "trials": 10 },
+    { "name": "not in the case at all", "utterance": "What is the central corneal thickness?", "notInCase": true, "trials": 10 }
+  ],
+  "citation": {
+    "name": "an answer that covers everything except the allergy",
+    "answer": "This is acute primary angle closure in the right eye, and the left eye has a narrow angle so it is at risk too. It was probably set off by the dark cinema and the chlorphenamine she has just started, so I would stop the chlorphenamine. I would lie her flat and give analgesia and an antiemetic. To lower the pressure I would give timolol and apraclonidine drops, intravenous acetazolamide, and pilocarpine once the pressure starts to fall. When the cornea has cleared she needs laser peripheral iridotomy to both eyes, including the fellow eye. After the attack settles I would repeat gonioscopy of the right eye and look at both optic discs.",
+    "expectTarget": "examiner_notes.key_points[1]",
+    "targetId": "kp1",
+    "trials": 5
+  },
+  "noSupport": [
+    { "name": "the supporting passages removed", "target": "examiner_notes.key_points[1]", "targetId": "kp1", "removeSupport": true, "trials": 3 },
+    { "name": "a key point the note does not cover", "target": "text:Arrange an urgent MRI of the brain and orbits", "removeSupport": false, "trials": 3 }
+  ]
+}

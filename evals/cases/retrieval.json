@@ -1,74 +1,176 @@
 {
-  "note": "Which sentences of the reference note support each target. Sentences are identified by a phrase they contain, so the file survives the note being re-prepared. 'gold' is the main source in the acute primary angle closure section; 'alsoSupports' is other text that backs the point; 'distractor' mentions the same words about something else.",
+  "note": "Which sentences of the reference note bear on each target. A sentence is identified by a phrase that occurs in exactly one sentence of the prepared note, so this file survives the note being re-prepared. 'gold' is the main source, in the acute primary angle closure material (the sections 'Acute primary angle closure' and 'Managing an acute attack', plus the definition of the condition). 'alsoSupports' is other text in that material that backs the point. 'offSection' is text elsewhere in the note that backs the point: correct, but not where the case author says to cite from. 'distractor' is text that shares the words but is about something else, and does not back the point. The revision checks marked 'all_support' leave out every passage listed under gold, alsoSupports and offSection for kp1, kp2, kp3 and kp5 and expect 'no support'; those four lists are meant to be complete. The other targets list the main supporting text, not every sentence: a few table cells (for example the single word 'Acetazolamide') have no phrase of their own to be identified by.",
   "targets": [
     {
       "id": "diagnosis",
       "source": "examiner_notes.diagnosis",
-      "gold": ["a sudden symptomatic rise in IOP caused by angle closure", "A narrow angle in the other eye, which is an important diagnostic clue", "Shallow chamber, fixed mid-dilated pupil, narrow angle in the other eye"],
-      "alsoSupports": ["Dim light, such as a cinema or a dark room", "Drugs with anticholinergic effects, including some antihistamines", "A fixed, mid-dilated, often vertically oval pupil", "Very high IOP, usually 50 to 80 mmHg"],
+      "gold": [
+        "a sudden symptomatic rise in IOP caused by angle closure",
+        "A narrow angle in the other eye, which is an important diagnostic clue",
+        "Shallow chamber, fixed mid-dilated pupil, narrow angle in the other eye"
+      ],
+      "alsoSupports": [
+        "Dim light, such as a cinema or a dark room",
+        "Drugs with anticholinergic effects, including some antihistamines",
+        "A fixed, mid-dilated, often vertically oval pupil",
+        "Very high IOP, usually 50 to 80 mmHg",
+        "Sudden, severe, aching pain in one eye",
+        "Blurred vision and coloured haloes around lights",
+        "Nausea, vomiting and sometimes abdominal pain",
+        "Reduced visual acuity, often 6/60 to hand movements",
+        "Ciliary injection (violaceous redness most marked around the limbus)",
+        "Corneal epithelial oedema, often with a hazy view of the iris and fundus",
+        "A shallow peripheral anterior chamber, usually with flare",
+        "Attacks are often triggered by things that dilate the pupil"
+      ],
+      "offSection": [
+        "Hypermetropia and short axial length",
+        "Older age, as the lens thickens and moves forward",
+        "Female sex",
+        "A family history of angle closure",
+        "A shallow anterior chamber and a thick or anteriorly placed lens",
+        "Angle usually dangerously narrow on gonioscopy"
+      ],
       "distractor": []
     },
     {
       "id": "kp0",
       "source": "examiner_notes.key_points[0]",
-      "gold": ["A beta-blocker such as timolol 0.5%", "so pilocarpine works better once the pressure has started to fall", "Acetazolamide 500 mg, given intravenously"],
-      "alsoSupports": ["The aims are to lower the IOP quickly", "Hyperosmotic agents if the pressure stays high"],
+      "gold": [
+        "A beta-blocker such as timolol 0.5%",
+        "so pilocarpine works better once the pressure has started to fall",
+        "Acetazolamide 500 mg, given intravenously"
+      ],
+      "alsoSupports": [
+        "The aims are to lower the IOP quickly",
+        "Hyperosmotic agents if the pressure stays high",
+        "A topical carbonic anhydrase inhibitor can be added",
+        "Pilocarpine 2% constricts the pupil and pulls the iris away from the angle"
+      ],
+      "offSection": [
+        "Timolol, betaxolol",
+        "Brimonidine, apraclonidine",
+        "Reduce production; brimonidine also increases uveoscleral outflow",
+        "Dorzolamide, brinzolamide",
+        "Contract the ciliary muscle, pulling the scleral spur",
+        "Draw water out of the vitreous"
+      ],
       "distractor": []
     },
     {
       "id": "kp1",
       "source": "examiner_notes.key_points[1]",
-      "gold": ["Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it"],
+      "gold": [
+        "Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it"
+      ],
       "alsoSupports": [],
-      "distractor": ["Avoid acetazolamide, which is itself a sulfonamide", "Stevens–Johnson syndrome; sulfonamide allergy, kidney disease, sickle cell disease", "Stinging, bitter taste; sulfonamide allergy"]
+      "offSection": [
+        "Stevens–Johnson syndrome; sulfonamide allergy, kidney disease, sickle cell disease"
+      ],
+      "distractor": [
+        "Avoid acetazolamide, which is itself a sulfonamide",
+        "Stinging, bitter taste; sulfonamide allergy"
+      ]
     },
     {
       "id": "kp2",
       "source": "examiner_notes.key_points[2]",
-      "gold": ["Any trigger drug should be stopped and the patient warned about others", "Drugs with anticholinergic effects, including some antihistamines"],
+      "gold": [
+        "Any trigger drug should be stopped and the patient warned about others",
+        "Drugs with anticholinergic effects, including some antihistamines"
+      ],
       "alsoSupports": [],
-      "distractor": ["Stop the drug (with the prescriber) and use cycloplegics"]
+      "offSection": [],
+      "distractor": [
+        "Stop the drug (with the prescriber) and use cycloplegics"
+      ]
     },
     {
       "id": "kp3",
       "source": "examiner_notes.key_points[3]",
-      "gold": ["give analgesia and an antiemetic"],
+      "gold": [
+        "give analgesia and an antiemetic"
+      ],
       "alsoSupports": [],
+      "offSection": [],
       "distractor": []
     },
     {
       "id": "kp4",
       "source": "examiner_notes.key_points[4]",
-      "gold": ["Laser peripheral iridotomy (LPI) in the affected eye once the cornea has cleared", "Prophylactic LPI in the fellow eye, because without treatment"],
-      "alsoSupports": ["the priority is prompt iridotomy in both eyes", "After acute primary angle closure, in both eyes"],
+      "gold": [
+        "Laser peripheral iridotomy (LPI) in the affected eye once the cornea has cleared",
+        "Prophylactic LPI in the fellow eye, because without treatment"
+      ],
+      "alsoSupports": [
+        "the priority is prompt iridotomy in both eyes",
+        "Early laser iridotomy, after clearing the cornea with topical glycerol"
+      ],
+      "offSection": [
+        "After acute primary angle closure, in both eyes",
+        "This is the most common mechanism and is relieved by a peripheral iridotomy",
+        "Laser peripheral iridotomy relieves pupil block in angle closure"
+      ],
       "distractor": []
     },
     {
       "id": "kp5",
       "source": "examiner_notes.key_points[5]",
-      "gold": ["Once the eye has settled, repeat gonioscopy"],
-      "alsoSupports": [],
+      "gold": [
+        "Once the eye has settled, repeat gonioscopy"
+      ],
+      "alsoSupports": [
+        "After the attack: an initially low IOP"
+      ],
+      "offSection": [],
       "distractor": []
     },
     {
       "id": "fu0",
       "source": "examiner_notes.follow_up_ideas[0]",
-      "gold": ["Prophylactic LPI in the fellow eye, because without treatment"],
-      "alsoSupports": ["the priority is prompt iridotomy in both eyes", "A narrow angle in the other eye, which is an important diagnostic clue"],
+      "gold": [
+        "Prophylactic LPI in the fellow eye, because without treatment"
+      ],
+      "alsoSupports": [
+        "the priority is prompt iridotomy in both eyes",
+        "A narrow angle in the other eye, which is an important diagnostic clue",
+        "The aims are to lower the IOP quickly"
+      ],
+      "offSection": [
+        "After acute primary angle closure, in both eyes"
+      ],
       "distractor": []
     },
     {
       "id": "fu1",
       "source": "examiner_notes.follow_up_ideas[1]",
-      "gold": ["The iris sphincter is often ischaemic and does not respond while the IOP is very high"],
-      "alsoSupports": [],
+      "gold": [
+        "The iris sphincter is often ischaemic and does not respond while the IOP is very high"
+      ],
+      "alsoSupports": [
+        "A fixed, mid-dilated, often vertically oval pupil"
+      ],
+      "offSection": [],
       "distractor": []
     },
     {
       "id": "fu2",
       "source": "examiner_notes.follow_up_ideas[2]",
-      "gold": ["Early laser iridotomy, after clearing the cornea with topical glycerol", "Laser peripheral iridoplasty to pull the peripheral iris away from the angle", "Hyperosmotic agents if the pressure stays high", "Review the diagnosis, for example aqueous misdirection"],
-      "alsoSupports": ["Anterior chamber paracentesis as a temporary measure", "Surgical peripheral iridectomy, early lens extraction"],
+      "gold": [
+        "Early laser iridotomy, after clearing the cornea with topical glycerol",
+        "Laser peripheral iridoplasty to pull the peripheral iris away from the angle",
+        "Hyperosmotic agents if the pressure stays high",
+        "Review the diagnosis, for example aqueous misdirection"
+      ],
+      "alsoSupports": [
+        "Anterior chamber paracentesis as a temporary measure",
+        "Surgical peripheral iridectomy, early lens extraction",
+        "Indenting the central cornea with a gonioscopy lens"
+      ],
+      "offSection": [
+        "Laser iridoplasty contracts the peripheral iris to pull it away from the angle",
+        "Draw water out of the vitreous"
+      ],
       "distractor": []
     }
   ],

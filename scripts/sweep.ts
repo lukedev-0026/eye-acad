@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+
 import { loadContext } from '../src/eval/context';
 import { captureEnv, modelInfo, swapUsedMb } from '../src/eval/env';
 import {
@@ -31,12 +32,12 @@ import { rank } from '../src/eval/rule';
 import { appendRow, configId, rowKey, runCases, summarise } from '../src/eval/run';
 import type { ResultRow } from '../src/eval/run';
 import { candidatesFor, loadSweep } from '../src/eval/sweep-data';
+import type { EvalCase } from '../src/eval/types';
 import { loadStepsConfig } from '../src/server/config.server';
 import { EMBEDDING_MODEL } from '../src/server/embed.server';
 import { ollamaHost } from '../src/server/llm/ollama.server';
 import { STEP_IDS } from '../src/server/llm/types';
 import type { StepId, StepSettings } from '../src/server/llm/types';
-import type { EvalCase } from '../src/eval/types';
 
 const { values: args } = parseArgs({
   options: {

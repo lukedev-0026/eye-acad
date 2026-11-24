@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { useEffect, useReducer, useRef, useState } from 'react';
+
 import { RevisionCardView } from '../../components/RevisionCardView';
 import { TalkButton } from '../../components/TalkButton';
 import type { PublicAttempt, RevealedItem, Turn } from '../../lib/attempt-types';

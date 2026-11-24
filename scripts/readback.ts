@@ -5,8 +5,10 @@
 //   pnpm readback            every row
 //   pnpm readback iop_right  one row, printing the transcript
 import { writeFile } from 'node:fs/promises';
-import { buildCatalogue } from '../src/server/catalogue';
+
+import { appendRow } from '../src/eval/run';
 import { loadCase } from '../src/server/case.server';
+import { buildCatalogue } from '../src/server/catalogue';
 import { renderFinding, renderHistory } from '../src/server/render';
 import type { RenderedItem } from '../src/server/render';
 import {
@@ -17,7 +19,6 @@ import {
   transcribe,
   voiceAvailable,
 } from '../src/server/voice.server';
-import { appendRow } from '../src/eval/run';
 
 if (!voiceAvailable()) {
   console.error('No DEEPGRAM_API_KEY in .env.local, so nothing can be spoken or heard.');

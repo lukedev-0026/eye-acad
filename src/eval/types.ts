@@ -1,5 +1,5 @@
-import type { Catalogue } from '../server/catalogue';
 import type { ExaminerNotes, PublicCase } from '../server/case-schema';
+import type { Catalogue } from '../server/catalogue';
 import type { CallOutcome, StepId, StepSettings } from '../server/llm/types';
 import type { NoteIndex } from '../server/note-types';
 

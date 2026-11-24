@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
+
 import { pageLabel } from '../src/server/note-types';
 import type { NoteIndex } from '../src/server/note-types';
 import { Bm25, retrieve, stem, tokenize } from '../src/server/retrieve';

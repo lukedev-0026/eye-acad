@@ -5,12 +5,13 @@
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+
+import { loadContext } from '../src/eval/context';
 import { CEILING_MS, describe, sizeOf, startSettings } from '../src/eval/grid';
 import { limitModels, rank, tieBand } from '../src/eval/rule';
 import type { Ranked } from '../src/eval/rule';
 import { configId, summarise } from '../src/eval/run';
 import type { ResultRow, Summary } from '../src/eval/run';
-import { loadContext } from '../src/eval/context';
 import { candidatesFor, loadSweep, regrade } from '../src/eval/sweep-data';
 import { sweepMarkdown } from '../src/eval/sweep-markdown';
 import { loadStepsConfig } from '../src/server/config.server';

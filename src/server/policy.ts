@@ -1,5 +1,5 @@
-import type { Catalogue } from './catalogue';
 import type { PublicCase } from './case-schema';
+import type { Catalogue } from './catalogue';
 import { LINES } from './lines';
 import { composeSpeechParts, renderFinding, renderHistory } from './render';
 import type { RenderedItem } from './render';

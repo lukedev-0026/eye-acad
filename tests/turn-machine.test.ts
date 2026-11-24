@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { canTraineeAct, nextTurnState } from '../src/lib/turn-machine';
 
 describe('whose turn it is', () => {

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+
 import { auth } from './firebase';
 
 // undefined: not known yet. null: signed out.

@@ -5,6 +5,7 @@
 import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
+
 import { EMBEDDING_MODEL, embed } from '../src/server/embed.server';
 import { NOTE_INDEX, NOTE_PDF, sha256OfFile } from '../src/server/note-index.server';
 import { parseNoteXml } from '../src/server/note-parse';

@@ -4,7 +4,9 @@
 //   pnpm sweep:preflight [--models small,medium,large]
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+
 import { z } from 'zod';
+
 import { loadContext } from '../src/eval/context';
 import { captureEnv, modelInfo } from '../src/eval/env';
 import { NUM_CTX, SIZES, settingsFor } from '../src/eval/grid';

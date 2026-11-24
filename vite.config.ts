@@ -1,7 +1,8 @@
 import path from 'node:path';
-import { defineConfig } from 'vite';
+
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 const root = import.meta.dirname;
 

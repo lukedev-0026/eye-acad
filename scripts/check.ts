@@ -8,16 +8,17 @@
 import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
-import { loadStepsConfig } from '../src/server/config.server';
-import { STEP_IDS } from '../src/server/llm/types';
-import type { StepId } from '../src/server/llm/types';
-import { checksMarkdown } from '../src/eval/checks-report';
+
 import { runChain } from '../src/eval/chain';
+import { checksMarkdown } from '../src/eval/checks-report';
 import { loadContext } from '../src/eval/context';
 import { captureEnv, modelInfo } from '../src/eval/env';
 import { STEP_EVALS } from '../src/eval/registry';
 import { runRequiredChecks } from '../src/eval/required';
 import { appendRow, readRows, resultsFile, runCases, selfTest, summarise } from '../src/eval/run';
+import { loadStepsConfig } from '../src/server/config.server';
+import { STEP_IDS } from '../src/server/llm/types';
+import type { StepId } from '../src/server/llm/types';
 
 const { values: args } = parseArgs({
   options: {

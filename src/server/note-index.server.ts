@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+
 import { EMBEDDING_MODEL } from './embed.server';
 import type { NoteIndex } from './note-types';
 

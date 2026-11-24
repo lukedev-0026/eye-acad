@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
-import { buildCatalogue } from '../src/server/catalogue';
+
 import { CaseFileSchema } from '../src/server/case-schema';
 import type { PublicCase } from '../src/server/case-schema';
+import { buildCatalogue } from '../src/server/catalogue';
 import { LINES } from '../src/server/lines';
 import { decide, replyFor } from '../src/server/policy';
 import { normaliseSelectorOutput, selectorSchema } from '../src/server/selector';

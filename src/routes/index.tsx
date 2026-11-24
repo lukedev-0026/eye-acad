@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from '../lib/firebase';
 import { useAuthUser } from '../lib/use-auth';
 

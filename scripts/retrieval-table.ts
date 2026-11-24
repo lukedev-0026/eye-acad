@@ -3,6 +3,7 @@
 // evals/retrieval-table.md. No language model is involved.
 //   pnpm retrieval-table
 import { readFile, writeFile } from 'node:fs/promises';
+
 import { loadExaminerNotes } from '../src/server/case.server';
 import { embed } from '../src/server/embed.server';
 import { loadNoteIndex } from '../src/server/note-index.server';

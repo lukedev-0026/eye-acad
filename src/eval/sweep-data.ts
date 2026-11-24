@@ -1,9 +1,9 @@
 import type { StepId, StepSettings } from '../server/llm/types';
 import { STEP_EVALS } from './registry';
-import { readRows, resultsFile, rowKey, summarise } from './run';
-import type { EvalCase, EvalContext } from './types';
-import type { ResultRow, Summary } from './run';
 import type { Candidate } from './rule';
+import { readRows, resultsFile, rowKey, summarise } from './run';
+import type { ResultRow, Summary } from './run';
+import type { EvalCase, EvalContext } from './types';
 
 // Everything the sweep has recorded so far, read back from its results file.
 // The runner uses it to resume; the report and the chart use nothing else.

@@ -3,6 +3,7 @@
 // config/steps.small.json (the small model everywhere, to show where weak
 // settings fail end to end).
 import { writeFile } from 'node:fs/promises';
+
 import { settingsFor, startSettings } from '../src/eval/grid';
 import { STEP_IDS } from '../src/server/llm/types';
 

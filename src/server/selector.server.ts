@@ -1,5 +1,5 @@
-import { buildCatalogue } from './catalogue';
 import type { PublicCase } from './case-schema';
+import { buildCatalogue } from './catalogue';
 import { callStep, describeJsonShape } from './llm/call-step.server';
 import type { CallResult, StepSettings } from './llm/types';
 import { decide } from './policy';

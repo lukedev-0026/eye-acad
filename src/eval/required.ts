@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+
 import { caseFilePath } from '../server/case.server';
 import { LINES } from '../server/lines';
 import type { StepsConfig } from '../server/llm/types';
@@ -183,7 +184,7 @@ export async function runRequiredChecks(
       const started = performance.now();
       const seeded = structuredClone(config);
       for (const s of Object.values(seeded.steps)) s.seed = trial;
-      let observed = '';
+      let observed: string;
       let pass = false;
       let retrieved: RequiredRow['retrieved'];
       let cited: RequiredRow['cited'];
@@ -249,7 +250,7 @@ export async function runRequiredChecks(
         const started = performance.now();
         const seeded = structuredClone(config);
         for (const s of Object.values(seeded.steps)) s.seed = trial;
-        let observed = '';
+        let observed: string;
         let pass = false;
         let retrieved: RequiredRow['retrieved'];
         try {

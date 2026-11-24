@@ -1,5 +1,6 @@
 import { Link, Navigate, Outlet, createFileRoute } from '@tanstack/react-router';
 import { signOut } from 'firebase/auth';
+
 import { auth } from '../lib/firebase';
 import { useAuthUser } from '../lib/use-auth';
 

@@ -4,6 +4,7 @@
 //   pnpm sweep:chart
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+
 import { loadContext } from '../src/eval/context';
 import { CEILING_MS } from '../src/eval/grid';
 import { STEP_EVALS } from '../src/eval/registry';

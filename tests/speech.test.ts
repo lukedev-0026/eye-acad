@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { speakLabel, speakValue } from '../src/server/speech';
 
 describe('speakValue', () => {

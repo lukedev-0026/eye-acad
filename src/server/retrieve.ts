@@ -37,12 +37,12 @@ export class Bm25 {
   private readonly lengths: Array<number>;
   private readonly averageLength: number;
   private readonly documentFrequency = new Map<string, number>();
+  private readonly k1: number;
+  private readonly b: number;
 
-  constructor(
-    documents: Array<Array<string>>,
-    private readonly k1 = 1.2,
-    private readonly b = 0.75,
-  ) {
+  constructor(documents: Array<Array<string>>, k1 = 1.2, b = 0.75) {
+    this.k1 = k1;
+    this.b = b;
     this.docs = documents.map((tokens) => {
       const counts = new Map<string, number>();
       for (const t of tokens) counts.set(t, (counts.get(t) ?? 0) + 1);

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { Catalogue } from './catalogue';
 
 // What the selector is allowed to say: choices from closed lists and one

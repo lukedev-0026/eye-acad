@@ -1,12 +1,12 @@
 import { AttemptError, MAX_TURNS, pushTurn, readAttempt, reveal, trace, updateAttempt } from './attempts.server';
-import { buildCatalogue } from './catalogue';
 import { loadCase } from './case.server';
+import { buildCatalogue } from './catalogue';
 import { loadStepsConfig } from './config.server';
 import { LINES } from './lines';
 import { fixedReply, replyFor } from './policy';
 import type { ExaminerReply } from './policy';
-import { MAX_UTTERANCE_CHARS, runSelector } from './selector.server';
 import { renderFinding, renderHistory } from './render';
+import { MAX_UTTERANCE_CHARS, runSelector } from './selector.server';
 import { prepareSpeech, speakParts, transcribe } from './voice.server';
 import type { SpokenReply } from './voice.server';
 

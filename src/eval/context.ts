@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
-import { buildCatalogue } from '../server/catalogue';
+
 import { loadCase, loadCitationGuidance, loadExaminerNotes } from '../server/case.server';
+import { buildCatalogue } from '../server/catalogue';
 import { embed } from '../server/embed.server';
 import { loadNoteIndex } from '../server/note-index.server';
 import type { NoteChunk, NoteIndex, NoteSentence } from '../server/note-types';

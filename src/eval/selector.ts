@@ -1,7 +1,7 @@
-import { historyLabel } from '../server/render';
 import type { CallResult } from '../server/llm/types';
-import { runSelector } from '../server/selector.server';
+import { historyLabel } from '../server/render';
 import type { SelectorRequest } from '../server/selector';
+import { runSelector } from '../server/selector.server';
 import { readCases } from './context';
 import type { EvalCase, StepEval, StepRun } from './types';
 

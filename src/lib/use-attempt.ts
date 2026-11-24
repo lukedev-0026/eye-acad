@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
 import { collection, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+
 import { PublicAttemptSchema } from './attempt-types';
 import type { PublicAttempt } from './attempt-types';
 import { db } from './firebase';

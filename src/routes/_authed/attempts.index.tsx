@@ -1,7 +1,8 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { auth } from '../../lib/firebase';
+
 import type { Phase } from '../../lib/attempt-types';
+import { auth } from '../../lib/firebase';
 import { useAttemptList } from '../../lib/use-attempt';
 import { startAttempt } from '../../server/functions';
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { settingsFor } from '../src/eval/grid';
 import { limitModels, rank, tieBand } from '../src/eval/rule';
 import type { Candidate } from '../src/eval/rule';

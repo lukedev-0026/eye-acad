@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { followUpPrompt } from '@/application/prompts/followup.prompt';
 import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
+import { itemAt } from '@/common/arrays';
 import { MAX_ANSWER_CHARS } from '@/domain/attempt/attempt';
 import type { ExaminerNotes } from '@/domain/case/case.schema';
 import { LINES } from '@/domain/examiner/lines';
@@ -97,7 +98,7 @@ export async function runFollowUp(
   // Fallback: a question from the case file, word for word. If the model never
   // gave a usable choice, code picks the one closest to what was said.
   const ideaIndex = lastIdea ?? closestIdea(answer, ideas);
-  return { question: ideas[ideaIndex], respondingTo: goodAnchor, path: 'supplied', ideaIndex, attempts };
+  return { question: itemAt(ideas, ideaIndex), respondingTo: goodAnchor, path: 'supplied', ideaIndex, attempts };
 }
 
 // What the examiner says aloud. A supplied question is prefaced with the

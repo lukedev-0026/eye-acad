@@ -87,8 +87,13 @@ export async function runRevision(
   }
 
   // The quotation comes from one passage: the one the first reference is in.
-  const picked = call.value.sentence_refs.map((ref) => byRef.get(ref)!);
-  const chunk = picked[0].chunk;
+  const picked = call.value.sentence_refs.flatMap((ref) => {
+    const hit = byRef.get(ref);
+    return hit ? [hit] : [];
+  });
+  const first = picked[0];
+  if (!first) return { call, outcome: 'no_support', ...none };
+  const chunk = first.chunk;
   const sentences = chunk.sentences
     .filter((s) => picked.some((p) => p.chunk.id === chunk.id && p.sentence.id === s.id))
     .slice(0, 2);

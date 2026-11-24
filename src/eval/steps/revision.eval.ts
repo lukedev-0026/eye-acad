@@ -141,8 +141,9 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
 
   ideal(c, ctx) {
     if (!c.expect.support) return { ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false };
-    const t = spec(ctx, c.expect.targetId)!;
-    const { sentence } = findSentence(ctx.index, t.gold[0]);
+    const gold = spec(ctx, c.expect.targetId)?.gold[0];
+    if (!gold) throw new InvalidEvalCaseError(`${c.id}: no supporting sentence listed for ${c.expect.targetId}`);
+    const { sentence } = findSentence(ctx.index, gold);
     return {
       outcome: 'supported',
       cited: [sentence.id],

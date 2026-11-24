@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 
 import { produceRevision } from '@/application/revision/produce-revision';
 import { runSelector } from '@/application/steps/selector.step';
+import { itemAt } from '@/common/arrays';
+import { describeError } from '@/common/errors/to-error';
 import { LINES } from '@/domain/examiner/lines';
 import { replyFor } from '@/domain/examiner/policy';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
@@ -155,7 +157,7 @@ export async function runRequiredChecks(
         const speechNeeds = expectation!.mustContain.filter((s) => /^\D*$/.test(s) || !/[a-zA-Z]/.test(s));
         pass =
           reply.items.length === 1 &&
-          reply.items[0].id === a.row &&
+          reply.items[0]?.id === a.row &&
           expectation!.mustContain.every((s) => shown.includes(s)) &&
           // Spoken units are said in full, so the spoken check is on the eye,
           // the reason and every number.
@@ -218,9 +220,9 @@ export async function runRequiredChecks(
             ? `Revision point: "${card.point}". Cited ${card.page}: "${card.excerpt}". Support check: supported.`
             : `No support reported (${trace.revision?.outcome ?? 'search'}; support check: ${trace.verifier ? (trace.verifier.supported ? 'supported' : 'not supported') : 'not reached'}).`);
       } catch (e) {
-        observed = `Could not run: ${String(e)}`;
+        observed = `Could not run: ${describeError(e)}`;
       }
-      const g = findSentence(ctx.index, t.gold[0]);
+      const g = findSentence(ctx.index, itemAt(t.gold, 0));
       await record({
         check: '3',
         name: `citation: ${c.name}`,
@@ -278,7 +280,7 @@ export async function runRequiredChecks(
               ? `"${card.message}" No page, no quotation.`
               : `Cited ${card.page}: "${card.excerpt}" for "${card.point}"`;
         } catch (e) {
-          observed = `Could not run: ${String(e)}`;
+          observed = `Could not run: ${describeError(e)}`;
         }
         await record({
           check: '3',

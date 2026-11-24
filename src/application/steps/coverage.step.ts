@@ -76,7 +76,9 @@ export async function runCoverage(
   }
 
   const judged: Array<JudgedItem> = items.map((item) => {
-    const j = call.value.items[item.id];
+    // The reply's shape guarantees a judgement for every item; if one were
+    // ever missing, the safe reading is that the item was not covered.
+    const j = call.value.items[item.id] ?? { quote: '', status: 'not_covered' as const };
     const claimed = j.status !== 'not_covered';
     // "Covered" must come with the trainee's own words. A claim without a real
     // quotation is not believed: a gap wrongly shown is cheaper than a gap
@@ -98,7 +100,7 @@ export async function runCoverage(
     target = named;
     targetChosenBy = 'model';
   } else if (open.length) {
-    target = open[0];
+    target = open[0] ?? null;
     targetChosenBy = 'order';
   } else {
     const partial = judged.find((i) => i.status === 'partial');

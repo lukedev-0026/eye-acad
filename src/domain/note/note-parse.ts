@@ -1,3 +1,5 @@
+import { itemAt } from '@/common/arrays';
+
 import type { NoteChunk, NoteSentence } from './note.schema';
 
 // Turns the layout XML that poppler's `pdftohtml -xml` produces into passages.
@@ -36,36 +38,39 @@ export type ParsedPage = { number: number; footerNumber: number | null };
 
 function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> } {
   const fonts = new Map<string, Font>();
-  for (const m of xml.matchAll(/<fontspec id="(\d+)" size="(\d+)"[^>]*color="(#[0-9a-fA-F]+)"/g)) {
-    fonts.set(m[1], { size: Number(m[2]), color: m[3].toLowerCase() });
+  for (const [, id = '', size = '', color = ''] of xml.matchAll(
+    /<fontspec id="(\d+)" size="(\d+)"[^>]*color="(#[0-9a-fA-F]+)"/g,
+  )) {
+    fonts.set(id, { size: Number(size), color: color.toLowerCase() });
   }
   const items: Array<Item> = [];
   const pages: Array<ParsedPage> = [];
   for (const pageXml of xml.split(/(?=<page number=)/).slice(1)) {
     const head = /<page number="(\d+)"[^>]*height="(\d+)"/.exec(pageXml);
     if (!head) continue;
-    const page = Number(head[1]);
-    const height = Number(head[2]);
+    const [, pageNumber = '', pageHeight = ''] = head;
+    const page = Number(pageNumber);
+    const height = Number(pageHeight);
     let footerNumber: number | null = null;
-    for (const m of pageXml.matchAll(
+    for (const [, topText = '', leftText = '', fontId = '', inner = ''] of pageXml.matchAll(
       /<text top="(\d+)" left="(\d+)" width="\d+" height="\d+" font="(\d+)">([\s\S]*?)<\/text>/g,
     )) {
-      const top = Number(m[1]);
-      const text = decode(m[4]);
+      const top = Number(topText);
+      const text = decode(inner);
       // Running header and footer, by position.
       if (top < height * 0.05) continue;
       if (top > height * 0.95) {
         if (/^\s*\d+\s*$/.test(text)) footerNumber = Number(text);
         continue;
       }
-      const font = fonts.get(m[3]) ?? { size: 15, color: '#000000' };
+      const font = fonts.get(fontId) ?? { size: 15, color: '#000000' };
       items.push({
         page,
         top,
-        left: Number(m[2]),
+        left: Number(leftText),
         size: font.size,
         white: font.color === '#ffffff',
-        bold: /<b>/.test(m[4]),
+        bold: /<b>/.test(inner),
         text,
       });
     }
@@ -167,14 +172,16 @@ export function parseNoteXml(xml: string): ParsedNote {
   const lines: Array<Line | { table: Array<Item>; page: number } | { heading: Item; role: 'h2' | 'h3' | 'title' }> = [];
   let tableRun: Array<Item> = [];
   const flushTable = () => {
-    if (tableRun.length) lines.push({ table: tableRun, page: tableRun[0].page });
+    const first = tableRun[0];
+    if (first) lines.push({ table: tableRun, page: first.page });
     tableRun = [];
   };
   for (const item of items) {
     const role = roleOf(item);
     if (role === 'small') continue;
     if (role === 'table_head' || role === 'table_cell') {
-      if (tableRun.length && tableRun[0].page !== item.page) flushTable();
+      const runStart = tableRun[0];
+      if (runStart && runStart.page !== item.page) flushTable();
       tableRun.push(item);
       continue;
     }
@@ -231,7 +238,7 @@ export function parseNoteXml(xml: string): ParsedNote {
         continues = line.top - lastBody.top <= 27 && Math.abs(line.left - lastBody.left) <= 10 && open.kind === kind;
       } else {
         continues =
-          open.kind === kind && !ENDS_SENTENCE.test(open.text) && /^[a-z0-9]/.test(text.trim()) && !line.parts[0].bold;
+          open.kind === kind && !ENDS_SENTENCE.test(open.text) && /^[a-z0-9]/.test(text.trim()) && !line.parts[0]?.bold;
       }
     }
     if (!continues) {
@@ -240,7 +247,7 @@ export function parseNoteXml(xml: string): ParsedNote {
       // A bold opening that ends in a full stop or colon is a label for the
       // passage. Bold text that runs straight into the sentence is part of it.
       const first = line.parts[0];
-      if (first.bold && line.parts.length > 1 && /[.:]\s*$/.test(first.text)) {
+      if (first?.bold && line.parts.length > 1 && /[.:]\s*$/.test(first.text)) {
         open.leadIn = first.text.trim();
         appendLine(
           open,
@@ -267,7 +274,7 @@ export function parseNoteXml(xml: string): ParsedNote {
     const columnOf = (c: Item) => {
       let best = 0;
       for (const [i, h] of head.entries()) {
-        if (Math.abs(c.left - h.left) < Math.abs(c.left - head[best].left)) best = i;
+        if (Math.abs(c.left - h.left) < Math.abs(c.left - itemAt(head, best).left)) best = i;
       }
       return best;
     };
@@ -295,9 +302,9 @@ export function parseNoteXml(xml: string): ParsedNote {
       return {
         kind: 'table_row' as const,
         headings,
-        label: /^\d+$/.test(name) ? `${head[0].text.trim()} ${name}` : name,
+        label: /^\d+$/.test(name) ? `${itemAt(head, 0).text.trim()} ${name}` : name,
         cells: head.slice(1).map((h, k) => ({ column: h.text.trim(), text: join(k + 1) })),
-        page: mine[0]?.page ?? cells[0].page,
+        page: mine[0]?.page ?? itemAt(cells, 0).page,
       };
     });
   }

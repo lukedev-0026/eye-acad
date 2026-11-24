@@ -72,6 +72,7 @@ export function checksMarkdown(all: Array<Record<string, unknown>>): string {
     const [check, name] = key.split('|');
     const passed = rows.filter((r) => r.pass).length;
     const example = rows.find((r) => !r.pass) ?? rows[0];
+    if (!example) continue;
     out.push(`### Check ${check}: ${name}`, '');
     out.push(`- **Input:** ${clip(example.input, 400)}`);
     out.push(`- **Expected:** ${example.expected}`);

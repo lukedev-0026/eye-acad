@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { itemAt } from '@/common/arrays';
 import type { Summary } from '@/eval/run/summarise';
 import { limitModels, rank, tieBand } from '@/eval/sweep/choosing-rule';
 import type { Candidate } from '@/eval/sweep/choosing-rule';
@@ -44,15 +45,15 @@ describe('the choosing rule', () => {
       ),
       cand('clean', { size: 'medium', thinking: false, forceFormat: true }, { casesAllPass: 17 }),
     ]);
-    expect(r[0].configId).toBe('clean');
-    expect(r[1].eligible).toBe(false);
+    expect(r[0]?.configId).toBe('clean');
+    expect(r[1]?.eligible).toBe(false);
   });
   it('over the speed ceiling is out', () => {
     const r = rank('selector', [
       cand('slow', { size: 'large', thinking: true, forceFormat: true }, { casesAllPass: 20, medianMs: 9000 }),
       cand('fast', { size: 'small', thinking: false, forceFormat: true }, { casesAllPass: 16, medianMs: 600 }),
     ]);
-    expect(r[0].configId).toBe('fast');
+    expect(r[0]?.configId).toBe('fast');
   });
   it('within one case counts as tied, and the faster one wins the tie', () => {
     expect(tieBand(20)).toBe(1);
@@ -62,14 +63,14 @@ describe('the choosing rule', () => {
       cand('17-fastest', { size: 'small', thinking: false, forceFormat: false }, { casesAllPass: 17, medianMs: 300 }),
     ]);
     expect(r.map((c) => c.configId)).toEqual(['19-fast', '20-slow', '17-fastest']);
-    expect(r[2].tier).toBeGreaterThan(1);
+    expect(r[2]?.tier).toBeGreaterThan(1);
   });
   it('a few milliseconds do not decide a tie: the next tie-break does', () => {
     const r = rank('selector', [
       cand('unforced-519', { size: 'small', thinking: false, forceFormat: false }, { casesAllPass: 19, medianMs: 519 }),
       cand('forced-536', { size: 'small', thinking: false, forceFormat: true }, { casesAllPass: 19, medianMs: 536 }),
     ]);
-    expect(r[0].configId).toBe('forced-536');
+    expect(r[0]?.configId).toBe('forced-536');
   });
   it('a clear difference in accuracy beats speed', () => {
     const r = rank('selector', [
@@ -80,14 +81,14 @@ describe('the choosing rule', () => {
         { casesAllPass: 19, medianMs: 1200 },
       ),
     ]);
-    expect(r[0].configId).toBe('slower-strong');
+    expect(r[0]?.configId).toBe('slower-strong');
   });
   it('when everything has a costly error, the fewest wins and none is called eligible', () => {
     const r = rank('selector', [
       cand('two', { size: 'medium', thinking: false, forceFormat: true }, { costly: 2 }),
       cand('one', { size: 'small', thinking: false, forceFormat: true }, { costly: 1, casesAllPass: 15 }),
     ]);
-    expect(r[0].configId).toBe('one');
+    expect(r[0]?.configId).toBe('one');
     expect(r.every((c) => !c.eligible)).toBe(true);
   });
   it('a stopped configuration is never chosen', () => {
@@ -98,14 +99,14 @@ describe('the choosing rule', () => {
       },
       cand('ok', { size: 'medium', thinking: false, forceFormat: true }, { casesAllPass: 12 }),
     ]);
-    expect(r[0].configId).toBe('ok');
+    expect(r[0]?.configId).toBe('ok');
   });
 });
 
 describe('at most two models', () => {
   it('moves the step on the least-used model onto one of the others', () => {
     const mk = (id: string, size: 'small' | 'medium' | 'large') =>
-      rank('selector', [cand(id, { size, thinking: false, forceFormat: true }, {})])[0];
+      itemAt(rank('selector', [cand(id, { size, thinking: false, forceFormat: true }, {})]), 0);
     const ranked = {
       selector: [mk('s-small', 'small'), mk('s-medium', 'medium')],
       followup: [mk('f-medium', 'medium')],

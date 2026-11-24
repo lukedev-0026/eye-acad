@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { itemAt } from '@/common/arrays';
 import { pageLabel } from '@/domain/note/note-text';
 import type { NoteIndex } from '@/domain/note/note.schema';
 import { Bm25, retrieve, stem, tokenize } from '@/domain/note/retrieve';
@@ -50,8 +51,8 @@ describe.skipIf(!supplied)('the supplied PDF', () => {
   it('keeps the one bullet that runs across a page break in one piece', () => {
     const crossing = index.chunks.filter((c) => c.pages.length > 1);
     expect(crossing).toHaveLength(1);
-    expect(crossing[0].leadIn).toBe('Systemic carbonic anhydrase inhibitor.');
-    expect(crossing[0].pages).toEqual([5, 6]);
+    expect(crossing[0]?.leadIn).toBe('Systemic carbonic anhydrase inhibitor.');
+    expect(crossing[0]?.pages).toEqual([5, 6]);
   });
   it('puts the allergy warning on page 6, in the same passage as the drug named on page 5', () => {
     const { chunk, sentence: s } = sentence('Check for sulfonamide allergy');
@@ -59,8 +60,8 @@ describe.skipIf(!supplied)('the supplied PDF', () => {
       'Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it.',
     );
     expect(pageLabel(s.pages)).toBe('p. 6');
-    expect(chunk.sentences[0].text.startsWith('Acetazolamide 500 mg')).toBe(true);
-    expect(pageLabel(chunk.sentences[0].pages)).toBe('pp. 5–6');
+    expect(chunk.sentences[0]?.text.startsWith('Acetazolamide 500 mg')).toBe(true);
+    expect(pageLabel(chunk.sentences[0]?.pages ?? [])).toBe('pp. 5–6');
   });
   it('does not join the similar-looking break between pages 3 and 4', () => {
     const { chunk } = sentence('Blurred vision and coloured haloes around lights');
@@ -90,18 +91,20 @@ describe('search', () => {
   });
   it('scores a document that shares rare words above one that does not', () => {
     const bm25 = new Bm25([tokenize('acetazolamide and sulfonamide allergy'), tokenize('the pupil is fixed')]);
-    const [a, b] = bm25.scores(tokenize('sulfonamide allergy'));
-    expect(a).toBeGreaterThan(b);
-    expect(b).toBe(0);
+    const scores = bm25.scores(tokenize('sulfonamide allergy'));
+    expect(itemAt(scores, 0)).toBeGreaterThan(itemAt(scores, 1));
+    expect(scores[1]).toBe(0);
   });
   it.skipIf(!supplied)('finds the page 5-6 passage first for the allergy key point, by keywords alone', () => {
     const run = retrieve(index, { target: 'Note the sulfonamide allergy before giving acetazolamide' });
     expect(run.mode).toBe('keyword_only');
-    expect(run.results[0].chunk.leadIn).toBe('Systemic carbonic anhydrase inhibitor.');
+    expect(run.results[0]?.chunk.leadIn).toBe('Systemic carbonic anhydrase inhibitor.');
   });
   it('can leave a passage out, for the "no support" tests', () => {
-    const first = retrieve(index, { target: 'Note the sulfonamide allergy before giving acetazolamide' }).results[0]
-      .chunk.id;
+    const first = itemAt(
+      retrieve(index, { target: 'Note the sulfonamide allergy before giving acetazolamide' }).results,
+      0,
+    ).chunk.id;
     const without = retrieve(
       index,
       { target: 'Note the sulfonamide allergy before giving acetazolamide' },

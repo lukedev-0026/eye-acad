@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { STATUSES, coverageItems, runCoverage } from '@/application/steps/coverage.step';
 import type { Status } from '@/application/steps/coverage.step';
+import { itemAt } from '@/common/arrays';
 import { readCases } from '@/eval/eval-context';
 import type { StepEval } from '@/eval/eval.types';
 
@@ -53,7 +54,7 @@ export const coverageEval: StepEval<Input, Expect, Observed> = {
   },
 
   ideal: (c) => ({
-    target: c.expect.acceptableTargets[0],
+    target: itemAt(c.expect.acceptableTargets, 0),
     statuses: Object.fromEntries(
       Object.entries(c.expect.statuses).map(([id, s]) => [id, s === 'either' ? 'partial' : s]),
     ),
@@ -65,7 +66,7 @@ export const coverageEval: StepEval<Input, Expect, Observed> = {
     observe: (_c, ctx) => {
       const items = coverageItems(ctx.notes);
       return {
-        target: items[0].id,
+        target: itemAt(items, 0).id,
         statuses: Object.fromEntries(items.map((i) => [i.id, 'not_covered' as const])),
         chosenBy: 'order',
       };

@@ -105,7 +105,7 @@ describe('what the examiner does', () => {
     );
     expect(reply.speechParts).toHaveLength(3);
     expect(reply.speechParts.join(' ')).toBe(reply.speech);
-    expect(reply.speechParts[0].startsWith('Right eye. Pupil:')).toBe(true);
+    expect(reply.speechParts[0]?.startsWith('Right eye. Pupil:')).toBe(true);
     expect(reply.speechParts[2]).toBe(LINES.alsoNotRecorded);
   });
   it('keeps case-file order whatever order was asked', () => {

@@ -30,7 +30,10 @@ function simpler(a: Candidate, b: Candidate): number {
     c.summary.medianMs === null
       ? Number.POSITIVE_INFINITY
       : Math.round(Math.log(Math.max(1, c.summary.medianMs)) / Math.log(1.1));
-  const size = (c: Candidate) => SIZE_ORDER.indexOf(sizeOf(c.settings.model) as never);
+  const size = (c: Candidate) => {
+    const s = sizeOf(c.settings.model);
+    return s === 'other' ? -1 : SIZE_ORDER.indexOf(s);
+  };
   return (
     ms(a) - ms(b) ||
     size(a) - size(b) ||
@@ -102,7 +105,9 @@ export function limitModels(
     const use = new Map<string, Array<StepId>>();
     for (const s of steps) use.set(chosen[s].settings.model, [...(use.get(chosen[s].settings.model) ?? []), s]);
     if (use.size <= maxModels) break;
-    const [leastUsed, itsSteps] = [...use.entries()].sort((a, b) => a[1].length - b[1].length)[0];
+    const least = [...use.entries()].sort((a, b) => a[1].length - b[1].length)[0];
+    if (!least) break;
+    const [leastUsed, itsSteps] = least;
     for (const s of itsSteps) {
       const alternative = ranked[s].find((c) => c.settings.model !== leastUsed && use.has(c.settings.model));
       if (!alternative) return { chosen, changed };

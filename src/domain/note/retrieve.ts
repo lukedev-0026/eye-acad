@@ -1,3 +1,5 @@
+import { itemAt } from '@/common/arrays';
+
 import { searchText } from './note-text';
 import type { NoteChunk, NoteIndex } from './note.schema';
 
@@ -65,7 +67,7 @@ export class Bm25 {
         if (!tf) continue;
         const df = this.documentFrequency.get(term) ?? 0;
         const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));
-        const norm = 1 - this.b + this.b * (this.lengths[i] / this.averageLength);
+        const norm = 1 - this.b + this.b * (itemAt(this.lengths, i) / this.averageLength);
         score += (idf * tf * (this.k1 + 1)) / (tf + this.k1 * norm);
       }
       return score;
@@ -77,10 +79,11 @@ export function cosine(a: Array<number>, b: Array<number>): number {
   let dot = 0;
   let na = 0;
   let nb = 0;
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i];
-    na += a[i] * a[i];
-    nb += b[i] * b[i];
+  for (const [i, x] of a.entries()) {
+    const y = b[i] ?? 0;
+    dot += x * y;
+    na += x * x;
+    nb += y * y;
   }
   return na && nb ? dot / Math.sqrt(na * nb) : 0;
 }
@@ -140,8 +143,12 @@ export function retrieve(
   const keywordScores = new Bm25(tokens).scores(queryTokens);
   const keywordRanks = ranks(keywordScores);
 
-  const useMeaning = Boolean(query.vector) && chunks.every((c) => c.vector);
-  const cosines = useMeaning ? chunks.map((c) => cosine(query.vector!, c.vector!)) : null;
+  // Meaning-based search needs a vector for the query and for every passage.
+  const queryVector = query.vector ?? null;
+  const chunkVectors = chunks.map((c) => c.vector ?? null);
+  const cosines =
+    queryVector && chunkVectors.every((v) => v !== null) ? chunkVectors.map((v) => cosine(queryVector, v)) : null;
+  const useMeaning = cosines !== null;
   const meaningRanks = cosines ? ranks(cosines) : null;
 
   const targetWords = new Set(tokenize(query.target));
@@ -155,8 +162,8 @@ export function retrieve(
   const fused = chunks.map((_, i) => {
     // A passage with no keyword overlap at all contributes nothing from that
     // search, however the ties happened to fall.
-    const keyword = keywordScores[i] > 0 ? 1 / (RRF_K + keywordRanks[i]) : 0;
-    const meaning = meaningRanks ? 1 / (RRF_K + meaningRanks[i]) : 0;
+    const keyword = itemAt(keywordScores, i) > 0 ? 1 / (RRF_K + itemAt(keywordRanks, i)) : 0;
+    const meaning = meaningRanks ? 1 / (RRF_K + itemAt(meaningRanks, i)) : 0;
     return keyword + meaning;
   });
   const fusedRanks = ranks(fused);
@@ -164,12 +171,12 @@ export function retrieve(
   const ranking = chunks
     .map((chunk, i): Retrieved => ({
       chunk,
-      keywordRank: keywordRanks[i],
-      keywordScore: Number(keywordScores[i].toFixed(3)),
-      meaningRank: meaningRanks ? meaningRanks[i] : null,
-      cosine: cosines ? Number(cosines[i].toFixed(3)) : null,
-      fusedRank: fusedRanks[i],
-      sharedWords: shared[i],
+      keywordRank: itemAt(keywordRanks, i),
+      keywordScore: Number(itemAt(keywordScores, i).toFixed(3)),
+      meaningRank: meaningRanks ? itemAt(meaningRanks, i) : null,
+      cosine: cosines ? Number(itemAt(cosines, i).toFixed(3)) : null,
+      fusedRank: itemAt(fusedRanks, i),
+      sharedWords: itemAt(shared, i),
     }))
     .sort((a, b) => a.fusedRank - b.fusedRank);
 

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
@@ -9,7 +11,37 @@ import { CEILING_MS } from '@/eval/sweep/grid';
 // panel per AI step. It is drawn from the rows of the results table and
 // nothing else, as SVG text with no chart library.
 
-type CsvRow = Record<string, string>;
+// The columns of the results table the chart reads. Every value in a CSV file
+// is text.
+export const ChartRowSchema = z.object({
+  provider: z.string(),
+  stage: z.string(),
+  split: z.string(),
+  step: z.string(),
+  size: z.string(),
+  temperature: z.string(),
+  sampling: z.string(),
+  thinking: z.string(),
+  forced_format: z.string(),
+  prompt: z.string(),
+  status: z.string(),
+  is_start: z.string(),
+  is_chosen: z.string(),
+  cases_n: z.string(),
+  cases_all_pass_k: z.string(),
+  costly_errors: z.string(),
+  fallbacks: z.string(),
+  truncated: z.string(),
+  schema_invalid: z.string(),
+  timed_calls: z.string(),
+  median_ms: z.string(),
+  min_ms: z.string(),
+  max_ms: z.string(),
+  date_utc: z.string(),
+  ollama_version: z.string(),
+  power_mode: z.string(),
+});
+type CsvRow = z.infer<typeof ChartRowSchema>;
 
 // What a step that ignores its input scores on the tuning cases.
 export interface Floor {
@@ -49,6 +81,7 @@ const SIZE = {
   large: { label: 'large (27b)', shape: 'triangle', light: '#1baf7a', dark: '#199e70' },
 } as const;
 type SizeKey = keyof typeof SIZE;
+const isSizeKey = (value: string): value is SizeKey => value in SIZE;
 
 const STEP_TITLE: Record<StepId, string> = {
   selector: 'Menu-picker',
@@ -165,8 +198,8 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
       py += tries % 2 === 0 ? -(5 + tries * 2) : 5 + tries * 2;
     }
     placed.push({ px, py });
-    const size = SIZE[r.size as SizeKey];
-    if (!size) continue;
+    if (!isSizeKey(r.size)) continue;
+    const size = SIZE[r.size];
     const hollow = r.thinking === 'on';
     const lo = num(r.min_ms);
     const hi = num(r.max_ms);
@@ -294,7 +327,7 @@ const CSS = `
 // same way.
 export function sweepChartSvg(rows: Array<CsvRow>, floors: Record<StepId, Floor>): string {
   const seconds = rows
-    .flatMap((r) => [num(r.median_ms ?? ''), num(r.min_ms ?? ''), num(r.max_ms ?? '')])
+    .flatMap((r) => [num(r.median_ms), num(r.min_ms), num(r.max_ms)])
     .filter((v): v is number => v !== null && v > 0);
   const xMin = Math.min(0.2, Math.min(...seconds) / 1000 / 1.3);
   const xMax = Math.max(30, (Math.max(...seconds) / 1000) * 1.3);

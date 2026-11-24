@@ -1,3 +1,4 @@
+import { itemAt } from '@/common/arrays';
 import { describeError } from '@/common/errors/to-error';
 import { sha1Hex } from '@/common/hash.server';
 import type { CallOutcome } from '@/domain/llm/call-result';
@@ -21,7 +22,9 @@ function shuffled<T>(items: Array<T>, seed: string): Array<T> {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(next() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
+    const swapped = itemAt(out, i);
+    out[i] = itemAt(out, j);
+    out[j] = swapped;
   }
   return out;
 }

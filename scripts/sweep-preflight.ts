@@ -7,15 +7,15 @@ import { parseArgs } from 'node:util';
 
 import { z } from 'zod';
 
-import { loadContext } from '../src/eval/context';
-import { captureEnv, modelInfo } from '../src/eval/env';
-import { NUM_CTX, SIZES, settingsFor } from '../src/eval/grid';
-import type { Size } from '../src/eval/grid';
-import { STEP_EVALS } from '../src/eval/registry';
-import { selfTest } from '../src/eval/run';
-import { callStep, describeJsonShape } from '../src/server/llm/call-step.server';
-import { ollamaHost } from '../src/server/llm/ollama.server';
-import { STEP_IDS } from '../src/server/llm/types';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import { loadContext } from '@/eval/eval-context';
+import { selfTest } from '@/eval/run/run-cases';
+import { captureEnv, modelInfo } from '@/eval/run-env';
+import { STEP_EVALS } from '@/eval/steps/registry';
+import { NUM_CTX, SIZES, settingsFor } from '@/eval/sweep/grid';
+import type { Size } from '@/eval/sweep/grid';
+import { callStep, describeJsonShape } from '@/infrastructure/llm/language-model.gateway';
+import { ollamaHost } from '@/infrastructure/llm/ollama.provider';
 
 const { values: args } = parseArgs({ options: { models: { type: 'string', default: 'small,medium,large' } } });
 const sizes = (args.models ?? '').split(',').filter((s): s is Size => s in SIZES);

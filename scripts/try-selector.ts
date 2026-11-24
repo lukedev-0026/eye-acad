@@ -1,9 +1,9 @@
 // Scratch: run a few requests through the selector on one model.
 //   pnpm tsx scripts/try-selector.ts qwen3.5:2b
-import { loadCase } from '../src/server/case.server';
-import type { StepSettings } from '../src/server/llm/types';
-import { replyFor } from '../src/server/policy';
-import { runSelector } from '../src/server/selector.server';
+import { runSelector } from '@/application/steps/selector.step';
+import { replyFor } from '@/domain/examiner/policy';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
+import { loadCase } from '@/infrastructure/files/case-file.loader';
 
 const model = process.argv[2] ?? 'qwen3.5:9b';
 const settings: StepSettings = {

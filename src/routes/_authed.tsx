@@ -1,8 +1,8 @@
 import { Link, Navigate, Outlet, createFileRoute } from '@tanstack/react-router';
 import { signOut } from 'firebase/auth';
 
-import { auth } from '../lib/firebase';
-import { useAuthUser } from '../lib/use-auth';
+import { useAuthUser } from '@/features/auth/hooks/use-auth';
+import { auth } from '@/features/auth/lib/firebase';
 
 // Everything under this layout needs a signed-in trainee. It is rendered in
 // the browser only, so a signed-out request receives no case content at all.

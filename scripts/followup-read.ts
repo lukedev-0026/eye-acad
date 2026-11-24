@@ -7,9 +7,9 @@
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { loadContext, readCases } from '../src/eval/context';
-import { describe } from '../src/eval/grid';
-import { loadSweep } from '../src/eval/sweep-data';
+import { loadContext, readCases } from '@/eval/eval-context';
+import { describe } from '@/eval/sweep/grid';
+import { loadSweep } from '@/eval/sweep/sweep-data';
 
 const SHEET = 'evals/sweep/followup-read.md';
 const KEY = 'evals/sweep/followup-read-key.json';

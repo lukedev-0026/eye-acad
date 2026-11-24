@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 
-import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from '../lib/firebase';
-import { useAuthUser } from '../lib/use-auth';
+import { useAuthUser } from '@/features/auth/hooks/use-auth';
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from '@/features/auth/lib/firebase';
 
 // Rendered in the browser only: sign-in state lives in the browser, and
 // nothing about the case is on this page.

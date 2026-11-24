@@ -12,8 +12,15 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { loadContext } from '../src/eval/context';
-import { captureEnv, modelInfo, swapUsedMb } from '../src/eval/env';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
+import { loadContext } from '@/eval/eval-context';
+import type { EvalCase } from '@/eval/eval.types';
+import { appendRow, configId, rowKey, runCases, summarise } from '@/eval/run/run-cases';
+import type { ResultRow } from '@/eval/run/run-cases';
+import { captureEnv, modelInfo, swapUsedMb } from '@/eval/run-env';
+import { STEP_EVALS } from '@/eval/steps/registry';
+import { rank } from '@/eval/sweep/choosing-rule';
 import {
   CEILING_MS,
   NUM_CTX,
@@ -25,19 +32,12 @@ import {
   sizeOf,
   startSettings,
   withoutPenalty,
-} from '../src/eval/grid';
-import type { Size } from '../src/eval/grid';
-import { STEP_EVALS } from '../src/eval/registry';
-import { rank } from '../src/eval/rule';
-import { appendRow, configId, rowKey, runCases, summarise } from '../src/eval/run';
-import type { ResultRow } from '../src/eval/run';
-import { candidatesFor, loadSweep } from '../src/eval/sweep-data';
-import type { EvalCase } from '../src/eval/types';
-import { loadStepsConfig } from '../src/server/config.server';
-import { EMBEDDING_MODEL } from '../src/server/embed.server';
-import { ollamaHost } from '../src/server/llm/ollama.server';
-import { STEP_IDS } from '../src/server/llm/types';
-import type { StepId, StepSettings } from '../src/server/llm/types';
+} from '@/eval/sweep/grid';
+import type { Size } from '@/eval/sweep/grid';
+import { candidatesFor, loadSweep } from '@/eval/sweep/sweep-data';
+import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
+import { EMBEDDING_MODEL } from '@/infrastructure/llm/ollama-embedding';
+import { ollamaHost } from '@/infrastructure/llm/ollama.provider';
 
 const { values: args } = parseArgs({
   options: {

@@ -1,18 +1,18 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { useEffect, useReducer, useRef, useState } from 'react';
 
-import { RevisionCardView } from '../../components/RevisionCardView';
-import { TalkButton } from '../../components/TalkButton';
-import type { PublicAttempt, RevealedItem, Turn } from '../../lib/attempt-types';
-import { playReply } from '../../lib/audio';
-import type { ReplyAudio } from '../../lib/audio';
-import { auth } from '../../lib/firebase';
-import { asTsv, summarise } from '../../lib/latency';
-import type { TurnTiming } from '../../lib/latency';
-import { recordingSupported, useRecorder } from '../../lib/recorder';
-import { TURN_LABEL, canTraineeAct, nextTurnState } from '../../lib/turn-machine';
-import type { TurnState } from '../../lib/turn-machine';
-import { useAttempt } from '../../lib/use-attempt';
+import type { PublicAttempt, RevealedItem, Turn } from '@/domain/attempt/attempt.schema';
+import { useAttempt } from '@/features/attempts/hooks/use-attempt';
+import { auth } from '@/features/auth/lib/firebase';
+import { RevisionCardView } from '@/features/viva/components/revision-card';
+import { TalkButton } from '@/features/viva/components/talk-button';
+import { recordingSupported, useRecorder } from '@/features/viva/hooks/use-recorder';
+import { playReply } from '@/features/viva/lib/audio-player';
+import type { ReplyAudio } from '@/features/viva/lib/audio-player';
+import { asTsv, summarise } from '@/features/viva/lib/latency';
+import type { TurnTiming } from '@/features/viva/lib/latency';
+import { TURN_LABEL, canTraineeAct, nextTurnState } from '@/features/viva/lib/turn-machine';
+import type { TurnState } from '@/features/viva/lib/turn-machine';
 import {
   askSpoken,
   askTyped,
@@ -22,7 +22,7 @@ import {
   retryRevision,
   speakOpening,
   transcribeOnly,
-} from '../../server/functions';
+} from '@/server/functions/viva.functions';
 
 export const Route = createFileRoute('/_authed/attempts/$attemptId')({
   component: AttemptPage,

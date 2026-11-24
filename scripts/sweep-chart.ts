@@ -5,12 +5,12 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { loadContext } from '../src/eval/context';
-import { CEILING_MS } from '../src/eval/grid';
-import { STEP_EVALS } from '../src/eval/registry';
-import { selfTest } from '../src/eval/run';
-import { STEP_IDS } from '../src/server/llm/types';
-import type { StepId } from '../src/server/llm/types';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import type { StepId } from '@/domain/llm/step-settings.schema';
+import { loadContext } from '@/eval/eval-context';
+import { selfTest } from '@/eval/run/run-cases';
+import { STEP_EVALS } from '@/eval/steps/registry';
+import { CEILING_MS } from '@/eval/sweep/grid';
 
 const { values: args } = parseArgs({ options: { provider: { type: 'string', default: 'ollama' } } });
 

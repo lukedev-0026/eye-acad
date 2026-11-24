@@ -4,7 +4,7 @@
 //   pnpm tsx scripts/make-voice-clips.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 
-import { synthesise, voiceAvailable } from '../src/server/voice.server';
+import { synthesise, voiceAvailable } from '@/infrastructure/speech/deepgram-speech.service';
 
 const QUESTIONS = [
   'What is the intraocular pressure in the right eye?',

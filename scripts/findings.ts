@@ -1,8 +1,8 @@
 // Prints every finding and history item exactly as the app will show and say
 // it, straight from the current case file. Compare against the case PDF.
 //   pnpm findings
-import { loadCase } from '../src/server/case.server';
-import { renderFinding, renderHistory } from '../src/server/render';
+import { renderFinding, renderHistory } from '@/domain/examiner/render';
+import { loadCase } from '@/infrastructure/files/case-file.loader';
 
 const c = await loadCase();
 console.log(`Case ${c.caseId} (file hash ${c.fileHash})\n`);

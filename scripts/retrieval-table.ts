@@ -4,12 +4,12 @@
 //   pnpm retrieval-table
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { loadExaminerNotes } from '../src/server/case.server';
-import { embed } from '../src/server/embed.server';
-import { loadNoteIndex } from '../src/server/note-index.server';
-import { pageLabel } from '../src/server/note-types';
-import type { NoteChunk, NoteIndex } from '../src/server/note-types';
-import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '../src/server/retrieve';
+import { pageLabel } from '@/domain/note/note.types';
+import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
+import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '@/domain/note/retrieve';
+import { loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
+import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
+import { embed } from '@/infrastructure/llm/ollama-embedding';
 
 type Target = {
   id: string;

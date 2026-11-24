@@ -4,9 +4,9 @@
 //   pnpm tsx scripts/cases-review.ts
 import { writeFile } from 'node:fs/promises';
 
-import { findSentence, loadContext, readCases, resolveTarget } from '../src/eval/context';
-import { coverageItems } from '../src/server/coverage.server';
-import { headingPath, pageLabel } from '../src/server/note-types';
+import { coverageItems } from '@/application/steps/coverage.step';
+import { headingPath, pageLabel } from '@/domain/note/note.types';
+import { findSentence, loadContext, readCases, resolveTarget } from '@/eval/eval-context';
 
 const ctx = await loadContext();
 const cell = (t: string) => t.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();

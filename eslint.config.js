@@ -40,6 +40,50 @@ export default defineConfig([
         },
       ],
       'import-x/no-default-export': 'error',
+      'import-x/no-cycle': 'error',
+      // One way to name another file: the alias across folders, `./` within one.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['../*'], message: 'Use the @/ alias for a file in another folder.' },
+            { group: ['./*/**'], message: 'Use the @/ alias for a file in another folder; ./ is for the same folder.' },
+          ],
+        },
+      ],
+      // Layers. Each folder may import only from the folders below it:
+      //   routes, features -> server -> application -> infrastructure -> domain -> config, common
+      // The measurement harness (eval) sits beside server, above application.
+      'import-x/no-restricted-paths': [
+        'error',
+        {
+          basePath: import.meta.dirname,
+          zones: [
+            { target: './src/common', from: './src', except: ['./common', './config'] },
+            { target: './src/config', from: './src', except: ['./config', './common'] },
+            { target: './src/domain', from: './src', except: ['./domain', './common'] },
+            {
+              target: './src/infrastructure',
+              from: './src',
+              except: ['./infrastructure', './domain', './common', './config'],
+            },
+            { target: './src/application', from: ['./src/server', './src/eval', './src/features', './src/routes'] },
+            { target: './src/eval', from: ['./src/server', './src/features', './src/routes'] },
+            { target: './src/server', from: ['./src/eval', './src/routes'] },
+            // The one step down into the browser's code: the sign-in middleware's
+            // browser half needs the signed-in user's token.
+            { target: './src/server', from: './src/features', except: ['./auth/lib/id-token.ts'] },
+            // The browser reaches the server only through server functions.
+            {
+              target: ['./src/features', './src/routes'],
+              from: ['./src/application', './src/infrastructure', './src/eval', './src/server/middleware'],
+            },
+            { target: ['./src/features', './src/routes'], from: './src/config', except: ['./public-env.ts'] },
+            { target: ['./src/features', './src/routes'], from: './src/common/logging' },
+            { target: './src', from: ['./scripts', './tests'] },
+          ],
+        },
+      ],
       // Every import is at the top of its file, where it can be seen.
       'no-restricted-syntax': [
         'error',

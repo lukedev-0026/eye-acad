@@ -6,17 +6,17 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { loadContext } from '../src/eval/context';
-import { CEILING_MS, describe, sizeOf, startSettings } from '../src/eval/grid';
-import { limitModels, rank, tieBand } from '../src/eval/rule';
-import type { Ranked } from '../src/eval/rule';
-import { configId, summarise } from '../src/eval/run';
-import type { ResultRow, Summary } from '../src/eval/run';
-import { candidatesFor, loadSweep, regrade } from '../src/eval/sweep-data';
-import { sweepMarkdown } from '../src/eval/sweep-markdown';
-import { loadStepsConfig } from '../src/server/config.server';
-import { STEP_IDS } from '../src/server/llm/types';
-import type { StepId, StepSettings } from '../src/server/llm/types';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
+import { loadContext } from '@/eval/eval-context';
+import { sweepMarkdown } from '@/eval/report/sweep.report';
+import { configId, summarise } from '@/eval/run/run-cases';
+import type { ResultRow, Summary } from '@/eval/run/run-cases';
+import { limitModels, rank, tieBand } from '@/eval/sweep/choosing-rule';
+import type { Ranked } from '@/eval/sweep/choosing-rule';
+import { CEILING_MS, describe, sizeOf, startSettings } from '@/eval/sweep/grid';
+import { candidatesFor, loadSweep, regrade } from '@/eval/sweep/sweep-data';
+import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
 const { values: args } = parseArgs({
   options: { 'run-id': { type: 'string', default: 'sweep-ollama' }, apply: { type: 'boolean', default: false } },

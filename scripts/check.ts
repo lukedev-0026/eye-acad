@@ -9,16 +9,16 @@ import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { runChain } from '../src/eval/chain';
-import { checksMarkdown } from '../src/eval/checks-report';
-import { loadContext } from '../src/eval/context';
-import { captureEnv, modelInfo } from '../src/eval/env';
-import { STEP_EVALS } from '../src/eval/registry';
-import { runRequiredChecks } from '../src/eval/required';
-import { appendRow, readRows, resultsFile, runCases, selfTest, summarise } from '../src/eval/run';
-import { loadStepsConfig } from '../src/server/config.server';
-import { STEP_IDS } from '../src/server/llm/types';
-import type { StepId } from '../src/server/llm/types';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import type { StepId } from '@/domain/llm/step-settings.schema';
+import { runChain } from '@/eval/checks/chain.check';
+import { runRequiredChecks } from '@/eval/checks/required.check';
+import { loadContext } from '@/eval/eval-context';
+import { checksMarkdown } from '@/eval/report/checks.report';
+import { appendRow, readRows, resultsFile, runCases, selfTest, summarise } from '@/eval/run/run-cases';
+import { captureEnv, modelInfo } from '@/eval/run-env';
+import { STEP_EVALS } from '@/eval/steps/registry';
+import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
 const { values: args } = parseArgs({
   options: {

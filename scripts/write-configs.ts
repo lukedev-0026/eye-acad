@@ -4,8 +4,8 @@
 // settings fail end to end).
 import { writeFile } from 'node:fs/promises';
 
-import { settingsFor, startSettings } from '../src/eval/grid';
-import { STEP_IDS } from '../src/server/llm/types';
+import { STEP_IDS } from '@/domain/llm/step-settings.schema';
+import { settingsFor, startSettings } from '@/eval/sweep/grid';
 
 const file = (steps: Record<string, unknown>) => `${JSON.stringify({ steps }, null, 2)}\n`;
 await writeFile('config/steps.start.json', file(Object.fromEntries(STEP_IDS.map((s) => [s, startSettings(s)]))));

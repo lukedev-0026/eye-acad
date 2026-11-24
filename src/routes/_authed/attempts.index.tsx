@@ -1,10 +1,10 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import type { Phase } from '../../lib/attempt-types';
-import { auth } from '../../lib/firebase';
-import { useAttemptList } from '../../lib/use-attempt';
-import { startAttempt } from '../../server/functions';
+import type { Phase } from '@/domain/attempt/attempt.schema';
+import { useAttemptList } from '@/features/attempts/hooks/use-attempt';
+import { auth } from '@/features/auth/lib/firebase';
+import { startAttempt } from '@/server/functions/viva.functions';
 
 export const Route = createFileRoute('/_authed/attempts/')({
   component: Attempts,

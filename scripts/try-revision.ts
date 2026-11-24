@@ -1,10 +1,10 @@
 // Scratch: run the after-viva steps on one sample answer.
 //   pnpm tsx scripts/try-revision.ts [model]
-import { loadCitationGuidance, loadExaminerNotes } from '../src/server/case.server';
-import { loadStepsConfig } from '../src/server/config.server';
-import { followUpSpeech, runFollowUp } from '../src/server/followup.server';
-import { loadNoteIndex } from '../src/server/note-index.server';
-import { produceRevision } from '../src/server/revision-pipeline.server';
+import { produceRevision } from '@/application/revision/produce-revision';
+import { followUpSpeech, runFollowUp } from '@/application/steps/followup.step';
+import { loadCitationGuidance, loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
+import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
+import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
 const config = await loadStepsConfig();
 if (process.argv[2]) for (const s of Object.values(config.steps)) s.model = process.argv[2];

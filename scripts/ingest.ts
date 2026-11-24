@@ -6,11 +6,11 @@ import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { EMBEDDING_MODEL, embed } from '../src/server/embed.server';
-import { NOTE_INDEX, NOTE_PDF, sha256OfFile } from '../src/server/note-index.server';
-import { parseNoteXml } from '../src/server/note-parse';
-import { searchText } from '../src/server/note-types';
-import type { NoteChunk, NoteIndex } from '../src/server/note-types';
+import { parseNoteXml } from '@/domain/note/note-parse';
+import { searchText } from '@/domain/note/note.types';
+import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
+import { NOTE_INDEX, NOTE_PDF, sha256OfFile } from '@/infrastructure/files/note-index.loader';
+import { EMBEDDING_MODEL, embed } from '@/infrastructure/llm/ollama-embedding';
 
 const pdf = path.resolve(process.argv[2] ?? NOTE_PDF());
 // Arguments are passed as a list, never through a shell.

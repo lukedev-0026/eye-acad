@@ -9,10 +9,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { loadContext } from '../src/eval/context';
-import { buildGolden, goldenDifferences } from '../src/eval/golden';
-import type { Golden } from '../src/eval/golden';
-import { loadSweep } from '../src/eval/sweep-data';
+import { loadContext } from '@/eval/eval-context';
+import { buildGolden, goldenDifferences } from '@/eval/golden/golden';
+import type { Golden } from '@/eval/golden/golden';
+import { loadSweep } from '@/eval/sweep/sweep-data';
 
 const GOLDEN_FILE = 'tests/golden/golden.json';
 const VECTORS_FILE = 'tests/golden/query-vectors.json';

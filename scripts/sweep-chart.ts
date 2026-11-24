@@ -141,7 +141,7 @@ function panel(step: StepId, col: number, rowIndex: number): string {
   const ceiling = CEILING_MS[step] / 1000
   if (ceiling >= xMin && ceiling <= xMax) {
     out.push(`<line class="ref" x1="${x(ceiling).toFixed(1)}" x2="${x(ceiling).toFixed(1)}" y1="${oy + PLOT.top}" y2="${y(0)}"/>`)
-    out.push(`<text class="ref-label" x="${(x(ceiling) + 4).toFixed(1)}" y="${oy + PLOT.top + 9}">ceiling ${ceiling} s</text>`)
+    out.push(`<text class="ref-label" x="${(x(ceiling) + 4).toFixed(1)}" y="${(y(0) - 6).toFixed(1)}">ceiling ${ceiling} s</text>`)
   }
   const f = floor[step]
   out.push(`<line class="ref" x1="${ox + PLOT.left}" x2="${ox + PLOT.left + pw}" y1="${y(f.k).toFixed(1)}" y2="${y(f.k).toFixed(1)}"/>`)
@@ -197,7 +197,7 @@ function panel(step: StepId, col: number, rowIndex: number): string {
     if (tags) {
       const right = px < ox + PLOT.left + pw - 70
       labels.push(
-        `<text class="direct" x="${(px + (right ? 15 : -15)).toFixed(1)}" y="${(py - 9).toFixed(1)}" text-anchor="${right ? 'start' : 'end'}">${tags}: ${stopped ? 'stopped' : `${r.cases_all_pass_k} of ${r.cases_n}`}</text>`,
+        `<text class="direct" x="${(px + (right ? 18 : -18)).toFixed(1)}" y="${(py + 4).toFixed(1)}" text-anchor="${right ? 'start' : 'end'}">${tags}: ${stopped ? 'stopped' : `${r.cases_all_pass_k} of ${r.cases_n}`}</text>`,
       )
     }
   }

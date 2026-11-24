@@ -108,12 +108,11 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
   useEffect(() => {
     if (openingTried.current || phase !== 'asking' || attempt.turns.length !== 1) return
     openingTried.current = true
+    // The turn is the examiner's from the start, so the trainee is not
+    // invited to speak and then talked over when the audio arrives.
+    send({ type: 'SUBMIT_TEXT' })
     speakOpening({ data: { attemptId } })
-      .then(({ audio }) => {
-        if (!audio) return
-        send({ type: 'SUBMIT_TEXT' })
-        return speak(audio)
-      })
+      .then(({ audio }) => speak(audio))
       .catch(() => send({ type: 'FAILED' }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId])

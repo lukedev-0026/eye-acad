@@ -24,7 +24,7 @@ export async function callStep<T>(
     raw = await callOllama(settings, prompt, jsonSchema)
   } else {
     const { callAnthropic } = await import('./anthropic.server')
-    raw = await callAnthropic(settings, prompt, jsonSchema)
+    raw = await callAnthropic(settings, prompt, schema)
   }
 
   const base = {

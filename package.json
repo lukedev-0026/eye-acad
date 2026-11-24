@@ -19,9 +19,11 @@
     "sweep:preflight": "tsx scripts/sweep-preflight.ts",
     "sweep": "tsx scripts/sweep.ts",
     "sweep:report": "tsx scripts/sweep-report.ts",
-    "sweep:chart": "tsx scripts/sweep-chart.ts"
+    "sweep:chart": "tsx scripts/sweep-chart.ts",
+    "readback": "tsx scripts/readback.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.13.0",
     "@tanstack/react-router": "1.170.46",
     "@tanstack/react-start": "1.169.7",
     "firebase": "12.19.0",

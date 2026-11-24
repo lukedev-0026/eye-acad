@@ -10,7 +10,8 @@ import { limitModels, rank, tieBand } from '../src/eval/rule'
 import type { Ranked } from '../src/eval/rule'
 import { configId, summarise } from '../src/eval/run'
 import type { ResultRow, Summary } from '../src/eval/run'
-import { candidatesFor, loadSweep } from '../src/eval/sweep-data'
+import { loadContext } from '../src/eval/context'
+import { candidatesFor, loadSweep, regrade } from '../src/eval/sweep-data'
 import { loadStepsConfig } from '../src/server/config.server'
 import { STEP_IDS } from '../src/server/llm/types'
 import type { StepId, StepSettings } from '../src/server/llm/types'
@@ -23,6 +24,11 @@ const data = await loadSweep(runId)
 if (!data.results.length) {
   console.error(`No results recorded under evals/results/${runId}.jsonl yet.`)
   process.exit(1)
+}
+// Every stored reply is scored against the case files as they are now.
+const regraded = await regrade(data, await loadContext())
+if (regraded.changed) {
+  console.log(`Note: ${regraded.changed} stored verdicts differ from the ones recorded at run time, because an expected answer has been corrected since. Corrections are listed in evals/cases/CORRECTIONS.md.`)
 }
 
 const runRow = data.rows.find((r) => r.type === 'run') as { env?: { commit: string; ollamaVersion: string; powerMode: string; machine: string } } | undefined

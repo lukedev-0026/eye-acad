@@ -146,10 +146,14 @@ async function runConfig(o: {
     runId,
     stage: o.stage,
     done: data.done,
-    // Far too slow to be usable: stop, and record it as stopped.
+    // Far too slow to be usable: stop, and record it as stopped. Either every
+    // one of the first three calls took more than twice the ceiling, or the
+    // median of the first five did.
     shouldStop: (soFar: Array<ResultRow>) => {
+      if (o.stage !== 'screen') return false
       const timed = soFar.filter((r) => r.calls > 0).map((r) => r.ms)
-      return o.stage === 'screen' && timed.length === 10 && median(timed) > 2 * CEILING_MS[o.step]
+      const limit = 2 * CEILING_MS[o.step]
+      return (timed.length === 3 && Math.min(...timed) > limit) || (timed.length === 5 && median(timed) > limit)
     },
   })
   for (const r of rows) data.done.add(rowKey(r.stage, r.configId, r.caseId, r.trial))
@@ -221,8 +225,8 @@ if (args.plan) {
       const probe = preflight.models?.[SIZES[size]]?.selectorMedianMs
       const off = (probe?.thinkingOff ?? { small: 800, medium: 1300, large: 3500 }[size]) / 1000
       const on = Math.min((probe?.thinkingOn ?? { small: 5000, medium: 12000, large: 40000 }[size]) / 1000, 60)
-      // Thinking-on configurations over twice the ceiling stop after ten calls.
-      const onCalls = on * weight[step] * 1000 > 2 * CEILING_MS[step] ? 10 : n
+      // Thinking-on configurations over twice the ceiling stop after a few calls.
+      const onCalls = on * weight[step] * 1000 > 2 * CEILING_MS[step] ? 4 : n
       seconds += weight[step] * (2 * n * off + 2 * onCalls * on) + weight[step] * 4 * n * off
     }
     seconds += weight[step] * confirm * n * 1.5

@@ -7,15 +7,22 @@ import type { Print } from '@/eval/cli';
 import { readCases } from '@/eval/eval-context';
 import type { EvalContext } from '@/eval/eval.types';
 import { PATHS } from '@/eval/paths';
+import type { ChainRow, ResultRow } from '@/eval/run/result-row';
 import { FollowUpExpectSchema, FollowUpInputSchema } from '@/eval/steps/followup.eval';
 import { describe } from '@/eval/sweep/grid';
-import type { SweepData } from '@/eval/sweep/sweep-data';
 
 // The blind read of follow-up questions. Whether a question fits what the
 // trainee said, and whether it gives anything away, is a person's judgement.
 // So every question a trainee would actually have been asked is collected,
-// identical ones are merged, the order is shuffled, and which configuration
-// wrote which is kept in a separate key.
+// identical ones are merged, the order is shuffled, and which settings wrote
+// which is kept in a separate key.
+
+// One group of settings, and the rows of a run made on it.
+export interface FollowUpSource {
+  // A short name for the settings: "start", "chosen".
+  readonly label: string;
+  readonly rows: ReadonlyArray<ResultRow | ChainRow>;
+}
 
 const ItemSchema = z.object({
   n: z.number().int(),
@@ -32,27 +39,31 @@ const ObservedSchema = z.looseObject({ question: z.string().optional(), path: z.
 
 const cell = (text: string): string => text.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
 
-export async function writeFollowUpSheet(ctx: EvalContext, data: SweepData, print: Print): Promise<void> {
+export async function writeFollowUpSheet(
+  ctx: EvalContext,
+  sources: ReadonlyArray<FollowUpSource>,
+  print: Print,
+): Promise<void> {
   const answers = new Map(
     (await readCases('followup.jsonl', FollowUpInputSchema, FollowUpExpectSchema)).map((c) => [c.id, c.input.answer]),
   );
-  // Only configurations that had the confirmation runs.
-  const confirmed = [
-    ...new Set(data.results.filter((r) => r.step === 'followup' && r.stage === 'confirm').map((r) => r.configId)),
-  ];
-  const rows = data.results.filter(
-    (r) => r.step === 'followup' && confirmed.includes(r.configId) && r.split === 'tune',
-  );
+  // Every run of the follow-up writer on a tuning case, for each group of settings.
+  const asked = sources.map((source) => ({
+    label: source.label,
+    rows: source.rows.filter((r) => r.step === 'followup' && r.split === 'tune'),
+  }));
 
   const byText = new Map<string, Item>();
-  for (const r of rows) {
-    const observed = ObservedSchema.safeParse(r.observed).data;
-    if (!observed?.question) continue;
-    const question = observed.question.trim();
-    const key = `${r.caseId}|${question}`;
-    const item = byText.get(key) ?? { n: 0, caseId: r.caseId, question, path: observed.path ?? '', configs: [] };
-    if (!item.configs.includes(r.configId)) item.configs.push(r.configId);
-    byText.set(key, item);
+  for (const { label, rows } of asked) {
+    for (const r of rows) {
+      const observed = ObservedSchema.safeParse(r.observed).data;
+      if (!observed?.question) continue;
+      const question = observed.question.trim();
+      const key = `${r.caseId}|${question}`;
+      const item = byText.get(key) ?? { n: 0, caseId: r.caseId, question, path: observed.path ?? '', configs: [] };
+      if (!item.configs.includes(label)) item.configs.push(label);
+      byText.set(key, item);
+    }
   }
   // Shuffled by a hash, so the order says nothing about the source.
   const order = (item: Item): string => sha1Hex(item.caseId + item.question);
@@ -62,7 +73,7 @@ export async function writeFollowUpSheet(ctx: EvalContext, data: SweepData, prin
   const sheet = [
     '# Follow-up questions: a blind read',
     '',
-    `These are the ${items.length} different follow-up questions that the confirmed settings asked across the sample answers. Which setting wrote which is hidden (it is in \`followup-read-key.json\`; please do not open it first). Some are the case file's own questions, used word for word.`,
+    `These are the ${items.length} different follow-up questions that the settings being compared asked across the sample answers, three runs each. Which settings wrote which is hidden (it is in \`followup-read-key.json\`; please do not open it first). Some are the case file's own questions, used word for word.`,
     '',
     'For each one, put **y** or **n** in the last two columns:',
     '',
@@ -81,16 +92,16 @@ export async function writeFollowUpSheet(ctx: EvalContext, data: SweepData, prin
   const key = {
     items: items.map((i) => ({ n: i.n, caseId: i.caseId, question: i.question, path: i.path, configs: i.configs })),
     configs: Object.fromEntries(
-      confirmed.map((id) => {
-        const config = data.configs.get(id);
-        return [id, config ? describe(config.settings) : id];
+      asked.map(({ label, rows }) => {
+        const settings = rows[0]?.settings;
+        return [label, settings ? `${label}: ${describe(settings)}` : label];
       }),
     ),
   };
   await writeFile(PATHS.followUpSheet, sheet);
   await writeFile(PATHS.followUpKey, `${JSON.stringify(key, null, 2)}\n`);
   print(
-    `Wrote ${PATHS.followUpSheet} (${items.length} questions from ${confirmed.length} configurations) and its key.`,
+    `Wrote ${PATHS.followUpSheet} (${items.length} questions from ${sources.length} groups of settings) and its key.`,
   );
 }
 

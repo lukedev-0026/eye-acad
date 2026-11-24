@@ -1,7 +1,7 @@
 # How the settings are chosen
 
 Written and committed before the sweep is run, so that the choice cannot be fitted to the
-results afterwards. The same rule is applied by code in `src/eval/rule.ts`; `pnpm sweep:report`
+results afterwards. The same rule is applied by code in `src/eval/sweep/choosing-rule.ts`; `pnpm sweep:report`
 re-applies it to the recorded results and must arrive at what `config/steps.json` holds.
 
 ## What is being chosen

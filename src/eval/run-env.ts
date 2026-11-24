@@ -45,14 +45,22 @@ export async function ollamaVersion(): Promise<string> {
   }
 }
 
+// The battery, as macOS reports it. A long run can draw more power than a
+// small charger supplies, so the sweep watches this and stops cleanly.
+export function batteryState(): { percent: number | null; onMains: boolean | null } {
+  const report = sh('pmset', ['-g', 'batt']);
+  if (!report) return { percent: null, onMains: null };
+  const percent = /(\d+)%/.exec(report)?.[1];
+  return { percent: percent === undefined ? null : Number(percent), onMains: /AC Power/.test(report) };
+}
+
 export async function captureEnv(): Promise<RunEnv> {
   const memory = Number(sh('sysctl', ['-n', 'hw.memsize']));
-  const battery = sh('pmset', ['-g', 'batt']);
   return {
     machine: sh('sysctl', ['-n', 'machdep.cpu.brand_string']) || process.arch,
     memoryGb: memory ? Math.round(memory / 2 ** 30) : null,
     powerMode: powerMode(),
-    onMains: battery ? /AC Power/.test(battery) : null,
+    onMains: batteryState().onMains,
     swapUsedMb: swapUsedMb(),
     ollamaVersion: await ollamaVersion(),
     node: process.version,

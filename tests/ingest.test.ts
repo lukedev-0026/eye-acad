@@ -37,7 +37,9 @@ describe('the prepared note', () => {
     const all = JSON.stringify(index.chunks.map((c) => [c.headings, c.text]))
     expect(all).not.toContain('Take-home reference note')
     expect(all).not.toContain('Eye Academy reference note')
-    expect(all).not.toMatch(/Kanski/)
+    // The body text mentions Kanski once; the sources list cites the edition.
+    expect(all).not.toMatch(/Clinical Ophthalmology, 10th ed/)
+    expect(all).not.toMatch(/accessed November 2026/)
     expect(index.chunks.some((c) => c.headings.includes('Sources'))).toBe(false)
   })
 })

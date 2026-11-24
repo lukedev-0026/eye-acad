@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { itemAt } from '@/common/arrays';
 import { keysOf } from '@/common/objects';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import type { EvalContext } from '@/eval/eval.types';
@@ -118,6 +119,103 @@ function marker(shape: string, cx: number, cy: number, r: number, cls: string): 
   return `<path class="${cls}" d="M${cx.toFixed(1)} ${(cy - h).toFixed(1)} L${(cx + h).toFixed(1)} ${(cy + h * 0.8).toFixed(1)} L${(cx - h).toFixed(1)} ${(cy + h * 0.8).toFixed(1)} Z"/>`;
 }
 
+// Placing labels. A label is tried in a few usual places and takes the first
+// that is clear of the dots and of the labels already down.
+
+interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+interface Dot {
+  row: CsvRow;
+  px: number;
+  py: number;
+  stopped: boolean;
+}
+
+interface Label {
+  svg: string;
+  box: Box;
+  // A thin line back to the dot, when the label is not beside it.
+  leader?: string;
+}
+
+const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
+// Roughly where a line of text will sit. `baseline` is the y it is drawn at;
+// the width is an estimate from the number of characters.
+function textBox(xAt: number, baseline: number, text: string, anchor: 'start' | 'end', charWidth: number): Box {
+  const width = text.length * charWidth;
+  const x0 = anchor === 'start' ? xAt : xAt - width;
+  return { x0, x1: x0 + width, y0: baseline - 10, y1: baseline + 3 };
+}
+
+// The first candidate that overlaps nothing, or failing that the one that
+// overlaps least.
+function clearest(candidates: ReadonlyArray<Label>, taken: ReadonlyArray<Box>): Label {
+  let best = itemAt(candidates, 0);
+  let fewest = Number.POSITIVE_INFINITY;
+  for (const candidate of candidates) {
+    const hits = taken.filter((box) => overlaps(candidate.box, box)).length;
+    if (hits < fewest) {
+      best = candidate;
+      fewest = hits;
+    }
+    if (hits === 0) break;
+  }
+  return best;
+}
+
+const REF_CHAR_WIDTH = 5.4;
+const DIRECT_CHAR_WIDTH = 6.2;
+
+function refLabel(xAt: number, baseline: number, text: string, anchor: 'start' | 'end'): Label {
+  return {
+    svg: `<text class="ref-label" x="${xAt.toFixed(1)}" y="${baseline.toFixed(1)}" text-anchor="${anchor}">${esc(text)}</text>`,
+    box: textBox(xAt, baseline, text, anchor, REF_CHAR_WIDTH),
+  };
+}
+
+// Where a dot's label may go, as a step across and a step down from the dot,
+// nearest first: beside it, then just above or below, then further out.
+const LABEL_OFFSETS: ReadonlyArray<readonly [number, number]> = [
+  [18, 0],
+  [-18, 0],
+  [16, -16],
+  [16, 18],
+  [-16, -16],
+  [-16, 18],
+  [34, 32],
+  [34, -30],
+  [-34, 32],
+  [-34, -30],
+  [56, 48],
+  [56, -46],
+  [80, 30],
+  [80, -28],
+  [60, 66],
+  [110, 46],
+];
+
+function directLabel(dot: Dot, dx: number, dy: number, text: string): Label {
+  const anchor = dx >= 0 ? 'start' : 'end';
+  const xAt = dot.px + dx;
+  const baseline = dot.py + dy + 4;
+  const beside = dy === 0;
+  return {
+    svg: `<text class="direct" x="${xAt.toFixed(1)}" y="${baseline.toFixed(1)}" text-anchor="${anchor}">${esc(text)}</text>`,
+    box: textBox(xAt, baseline, text, anchor, DIRECT_CHAR_WIDTH),
+    ...(beside
+      ? {}
+      : {
+          leader: `<line class="leader" x1="${dot.px.toFixed(1)}" y1="${dot.py.toFixed(1)}" x2="${(xAt - Math.sign(dx) * 3).toFixed(1)}" y2="${(baseline - 4).toFixed(1)}"/>`,
+        }),
+  };
+}
+
 function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): string {
   const { xMin, xMax, xTicks } = frame;
   const rows = frame.rows.filter((r) => r.step === step);
@@ -161,23 +259,69 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
   }
   out.push(`<line class="axis" x1="${ox + PLOT.left}" x2="${ox + PLOT.left + pw}" y1="${y(0)}" y2="${y(0)}"/>`);
 
-  // Reference lines: the speed ceiling and the floor.
-  const ceiling = CEILING_MS[step] / 1000;
-  if (ceiling >= xMin && ceiling <= xMax) {
-    out.push(
-      `<line class="ref" x1="${x(ceiling).toFixed(1)}" x2="${x(ceiling).toFixed(1)}" y1="${oy + PLOT.top}" y2="${y(0)}"/>`,
-    );
-    out.push(
-      `<text class="ref-label" x="${(x(ceiling) + 4).toFixed(1)}" y="${(y(0) - 6).toFixed(1)}">ceiling ${ceiling} s</text>`,
-    );
+  // Where each dot goes. Those that would land on top of each other are
+  // nudged apart. Worked out first, so that the labels can keep clear of them.
+  const dots: Array<Dot> = [];
+  const sorted = [...rows].sort((a, b) => Number(a.is_chosen === 'yes') - Number(b.is_chosen === 'yes'));
+  for (const row of sorted) {
+    const med = num(row.median_ms);
+    if (med === null || med <= 0) continue;
+    const stopped = row.status === 'stopped';
+    const px = x(med / 1000);
+    let py = stopped ? stoppedY : y(Number(row.cases_all_pass_k));
+    for (let tries = 0; tries < 8 && dots.some((d) => Math.abs(d.px - px) < 9 && Math.abs(d.py - py) < 9); tries++) {
+      py += tries % 2 === 0 ? -(5 + tries * 2) : 5 + tries * 2;
+    }
+    dots.push({ row, px, py, stopped });
   }
+  // What a label must not sit on: every dot, with its cross if it has one.
+  const taken: Array<Box> = dots.map((d) => ({
+    x0: d.px - 9,
+    x1: d.px + (Number(d.row.costly_errors) > 0 ? 13 : 9),
+    y0: d.py - (Number(d.row.costly_errors) > 0 ? 14 : 9),
+    y1: d.py + 9,
+  }));
+  const inPanel = (box: Box): boolean =>
+    box.x0 >= ox + PLOT.left && box.x1 <= ox + PANEL_W && box.y0 >= oy + 16 && box.y1 <= stoppedY + 12;
+
+  // Reference lines: the speed ceiling and the floor. Each label takes the
+  // first of its usual places that is clear.
   const f = frame.floors[step];
+  const floorText = `floor ${f.k}: ${f.name}`;
+  const floorLabel = clearest(
+    [
+      refLabel(ox + PLOT.left + pw, y(f.k) - 4, floorText, 'end'),
+      refLabel(ox + PLOT.left + 4, y(f.k) - 4, floorText, 'start'),
+      // Under the line, unless the line is the bottom of the plot.
+      ...(f.k > 0 ? [refLabel(ox + PLOT.left + pw, y(f.k) + 12, floorText, 'end')] : []),
+    ],
+    taken,
+  );
   out.push(
     `<line class="ref" x1="${ox + PLOT.left}" x2="${ox + PLOT.left + pw}" y1="${y(f.k).toFixed(1)}" y2="${y(f.k).toFixed(1)}"/>`,
+    floorLabel.svg,
   );
-  out.push(
-    `<text class="ref-label" x="${ox + PLOT.left + pw}" y="${(y(f.k) - 4).toFixed(1)}" text-anchor="end">floor ${f.k}: ${esc(f.name)}</text>`,
-  );
+  taken.push(floorLabel.box);
+
+  const ceiling = CEILING_MS[step] / 1000;
+  if (ceiling >= xMin && ceiling <= xMax) {
+    const ceilingText = `ceiling ${ceiling} s`;
+    const ceilingLabel = clearest(
+      [
+        refLabel(x(ceiling) + 4, y(0) - 6, ceilingText, 'start'),
+        refLabel(x(ceiling) + 4, oy + PLOT.top + 11, ceilingText, 'start'),
+        refLabel(x(ceiling) - 4, y(0) - 6, ceilingText, 'end'),
+        refLabel(x(ceiling) - 4, oy + PLOT.top + 11, ceilingText, 'end'),
+        refLabel(x(ceiling) + 4, oy + PLOT.top + ph / 2, ceilingText, 'start'),
+      ],
+      taken,
+    );
+    out.push(
+      `<line class="ref" x1="${x(ceiling).toFixed(1)}" x2="${x(ceiling).toFixed(1)}" y1="${oy + PLOT.top}" y2="${y(0)}"/>`,
+      ceilingLabel.svg,
+    );
+    taken.push(ceilingLabel.box);
+  }
 
   // The band under the plot for configurations stopped as far too slow.
   if (rows.some((r) => r.status === 'stopped')) {
@@ -189,20 +333,26 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
     );
   }
 
-  // Dots. Those that would land on top of each other are nudged apart.
-  const placed: Array<{ px: number; py: number }> = [];
+  // Only two dots per panel are named: where the build started, and the
+  // choice. The choice is placed first. A label that cannot sit beside its
+  // dot is moved to clear space and joined to it by a thin line.
+  const leaders: Array<string> = [];
   const labels: Array<string> = [];
-  const sorted = [...rows].sort((a, b) => Number(a.is_chosen === 'yes') - Number(b.is_chosen === 'yes'));
-  for (const r of sorted) {
-    const med = num(r.median_ms);
-    if (med === null || med <= 0) continue;
-    const stopped = r.status === 'stopped';
-    const px = x(med / 1000);
-    let py = stopped ? stoppedY : y(Number(r.cases_all_pass_k));
-    for (let tries = 0; tries < 8 && placed.some((p) => Math.abs(p.px - px) < 9 && Math.abs(p.py - py) < 9); tries++) {
-      py += tries % 2 === 0 ? -(5 + tries * 2) : 5 + tries * 2;
-    }
-    placed.push({ px, py });
+  for (const d of [...dots].reverse()) {
+    const tags = [d.row.is_start === 'yes' ? 'start' : '', d.row.is_chosen === 'yes' ? 'chosen' : '']
+      .filter(Boolean)
+      .join(' = ');
+    if (!tags) continue;
+    const text = `${tags}: ${d.stopped ? 'stopped' : `${d.row.cases_all_pass_k} of ${d.row.cases_n}`}`;
+    const candidates = LABEL_OFFSETS.map(([dx, dy]) => directLabel(d, dx, dy, text)).filter((c) => inPanel(c.box));
+    const label = clearest(candidates.length ? candidates : [directLabel(d, 18, 0, text)], taken);
+    if (label.leader) leaders.push(label.leader);
+    labels.push(label.svg);
+    taken.push(label.box);
+  }
+  out.push(...leaders);
+
+  for (const { row: r, px, py, stopped } of dots) {
     if (!isSizeKey(r.size)) continue;
     const size = SIZE[r.size];
     const hollow = r.thinking === 'on';
@@ -235,16 +385,6 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
       `<circle class="hit" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="13"><title>${esc(tip)}</title></circle>`,
     );
     out.push(`<g>${parts.join('')}</g>`);
-    // Only two dots per panel are named: where the build started, and the choice.
-    const tags = [r.is_start === 'yes' ? 'start' : '', r.is_chosen === 'yes' ? 'chosen' : '']
-      .filter(Boolean)
-      .join(' = ');
-    if (tags) {
-      const right = px < ox + PLOT.left + pw - 70;
-      labels.push(
-        `<text class="direct" x="${(px + (right ? 18 : -18)).toFixed(1)}" y="${(py + 4).toFixed(1)}" text-anchor="${right ? 'start' : 'end'}">${tags}: ${stopped ? 'stopped' : `${r.cases_all_pass_k} of ${r.cases_n}`}</text>`,
-      );
-    }
   }
   out.push(...labels);
   out.push(
@@ -318,6 +458,7 @@ const CSS = `
   .axis { stroke: var(--axis); stroke-width: 1; }
   .ref { stroke: var(--axis); stroke-width: 1; }
   .whisker { stroke: var(--muted); stroke-width: 1; opacity: 0.55; }
+  .leader { stroke: var(--ink2); stroke-width: 0.75; }
   .solid { stroke: var(--surface); stroke-width: 2; }
   .hollow { fill: var(--surface); stroke-width: 2; }
   .solid.s-small { fill: var(--small); } .solid.s-medium { fill: var(--medium); } .solid.s-large { fill: var(--large); }

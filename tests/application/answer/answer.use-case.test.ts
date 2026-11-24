@@ -63,7 +63,6 @@ let attempts: InMemoryAttemptRepository;
 let attemptId: string;
 
 beforeAll(() => {
-  vi.stubEnv('DEEPGRAM_API_KEY', '');
   vi.stubEnv('VIVA_STEPS_FILE', 'config/steps.start.json');
   model = scriptModel();
 });

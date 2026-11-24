@@ -7,10 +7,9 @@ import { LINES } from '@/domain/examiner/lines';
 import { fixedReply, replyFor } from '@/domain/examiner/policy';
 import type { ExaminerReply } from '@/domain/examiner/policy';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
+import type { SpokenReply } from '@/domain/speech/speech.service';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
-import { prepareSpeech, speakParts, transcribe } from '@/infrastructure/speech/deepgram-speech.service';
-import type { SpokenReply } from '@/infrastructure/speech/deepgram-speech.service';
 
 export type TurnTimings = {
   speechToTextMs: number | null;
@@ -29,15 +28,15 @@ export type TurnResult = {
 // One request for findings. A spoken request is turned into text first; from
 // then on typed and spoken requests take exactly the same path.
 export async function handleRequest(
-  deps: Pick<VivaDeps, 'attempts' | 'models'>,
+  deps: VivaDeps,
   uid: string,
   attemptId: string,
-  input: { text: string } | { audio: Buffer; mimeType: string },
+  input: { text: string } | { audio: Uint8Array; mimeType: string },
 ): Promise<TurnResult> {
   const started = performance.now();
   const via = 'audio' in input ? 'voice' : 'typed';
 
-  const { attempts, models } = deps;
+  const { attempts, models, speech: voice } = deps;
   const attempt = await attempts.read(uid, attemptId);
   if (attempt.phase !== 'asking') {
     throw new AttemptPhaseError('This attempt is no longer taking questions.');
@@ -49,7 +48,7 @@ export async function handleRequest(
   let speechToTextMs: number | null = null;
   let reply: ExaminerReply | null = null;
   if ('audio' in input) {
-    const stt = await transcribe(input.audio, input.mimeType, buildCatalogue(c).names);
+    const stt = await voice.transcribe(input.audio, input.mimeType, buildCatalogue(c).names);
     speechToTextMs = stt.ms;
     if (stt.ok) heard = stt.text.slice(0, MAX_UTTERANCE_CHARS);
     else reply = fixedReply('error', LINES.somethingWentWrong);
@@ -96,7 +95,7 @@ export async function handleRequest(
   }
 
   // The spoken words are the same sentences code built for the screen.
-  const speech = await speakParts(reply.speechParts);
+  const speech = await voice.speak(reply.speechParts);
   const timings: TurnTimings = {
     speechToTextMs,
     modelMs,
@@ -125,7 +124,7 @@ export async function handleRequest(
 // attempt, not from the request, so this cannot be used to speak arbitrary
 // text at the project's expense.
 export async function openingSpeech(
-  deps: Pick<VivaDeps, 'attempts'>,
+  deps: Pick<VivaDeps, 'attempts' | 'speech'>,
   uid: string,
   attemptId: string,
 ): Promise<SpokenReply | null> {
@@ -135,10 +134,10 @@ export async function openingSpeech(
   // While the opening is being read, make the audio for every sentence the
   // examiner could say about this case, so later replies do not wait for it.
   const c = await loadCase();
-  prepareSpeech([
+  deps.speech.prepare([
     ...c.findings.map((f) => renderFinding(f).speech),
     ...Object.entries(c.patient).map(([key, value]) => renderHistory(key, value).speech),
     ...Object.values(LINES),
   ]);
-  return speakParts([opening.text]);
+  return deps.speech.speak([opening.text]);
 }

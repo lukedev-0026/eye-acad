@@ -23,8 +23,6 @@ let attempts: InMemoryAttemptRepository;
 let attemptId: string;
 
 beforeAll(() => {
-  // No speech key: replies are shown and not spoken, and nothing leaves the machine.
-  vi.stubEnv('DEEPGRAM_API_KEY', '');
   vi.stubEnv('VIVA_STEPS_FILE', 'config/steps.start.json');
   model = scriptModel();
 });

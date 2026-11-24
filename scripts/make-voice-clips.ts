@@ -4,7 +4,8 @@
 //   pnpm tsx scripts/make-voice-clips.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 
-import { synthesise, voiceAvailable } from '@/infrastructure/speech/deepgram-speech.service';
+import { getConfig } from '@/config/env.server';
+import { DeepgramSpeechService } from '@/infrastructure/speech/deepgram-speech.service';
 
 const QUESTIONS = [
   'What is the intraocular pressure in the right eye?',
@@ -21,16 +22,19 @@ const QUESTIONS = [
   'What does the left optic disc look like?',
 ];
 
-if (!voiceAvailable()) {
+// A different voice from the examiner's, so the two are not confused.
+const TRAINEE_VOICE = 'aura-2-pandora-en';
+
+const { deepgram } = getConfig();
+if (!deepgram.apiKey) {
   console.error('No DEEPGRAM_API_KEY in .env.local.');
   process.exit(1);
 }
-// A different voice from the examiner's, so the two are not confused.
-process.env.VIVA_TTS_VOICE = 'aura-2-pandora-en';
+const voice = new DeepgramSpeechService({ ...deepgram, apiKey: deepgram.apiKey, ttsVoice: TRAINEE_VOICE });
 await mkdir('evals/voice-clips', { recursive: true });
 const index: Array<{ file: string; says: string }> = [];
 for (const [i, says] of QUESTIONS.entries()) {
-  const speech = await synthesise(says);
+  const speech = await voice.synthesise(says);
   if (!speech) throw new Error(`Could not synthesise: ${says}`);
   const file = `q${String(i + 1).padStart(2, '0')}.mp3`;
   await writeFile(`evals/voice-clips/${file}`, Buffer.from(speech.audioBase64, 'base64'));
@@ -39,5 +43,5 @@ for (const [i, says] of QUESTIONS.entries()) {
 }
 await writeFile(
   'evals/voice-clips/index.json',
-  `${JSON.stringify({ voice: 'aura-2-pandora-en', note: 'Synthetic speech, generated for testing the spoken path without a microphone.', clips: index }, null, 2)}\n`,
+  `${JSON.stringify({ voice: TRAINEE_VOICE, note: 'Synthetic speech, generated for testing the spoken path without a microphone.', clips: index }, null, 2)}\n`,
 );

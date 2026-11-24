@@ -10,7 +10,6 @@ import {
 import { startAttempt as startAttemptUseCase } from '@/application/attempt/start-attempt.use-case';
 import { getContainer } from '@/application/container';
 import { handleRequest, openingSpeech } from '@/application/turn/turn.use-case';
-import { speakParts, transcribe } from '@/infrastructure/speech/deepgram-speech.service';
 import { requireUser } from '@/server/middleware/auth.middleware';
 
 // The browser's only way in. Every function checks the caller's token first
@@ -37,7 +36,7 @@ const AskInput = z.object({
 });
 
 // One or more clips, played back to back by the browser.
-const audioOut = (speech: { clips: Array<{ audioBase64: string; mimeType: string }> } | null) =>
+const audioOut = (speech: { clips: ReadonlyArray<{ audioBase64: string; mimeType: string }> } | null) =>
   speech ? speech.clips.map((c) => ({ base64: c.audioBase64, mimeType: c.mimeType })) : null;
 
 export const askTyped = createServerFn({ method: 'POST' })
@@ -96,7 +95,7 @@ export const transcribeOnly = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AudioInput)
   .handler(async ({ data }) => {
-    const result = await transcribe(Buffer.from(data.audioBase64, 'base64'), data.mimeType, []);
+    const result = await getContainer().speech.transcribe(Buffer.from(data.audioBase64, 'base64'), data.mimeType, []);
     return result.ok ? { ok: true as const, text: result.text } : { ok: false as const, text: '' };
   });
 
@@ -114,7 +113,7 @@ export const giveAnswer = createServerFn({ method: 'POST' })
   .validator(TextInput)
   .handler(async ({ context, data }) => {
     const followUp = await handleAnswer(getContainer(), context.uid, data.attemptId, data.text, data.via);
-    return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
+    return { ...followUp, audio: audioOut(await getContainer().speech.speak([followUp.speech])) };
   });
 
 export const retryFollowUp = createServerFn({ method: 'POST' })
@@ -122,7 +121,7 @@ export const retryFollowUp = createServerFn({ method: 'POST' })
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
     const followUp = await ensureFollowUp(getContainer(), context.uid, data.attemptId);
-    return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
+    return { ...followUp, audio: audioOut(await getContainer().speech.speak([followUp.speech])) };
   });
 
 export const replyToFollowUp = createServerFn({ method: 'POST' })

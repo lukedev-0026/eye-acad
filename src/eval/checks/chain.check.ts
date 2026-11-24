@@ -2,8 +2,8 @@ import { produceRevision } from '@/application/revision/produce-revision';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
 import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
 import type { EvalCase, EvalContext, Graded } from '@/eval/eval.types';
-import type { ResultRow } from '@/eval/run/run-cases';
-import { appendRow } from '@/eval/run/run-cases';
+import type { ResultRow } from '@/eval/run/result-row';
+import { appendRow } from '@/eval/run/results.store';
 
 // The revision step and the support check, run together as the app runs them:
 // search, pick a sentence, word the advice, check the support, and build the

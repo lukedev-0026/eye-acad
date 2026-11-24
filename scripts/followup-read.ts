@@ -7,12 +7,12 @@
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { loadContext, readCases } from '@/eval/eval-context';
 import { describe } from '@/eval/sweep/grid';
 import { loadSweep } from '@/eval/sweep/sweep-data';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const SHEET = 'evals/sweep/followup-read.md';
 const KEY = 'evals/sweep/followup-read-key.json';

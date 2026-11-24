@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import type { PromptVariant, StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
-import type { ResultRow } from '@/eval/run/run-cases';
+import type { ResultRow } from '@/eval/run/result-row';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { PROMPTS, settingsFor } from '@/eval/sweep/grid';
 

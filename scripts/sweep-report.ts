@@ -6,20 +6,22 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
 import { sweepMarkdown } from '@/eval/report/sweep.report';
-import { configId, summarise } from '@/eval/run/run-cases';
-import type { ResultRow, Summary } from '@/eval/run/run-cases';
+import { configId } from '@/eval/run/config-id';
+import type { ResultRow } from '@/eval/run/result-row';
+import { summarise } from '@/eval/run/summarise';
+import type { Summary } from '@/eval/run/summarise';
 import { limitModels, rank, tieBand } from '@/eval/sweep/choosing-rule';
 import type { Ranked } from '@/eval/sweep/choosing-rule';
 import { CEILING_MS, describe, sizeOf, startSettings } from '@/eval/sweep/grid';
 import { candidatesFor, loadSweep, regrade } from '@/eval/sweep/sweep-data';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const { values: args } = parseArgs({
   options: { 'run-id': { type: 'string', default: 'sweep-ollama' }, apply: { type: 'boolean', default: false } },

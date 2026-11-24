@@ -9,14 +9,14 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { loadContext } from '@/eval/eval-context';
 import { buildGolden, goldenDifferences } from '@/eval/golden/golden';
 import type { Golden } from '@/eval/golden/golden';
 import { loadSweep } from '@/eval/sweep/sweep-data';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const GOLDEN_FILE = 'tests/golden/golden.json';
 const VECTORS_FILE = 'tests/golden/query-vectors.json';

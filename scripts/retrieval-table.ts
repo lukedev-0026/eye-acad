@@ -4,7 +4,7 @@
 //   pnpm retrieval-table
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { pageLabel } from '@/domain/note/note.types';
 import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
@@ -13,7 +13,7 @@ import { loadExaminerNotes } from '@/infrastructure/files/case-file.loader';
 import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
 import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const models = createLanguageModelGateway(getConfig());
 

@@ -9,19 +9,23 @@ import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import { runChain } from '@/eval/checks/chain.check';
 import { runRequiredChecks } from '@/eval/checks/required.check';
 import { loadContext } from '@/eval/eval-context';
+import { resultsFile } from '@/eval/paths';
 import { checksMarkdown } from '@/eval/report/checks.report';
-import { appendRow, readRows, resultsFile, runCases, selfTest, summarise } from '@/eval/run/run-cases';
+import { appendRow, readRows } from '@/eval/run/results.store';
+import { runCases } from '@/eval/run/run-cases';
+import { selfTest } from '@/eval/run/self-test';
+import { summarise } from '@/eval/run/summarise';
 import { captureEnv, modelInfo } from '@/eval/run-env';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const { values: args } = parseArgs({
   options: {

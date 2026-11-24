@@ -1,6 +1,6 @@
 import type { RequiredRow } from '@/eval/checks/required.check';
-import { summarise } from '@/eval/run/run-cases';
-import type { ResultRow } from '@/eval/run/run-cases';
+import type { ResultRow } from '@/eval/run/result-row';
+import { summarise } from '@/eval/run/summarise';
 import type { RunEnv } from '@/eval/run-env';
 
 type Header = {

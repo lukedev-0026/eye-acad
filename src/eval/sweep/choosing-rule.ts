@@ -1,5 +1,5 @@
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
-import type { Summary } from '@/eval/run/run-cases';
+import type { Summary } from '@/eval/run/summarise';
 
 import { CEILING_MS, SIZE_ORDER, sizeOf } from './grid';
 

@@ -23,6 +23,7 @@ export const ERROR_CODES = [
   'EVAL_OUT_OF_TIME',
   'EVAL_LOW_BATTERY',
   'EVAL_INVALID_CASE',
+  'EVAL_REFUSED',
   'INTERNAL',
 ] as const;
 

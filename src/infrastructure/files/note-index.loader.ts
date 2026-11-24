@@ -1,15 +1,9 @@
-import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
+import { sha256OfFile } from '@/common/hash.server';
 import { getConfig } from '@/config/env.server';
 import { NoteIndexMissingError, NoteIndexStaleError } from '@/domain/note/note.error';
 import type { NoteIndex } from '@/domain/note/note.types';
-
-export async function sha256OfFile(file: string): Promise<string> {
-  return createHash('sha256')
-    .update(await readFile(file))
-    .digest('hex');
-}
 
 // Loads the prepared note and refuses to use it if the PDF has changed since.
 // Quoting old text against a new document would be worse than stopping.

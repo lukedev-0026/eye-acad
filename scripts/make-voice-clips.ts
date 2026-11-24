@@ -4,11 +4,11 @@
 //   pnpm tsx scripts/make-voice-clips.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { DeepgramSpeechService } from '@/infrastructure/speech/deepgram-speech.service';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const QUESTIONS = [
   'What is the intraocular pressure in the right eye?',

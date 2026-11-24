@@ -12,14 +12,18 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
 import type { EvalCase } from '@/eval/eval.types';
-import { appendRow, configId, rowKey, runCases, summarise } from '@/eval/run/run-cases';
-import type { ResultRow } from '@/eval/run/run-cases';
+import { configId } from '@/eval/run/config-id';
+import { rowKey } from '@/eval/run/result-row';
+import type { ResultRow } from '@/eval/run/result-row';
+import { appendRow } from '@/eval/run/results.store';
+import { runCases } from '@/eval/run/run-cases';
+import { summarise } from '@/eval/run/summarise';
 import { captureEnv, modelInfo, swapUsedMb } from '@/eval/run-env';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { rank } from '@/eval/sweep/choosing-rule';
@@ -40,7 +44,7 @@ import { candidatesFor, loadSweep } from '@/eval/sweep/sweep-data';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const { values: args } = parseArgs({
   options: {

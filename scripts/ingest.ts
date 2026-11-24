@@ -6,15 +6,15 @@ import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { sha256OfFile } from '@/common/hash.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { parseNoteXml } from '@/domain/note/note-parse';
 import { searchText } from '@/domain/note/note.types';
 import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
-import { sha256OfFile } from '@/infrastructure/files/note-index.loader';
 import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const { files } = getConfig();
 const pdf = path.resolve(process.argv[2] ?? files.notePdf);

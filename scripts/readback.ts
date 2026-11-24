@@ -6,12 +6,12 @@
 //   pnpm readback iop_right  one row, printing the transcript
 import { writeFile } from 'node:fs/promises';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { buildCatalogue } from '@/domain/examiner/catalogue';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
 import type { RenderedItem } from '@/domain/examiner/render';
-import { appendRow } from '@/eval/run/run-cases';
+import { appendRow } from '@/eval/run/results.store';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 import {
   DeepgramSpeechService,
@@ -19,7 +19,7 @@ import {
   createSpeechService,
 } from '@/infrastructure/speech/deepgram-speech.service';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const voice = createSpeechService(getConfig().deepgram);
 if (!(voice instanceof DeepgramSpeechService)) {

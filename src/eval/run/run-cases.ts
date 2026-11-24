@@ -1,90 +1,19 @@
-import { createHash } from 'node:crypto';
-import { appendFile, mkdir, readFile } from 'node:fs/promises';
-import path from 'node:path';
-
+import { describeError } from '@/common/errors/to-error';
+import { sha1Hex } from '@/common/hash.server';
 import type { CallOutcome } from '@/domain/llm/call-result';
-import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
-import type { AnyStepEval, EvalCase, EvalContext, Graded, Split } from '@/eval/eval.types';
+import type { StepSettings } from '@/domain/llm/step-settings.schema';
+import { TooManyInfraErrorsError } from '@/eval/eval.error';
+import type { AnyStepEval, EvalCase, EvalContext, Graded } from '@/eval/eval.types';
 
-// A short, stable name for one configuration of one step. Two runs with the
-// same settings get the same id, which is what makes a run resumable.
-export function configId(step: StepId, s: StepSettings): string {
-  const key = JSON.stringify([
-    step,
-    s.provider,
-    s.model,
-    s.thinking,
-    s.forceFormat,
-    s.promptVariant,
-    s.temperature ?? null,
-    s.sampling ?? null,
-    s.effort ?? null,
-    s.numCtx ?? null,
-    s.maxOutputTokens,
-    // Left out when empty so that ids recorded before this field existed stay valid.
-    ...(s.improvements?.length ? [[...s.improvements].sort()] : []),
-  ]);
-  return createHash('sha1').update(key).digest('hex').slice(0, 10);
-}
-
-export type ResultRow = {
-  type: 'result';
-  runId: string;
-  stage: string;
-  at: string;
-  step: StepId;
-  configId: string;
-  settings: StepSettings;
-  split: Split;
-  caseId: string;
-  caseType: string;
-  trial: number;
-  seed: number | null;
-  outcome: CallOutcome;
-  pass: boolean;
-  costly: boolean;
-  fallback: boolean;
-  detail: string;
-  secondary?: Graded['secondary'];
-  ms: number;
-  modelMs: number;
-  calls: number;
-  promptTokens: number;
-  outputTokens: number;
-  thinkingChars: number;
-  model: string;
-  observed: unknown;
-  raw: string;
-};
-
-export function resultsFile(runId: string): string {
-  return path.resolve(process.cwd(), 'evals/results', `${runId}.jsonl`);
-}
-
-export async function appendRow(runId: string, row: Record<string, unknown>): Promise<void> {
-  const file = resultsFile(runId);
-  await mkdir(path.dirname(file), { recursive: true });
-  await appendFile(file, `${JSON.stringify(row)}\n`);
-}
-
-export async function readRows(file: string): Promise<Array<Record<string, unknown>>> {
-  try {
-    return (await readFile(file, 'utf8'))
-      .split('\n')
-      .filter((l) => l.trim())
-      .map((l) => JSON.parse(l) as Record<string, unknown>);
-  } catch {
-    return [];
-  }
-}
-
-export const rowKey = (stage: string, cfg: string, caseId: string, trial: number) =>
-  `${stage}|${cfg}|${caseId}|${trial}`;
+import { configId } from './config-id';
+import { rowKey } from './result-row';
+import type { ResultRow } from './result-row';
+import { appendRow } from './results.store';
 
 // A small seeded shuffle, so the order is the same on a re-run but the same
 // prompt never follows itself (Ollama skips work on a repeated prompt).
 function shuffled<T>(items: Array<T>, seed: string): Array<T> {
-  let state = Number.parseInt(createHash('sha1').update(seed).digest('hex').slice(0, 8), 16);
+  let state = Number.parseInt(sha1Hex(seed).slice(0, 8), 16);
   const next = () => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 2 ** 32;
@@ -96,8 +25,6 @@ function shuffled<T>(items: Array<T>, seed: string): Array<T> {
   }
   return out;
 }
-
-export class TooManyInfraErrors extends Error {}
 
 export type RunOptions = {
   evalDef: AnyStepEval;
@@ -141,7 +68,7 @@ export async function runCases(o: RunOptions): Promise<{ rows: Array<ResultRow>;
         if (outcome !== 'ok') graded = { ...graded, pass: false, detail: `${outcome}; ${graded.detail}` };
       } catch (e) {
         outcome = 'infra_error';
-        graded = { pass: false, costly: false, fallback: false, detail: `exception: ${String(e)}` };
+        graded = { pass: false, costly: false, fallback: false, detail: `exception: ${describeError(e)}` };
       }
       infraStreak = outcome === 'infra_error' ? infraStreak + 1 : 0;
       const row: ResultRow = {
@@ -176,93 +103,9 @@ export async function runCases(o: RunOptions): Promise<{ rows: Array<ResultRow>;
       rows.push(row);
       await appendRow(o.runId, row);
       o.onRow?.(row);
-      if (infraStreak >= 5) throw new TooManyInfraErrors('Five calls in a row could not reach the model.');
+      if (infraStreak >= 5) throw new TooManyInfraErrorsError();
       if (o.shouldStop?.(rows)) return { rows, stopped: true };
     }
   }
   return { rows, stopped: false };
-}
-
-// How one configuration did on one set of cases. n is the number of CASES and
-// k the number that passed on every run: twenty cases run three times is 20,
-// never 60.
-export type Summary = {
-  cases: number;
-  trialsPerCase: number;
-  casesAllPass: number;
-  casesFlipped: number;
-  trialsPassed: number;
-  trialsCounted: number;
-  costly: number;
-  fallbacks: number;
-  truncated: number;
-  schemaInvalid: number;
-  refusals: number;
-  infraErrors: number;
-  medianMs: number | null;
-  minMs: number | null;
-  maxMs: number | null;
-  timedCalls: number;
-  medianOutputTokens: number | null;
-  secondaryK: number;
-  secondaryN: number;
-  secondaryLeftOut: number;
-};
-
-const median = (values: Array<number>): number | null => {
-  if (!values.length) return null;
-  const s = [...values].sort((a, b) => a - b);
-  const m = Math.floor(s.length / 2);
-  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
-};
-
-export function summarise(rows: Array<ResultRow>): Summary {
-  // A call that never reached the model says nothing about the configuration.
-  const counted = rows.filter((r) => r.outcome !== 'infra_error');
-  const byCase = new Map<string, Array<ResultRow>>();
-  for (const r of counted) byCase.set(r.caseId, [...(byCase.get(r.caseId) ?? []), r]);
-  const groups = [...byCase.values()];
-  const timed = counted.filter((r) => r.calls > 0).map((r) => r.ms);
-  const count = (outcome: CallOutcome) => rows.filter((r) => r.outcome === outcome).length;
-  return {
-    cases: groups.length,
-    trialsPerCase: Math.max(0, ...groups.map((g) => g.length)),
-    casesAllPass: groups.filter((g) => g.every((r) => r.pass)).length,
-    casesFlipped: groups.filter((g) => g.some((r) => r.pass) && g.some((r) => !r.pass)).length,
-    trialsPassed: counted.filter((r) => r.pass).length,
-    trialsCounted: counted.length,
-    costly: counted.filter((r) => r.costly).length,
-    fallbacks: counted.filter((r) => r.fallback).length,
-    truncated: count('truncated'),
-    schemaInvalid: count('schema_invalid'),
-    refusals: count('refusal'),
-    infraErrors: count('infra_error'),
-    medianMs: median(timed),
-    minMs: timed.length ? Math.min(...timed) : null,
-    maxMs: timed.length ? Math.max(...timed) : null,
-    timedCalls: timed.length,
-    medianOutputTokens: median(counted.filter((r) => r.calls > 0).map((r) => r.outputTokens)),
-    secondaryK: counted.reduce((n, r) => n + (r.secondary?.k ?? 0), 0),
-    secondaryN: counted.reduce((n, r) => n + (r.secondary?.n ?? 0), 0),
-    secondaryLeftOut: counted.reduce((n, r) => n + (r.secondary?.leftOut ?? 0), 0),
-  };
-}
-
-// Before any model runs: do the graders agree with their own expected
-// answers, and what does a step that ignores its input score?
-export function selfTest(evalDef: AnyStepEval, cases: Array<EvalCase>, ctx: EvalContext) {
-  const wrong: Array<string> = [];
-  let constantPass = 0;
-  for (const c of cases) {
-    const ideal = evalDef.grade(c, evalDef.ideal(c, ctx), ctx);
-    if (!ideal.pass || ideal.costly) wrong.push(`${c.id}: ${ideal.detail}`);
-    if (evalDef.grade(c, evalDef.constant.observe(c, ctx), ctx).pass) constantPass++;
-  }
-  return {
-    cases: cases.length,
-    idealPass: cases.length - wrong.length,
-    wrong,
-    constantName: evalDef.constant.name,
-    constantPass,
-  };
 }

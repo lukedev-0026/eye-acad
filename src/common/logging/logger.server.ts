@@ -97,7 +97,7 @@ const children = new Map<string, Logger>();
 // their log lines go to stderr; and unless LOG_LEVEL asks for more, only
 // warnings and errors are written, so a run of hundreds of model calls does
 // not bury its own report.
-export function useCommandLineLogging(): void {
+export function configureCommandLineLogging(): void {
   stream = 'stderr';
   quietByDefault = true;
   root = undefined;

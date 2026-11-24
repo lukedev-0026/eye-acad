@@ -5,15 +5,15 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-import { useCommandLineLogging } from '@/common/logging/logger.server';
+import { configureCommandLineLogging } from '@/common/logging/logger.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
-import { selfTest } from '@/eval/run/run-cases';
+import { selfTest } from '@/eval/run/self-test';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { CEILING_MS } from '@/eval/sweep/grid';
 
-useCommandLineLogging();
+configureCommandLineLogging();
 
 const { values: args } = parseArgs({ options: { provider: { type: 'string', default: 'ollama' } } });
 

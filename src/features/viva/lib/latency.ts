@@ -1,3 +1,5 @@
+import { median } from '@/common/stats';
+
 // The timing of one voice turn, as the trainee experiences it.
 //
 // The timer STARTS when the trainee releases the talk button (the moment they
@@ -19,13 +21,6 @@ export type TurnTiming = {
     serverTotalMs: number;
   };
 };
-
-export function median(values: Array<number>): number | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
-}
 
 export function summarise(timings: Array<TurnTiming>) {
   const played = timings

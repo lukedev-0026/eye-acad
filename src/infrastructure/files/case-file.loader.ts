@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 import { z } from 'zod';
 
 import { errorMessage } from '@/common/errors/to-error';
+import { sha256Hex } from '@/common/hash.server';
 import { getConfig } from '@/config/env.server';
 import { CaseFileError } from '@/domain/case/case.error';
 import { CaseFileSchema } from '@/domain/case/case.schema';
@@ -36,7 +36,7 @@ async function readCaseFile(file: string): Promise<{ data: CaseFile; fileHash: s
       details: { file },
     });
   }
-  const fileHash = createHash('sha256').update(text).digest('hex').slice(0, 16);
+  const fileHash = sha256Hex(text).slice(0, 16);
   return { data: parsed.data, fileHash };
 }
 

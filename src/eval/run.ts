@@ -10,6 +10,8 @@ export function configId(step: StepId, s: StepSettings): string {
   const key = JSON.stringify([
     step, s.provider, s.model, s.thinking, s.forceFormat, s.promptVariant,
     s.temperature ?? null, s.sampling ?? null, s.effort ?? null, s.numCtx ?? null, s.maxOutputTokens,
+    // Left out when empty so that ids recorded before this field existed stay valid.
+    ...(s.improvements?.length ? [[...s.improvements].sort()] : []),
   ])
   return createHash('sha1').update(key).digest('hex').slice(0, 10)
 }

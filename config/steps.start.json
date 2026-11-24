@@ -12,9 +12,9 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 400,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 400
+      "timeoutMs": 30000
     },
     "followup": {
       "provider": "ollama",
@@ -28,9 +28,9 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 600,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 600
+      "timeoutMs": 30000
     },
     "coverage": {
       "provider": "ollama",
@@ -44,9 +44,9 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 1500,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 1500
+      "timeoutMs": 60000
     },
     "revision": {
       "provider": "ollama",
@@ -60,9 +60,9 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 800,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 800
+      "timeoutMs": 60000
     },
     "verifier": {
       "provider": "ollama",
@@ -76,9 +76,9 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 300,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 300
+      "timeoutMs": 60000
     }
   }
 }

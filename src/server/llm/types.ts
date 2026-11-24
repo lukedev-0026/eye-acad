@@ -39,6 +39,10 @@ export const StepSettingsSchema = z.object({
   effort: z.enum(['low', 'medium', 'high']).optional(),
   maxOutputTokens: z.number().int().positive(),
   numCtx: z.number().int().positive().optional(),
+  // Named changes to the step's own logic that are switched on for it. They
+  // live in the settings so that "before" and "after" can be run side by side
+  // on the same cases, and so the app's settings file says what is in force.
+  improvements: z.array(z.string()).optional(),
   timeoutMs: z.number().int().positive().default(120_000),
 })
 export type StepSettings = z.infer<typeof StepSettingsSchema>

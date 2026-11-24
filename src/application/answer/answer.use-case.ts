@@ -1,6 +1,7 @@
 import type { VivaDeps } from '@/application/deps';
 import { produceRevision } from '@/application/revision/produce-revision';
 import { followUpSpeech, runFollowUp } from '@/application/steps/followup.step';
+import { getLogger } from '@/common/logging/logger.server';
 import { MAX_ANSWER_CHARS, pushTurn } from '@/domain/attempt/attempt';
 import { AttemptPhaseError, EmptyAnswerError } from '@/domain/attempt/attempt.error';
 import type { PublicAttempt, RevisionCard } from '@/domain/attempt/attempt.schema';
@@ -9,6 +10,8 @@ import { loadNoteIndex } from '@/infrastructure/files/note-index.loader';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
 type Deps = Pick<VivaDeps, 'attempts' | 'models'>;
+
+const log = () => getLogger('answer');
 
 // Everything that happens after the trainee presses "Give my answer". This is
 // the only code that reads the examiner notes.
@@ -80,6 +83,15 @@ export async function ensureFollowUp(deps: Deps, uid: string, attemptId: string)
       anchorCheck: x.anchorCheck ?? null,
     })),
   });
+  log().info(
+    {
+      actionResult: 'DONE',
+      path: result.path,
+      modelCalls: result.attempts.length,
+      respondsToQuote: result.respondingTo !== null,
+    },
+    'ensureFollowUp.asked',
+  );
   return { ...asReply(saved), speech };
 }
 
@@ -185,5 +197,16 @@ export async function prepareRevision(deps: Deps, uid: string, attemptId: string
       ? { ms: working.keyPointCheck.call.ms, value: working.keyPointCheck.call.value ?? null }
       : null,
   });
+  log().info(
+    {
+      actionResult: 'DONE',
+      outcome: card.outcome,
+      targetKind: working.target?.kind ?? null,
+      targetChosenBy: working.coverage?.targetChosenBy ?? null,
+      retrievalMode: card.retrievalMode,
+      pointSource: card.pointSource,
+    },
+    'prepareRevision.completed',
+  );
   return card;
 }

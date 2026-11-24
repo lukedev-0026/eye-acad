@@ -41,6 +41,7 @@ export async function runSelector(
   );
   const call = await models.callStep(settings, prompt, schema, {
     normalise: normaliseSelectorOutput(catalogue),
+    step: 'selector',
   });
   if (call.outcome !== 'ok') return { call };
   return { call, decision: decide(c, catalogue, call.value) };

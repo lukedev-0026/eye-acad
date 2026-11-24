@@ -5,8 +5,11 @@
 import { writeFile } from 'node:fs/promises';
 
 import { coverageItems } from '@/application/steps/coverage.step';
+import { useCommandLineLogging } from '@/common/logging/logger.server';
 import { headingPath, pageLabel } from '@/domain/note/note.types';
 import { findSentence, loadContext, readCases, resolveTarget } from '@/eval/eval-context';
+
+useCommandLineLogging();
 
 const ctx = await loadContext();
 const cell = (t: string) => t.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();

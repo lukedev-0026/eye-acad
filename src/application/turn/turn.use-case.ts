@@ -1,5 +1,6 @@
 import type { VivaDeps } from '@/application/deps';
 import { MAX_UTTERANCE_CHARS, runSelector } from '@/application/steps/selector.step';
+import { getLogger } from '@/common/logging/logger.server';
 import { MAX_TURNS, pushTurn, reveal } from '@/domain/attempt/attempt';
 import { AttemptPhaseError } from '@/domain/attempt/attempt.error';
 import { buildCatalogue } from '@/domain/examiner/catalogue';
@@ -117,6 +118,17 @@ export async function handleRequest(
     a.timings.push({ turn: said.n, via, ...timings });
   });
 
+  getLogger('turn').info(
+    {
+      actionResult: 'DONE',
+      via,
+      replyKind: final.kind,
+      items: final.items.length,
+      spoken: speech !== null,
+      ...timings,
+    },
+    'handleRequest.completed',
+  );
   return { reply: final, heard, speech, timings };
 }
 

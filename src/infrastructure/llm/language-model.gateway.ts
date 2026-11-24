@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { getLogger } from '@/common/logging/logger.server';
 import type { AppConfig } from '@/config/env.server';
 import type { CallResult, Prompt } from '@/domain/llm/call-result';
 import { extractJson } from '@/domain/llm/extract-json';
@@ -17,6 +18,8 @@ import { OllamaEmbedder } from './ollama.embedder';
 import { OllamaProvider } from './ollama.provider';
 
 type ProviderName = StepSettings['provider'];
+
+const log = () => getLogger('language-model');
 
 interface Embedder {
   embed(texts: ReadonlyArray<string>, kind: EmbeddingKind): Promise<Array<Array<number>> | null>;
@@ -55,7 +58,22 @@ export class ProviderLanguageModelGateway implements LanguageModelGateway {
       ms: Math.round(performance.now() - started),
       server: reply.server,
     };
+    const logged = {
+      step: options.step,
+      provider: settings.provider,
+      model: reply.model,
+      promptVariant: settings.promptVariant,
+      durationMs: facts.ms,
+      promptTokens: reply.server.promptTokens,
+      outputTokens: reply.server.outputTokens,
+      thinkingChars: reply.thinkingChars,
+    };
     if (reply.outcome !== 'ok') {
+      // An expected outcome, not an exception: the caller has a fallback for it.
+      log().info(
+        { ...logged, actionResult: 'FAILED', outcome: reply.outcome, reason: reply.error },
+        'callStep.unusable',
+      );
       return { ...facts, outcome: reply.outcome, error: reply.error };
     }
 
@@ -65,8 +83,11 @@ export class ProviderLanguageModelGateway implements LanguageModelGateway {
     const candidate = options.normalise ? options.normalise(json) : json;
     const parsed = schema.safeParse(candidate);
     if (!parsed.success) {
-      return { ...facts, outcome: 'schema_invalid', error: z.prettifyError(parsed.error) };
+      const reason = z.prettifyError(parsed.error);
+      log().info({ ...logged, actionResult: 'FAILED', outcome: 'schema_invalid', reason }, 'callStep.unusable');
+      return { ...facts, outcome: 'schema_invalid', error: reason };
     }
+    log().debug({ ...logged, actionResult: 'SUCCESS', outcome: 'ok' }, 'callStep.completed');
     return { ...facts, outcome: 'ok', value: parsed.data };
   }
 

@@ -82,14 +82,31 @@ export function createLogger(options: LoggerOptions): Logger {
   );
 }
 
+function createRootLogger(): Logger {
+  const { logging } = getConfig();
+  const level = quietByDefault && !logging.levelWasSet && logging.level !== 'silent' ? 'warn' : logging.level;
+  return createLogger({ level, format: logging.format, stream });
+}
+
 let root: Logger | undefined;
 let stream: LogStream = 'stdout';
+let quietByDefault = false;
 const children = new Map<string, Logger>();
 
-// Command-line tools call this first, to send log lines to stderr.
-export function useLogStream(next: LogStream): void {
-  stream = next;
+// Command-line tools call this first. Their own output goes to stdout, so
+// their log lines go to stderr; and unless LOG_LEVEL asks for more, only
+// warnings and errors are written, so a run of hundreds of model calls does
+// not bury its own report.
+export function useCommandLineLogging(): void {
+  stream = 'stderr';
+  quietByDefault = true;
   root = undefined;
+  children.clear();
+}
+
+// For tests: every logger then writes through this one. Pass nothing to undo.
+export function replaceRootLogger(logger?: Logger): void {
+  root = logger;
   children.clear();
 }
 
@@ -98,8 +115,7 @@ export function useLogStream(next: LogStream): void {
 export function getLogger(component: string): Logger {
   const existing = children.get(component);
   if (existing) return existing;
-  const { logging } = getConfig();
-  root ??= createLogger({ level: logging.level, format: logging.format, stream });
+  root ??= createRootLogger();
   const child = root.child({ component });
   children.set(component, child);
   return child;

@@ -68,6 +68,7 @@ export async function runFollowUp(
       settings,
       followUpPrompt(settings.promptVariant, { notes, answer, retryReason }, shape),
       schema,
+      { step: 'followup' },
     );
     const attempt: FollowUpAttempt = { call };
     attempts.push(attempt);

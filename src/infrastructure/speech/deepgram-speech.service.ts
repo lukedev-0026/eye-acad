@@ -1,4 +1,5 @@
 import { describeError } from '@/common/errors/to-error';
+import { getLogger } from '@/common/logging/logger.server';
 import type { AppConfig } from '@/config/env.server';
 import type { Secret } from '@/config/secret';
 import type { SpeechService, SpokenReply, Transcription } from '@/domain/speech/speech.service';
@@ -17,6 +18,8 @@ const MAX_KEYTERMS = 60;
 // Clips kept in memory. The oldest goes first.
 const MAX_HELD = 600;
 const PREPARE_WORKERS = 3;
+
+const log = () => getLogger('speech');
 
 export interface Speech {
   readonly audioBase64: string;
@@ -92,11 +95,19 @@ export class DeepgramSpeechService implements SpeechService {
           continue;
         }
         const text = reply.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? '';
+        log().debug(
+          { actionResult: 'SUCCESS', model, durationMs: elapsed(), audioBytes: audio.byteLength },
+          'transcribe.completed',
+        );
         return { ok: true, text: text.trim(), ms: elapsed(), model };
       } catch (error) {
         lastError = `${model}: ${describeError(error)}`;
       }
     }
+    log().warn(
+      { actionResult: 'FAILED', durationMs: elapsed(), audioBytes: audio.byteLength, reason: lastError },
+      'transcribe.failed',
+    );
     return { ok: false, ms: elapsed(), error: lastError };
   }
 
@@ -114,6 +125,10 @@ export class DeepgramSpeechService implements SpeechService {
       });
       if (!res.ok) {
         this.lastSynthesisError = `HTTP ${res.status} ${(await res.text()).slice(0, 200)}`;
+        log().warn(
+          { actionResult: 'FAILED', voice: this.voice, status: res.status, chars: text.length },
+          'synthesise.refused',
+        );
         return null;
       }
       const bytes = Buffer.from(await res.arrayBuffer());
@@ -125,6 +140,10 @@ export class DeepgramSpeechService implements SpeechService {
       };
     } catch (error) {
       this.lastSynthesisError = describeError(error);
+      log().warn(
+        { actionResult: 'FAILED', voice: this.voice, chars: text.length, err: error },
+        'synthesise.unreachable',
+      );
       return null;
     }
   }

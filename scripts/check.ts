@@ -9,6 +9,7 @@ import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
+import { useCommandLineLogging } from '@/common/logging/logger.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import { runChain } from '@/eval/checks/chain.check';
@@ -19,6 +20,8 @@ import { appendRow, readRows, resultsFile, runCases, selfTest, summarise } from 
 import { captureEnv, modelInfo } from '@/eval/run-env';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
+
+useCommandLineLogging();
 
 const { values: args } = parseArgs({
   options: {

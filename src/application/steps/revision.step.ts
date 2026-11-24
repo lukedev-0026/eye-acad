@@ -78,6 +78,7 @@ export async function runRevision(
     settings,
     revisionPrompt(settings.promptVariant, { target, guidance, passages }, describeJsonShape(schema)),
     schema,
+    { step: 'revision' },
   );
   const none = { citation: null, point: null, pointSource: null, wordingCheck: null };
   if (call.outcome !== 'ok') return { call, outcome: 'unusable', ...none };

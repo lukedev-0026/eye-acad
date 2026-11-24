@@ -52,6 +52,7 @@ export async function runVerifier(
       describeJsonShape(VerifierSchema),
     ),
     VerifierSchema,
+    { step: 'verifier' },
   );
   return { call, supported: call.outcome === 'ok' && call.value?.verdict === 'supported' };
 }

@@ -1,8 +1,11 @@
 // Prints every finding and history item exactly as the app will show and say
 // it, straight from the current case file. Compare against the case PDF.
 //   pnpm findings
+import { useCommandLineLogging } from '@/common/logging/logger.server';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
+
+useCommandLineLogging();
 
 const c = await loadCase();
 console.log(`Case ${c.caseId} (file hash ${c.fileHash})\n`);

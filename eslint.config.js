@@ -123,6 +123,10 @@ export default defineConfig([
     },
   },
 
+  // Application code logs through the logger. The command-line scripts print:
+  // their output is the product.
+  { files: ['src/**'], rules: { 'no-console': 'error' } },
+
   // Tool configuration files must export a default.
   { files: ['*.config.{js,ts}'], rules: { 'import-x/no-default-export': 'off' } },
 ]);

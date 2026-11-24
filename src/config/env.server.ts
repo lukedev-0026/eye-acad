@@ -15,6 +15,8 @@ export interface AppConfig {
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly logging: {
     readonly level: LogLevel;
+    // False when LOG_LEVEL was not set and `level` is the default.
+    readonly levelWasSet: boolean;
     readonly format: LogFormat;
   };
   readonly ollama: {
@@ -71,6 +73,7 @@ export function loadConfig(source: EnvSource, projectDir: string = process.cwd()
     nodeEnv: env.NODE_ENV,
     logging: {
       level: env.LOG_LEVEL ?? (env.NODE_ENV === 'test' ? 'silent' : 'info'),
+      levelWasSet: env.LOG_LEVEL !== undefined,
       format: env.LOG_FORMAT ?? (env.NODE_ENV === 'production' ? 'json' : 'pretty'),
     },
     ollama: {

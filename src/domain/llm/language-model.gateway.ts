@@ -7,6 +7,8 @@ export interface CallStepOptions {
   // Tidies a parsed reply before it is checked (for example matching a label
   // without regard to capitals). It cannot widen what the schema accepts.
   readonly normalise?: (value: unknown) => unknown;
+  // Which step is calling, for the log.
+  readonly step?: string;
 }
 
 export type EmbeddingKind = 'query' | 'document';

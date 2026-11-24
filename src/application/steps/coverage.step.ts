@@ -69,6 +69,7 @@ export async function runCoverage(
     settings,
     coveragePrompt(settings.promptVariant, { items, answer }, describeJsonShape(schema)),
     schema,
+    { step: 'coverage' },
   );
   if (call.outcome !== 'ok') {
     return { call, items: [], target: null, targetChosenBy: null };

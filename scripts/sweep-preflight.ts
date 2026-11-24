@@ -8,6 +8,7 @@ import { parseArgs } from 'node:util';
 import { z } from 'zod';
 
 import { describeJsonShape } from '@/application/prompts/json-shape.prompt';
+import { useCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import { loadContext } from '@/eval/eval-context';
@@ -17,6 +18,8 @@ import { STEP_EVALS } from '@/eval/steps/registry';
 import { NUM_CTX, SIZES, settingsFor } from '@/eval/sweep/grid';
 import type { Size } from '@/eval/sweep/grid';
 import { OllamaClient } from '@/infrastructure/llm/ollama-http';
+
+useCommandLineLogging();
 
 const { values: args } = parseArgs({ options: { models: { type: 'string', default: 'small,medium,large' } } });
 const sizes = (args.models ?? '').split(',').filter((s): s is Size => s in SIZES);

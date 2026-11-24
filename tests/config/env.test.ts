@@ -15,7 +15,7 @@ describe('loadConfig', () => {
     const config = loadConfig({}, PROJECT);
 
     expect(config.nodeEnv).toBe('development');
-    expect(config.logging).toEqual({ level: 'info', format: 'pretty' });
+    expect(config.logging).toEqual({ level: 'info', levelWasSet: false, format: 'pretty' });
     expect(config.ollama).toEqual({ host: 'http://127.0.0.1:11434', keepAlive: '30m' });
     expect(config.embeddings.model).toBe('nomic-embed-text');
     expect(config.deepgram).toEqual({
@@ -62,7 +62,7 @@ describe('loadConfig', () => {
       PROJECT,
     );
 
-    expect(config.logging).toEqual({ level: 'debug', format: 'json' });
+    expect(config.logging).toEqual({ level: 'debug', levelWasSet: true, format: 'json' });
     expect(config.ollama).toEqual({ host: 'http://ollama.internal:11434', keepAlive: '5m' });
     expect(config.deepgram.sttModels).toEqual(['nova-3', 'nova-3']);
     expect(config.deepgram.ttsVoice).toBe('aura-2-pandora-en');

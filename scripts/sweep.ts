@@ -12,6 +12,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
+import { useCommandLineLogging } from '@/common/logging/logger.server';
 import { getConfig } from '@/config/env.server';
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
@@ -38,6 +39,8 @@ import type { Size } from '@/eval/sweep/grid';
 import { candidatesFor, loadSweep } from '@/eval/sweep/sweep-data';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 import { OllamaClient } from '@/infrastructure/llm/ollama-http';
+
+useCommandLineLogging();
 
 const { values: args } = parseArgs({
   options: {

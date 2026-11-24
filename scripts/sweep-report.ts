@@ -1,7 +1,7 @@
 // Turns the sweep's recorded calls into evals/sweep/results.csv, applies the
 // rule in evals/sweep/RULE.md, and prints the choice.
 //   pnpm sweep:report            write the CSV and print the ranking
-//   pnpm sweep:report --apply    also write the chosen settings to config/steps.json
+//   pnpm sweep:report --apply    also write the chosen settings to config/steps.chosen.json and config/steps.json
 import { parseArgs } from 'node:util';
 
 import { runCli } from '@/eval/cli';

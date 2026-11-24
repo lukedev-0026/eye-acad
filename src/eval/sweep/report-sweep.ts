@@ -26,7 +26,8 @@ import type { Preflight } from './sweep-rows.schema';
 
 export interface ReportOptions {
   readonly runId: string;
-  // Also write the chosen settings to config/steps.json.
+  // Also write the chosen settings: config/steps.chosen.json as the rule made
+  // them, and config/steps.json for the app.
   readonly apply: boolean;
 }
 
@@ -163,11 +164,34 @@ export async function reportSweep(options: ReportOptions, print: Print): Promise
   } catch {
     // Nothing has been chosen yet.
   }
+  // The sweep chooses settings. A named improvement is a change to a step's
+  // logic switched on afterwards, on top of that choice, so it is set aside
+  // for the comparison and reported beside it.
+  const sweptOnly = ({ improvements: _improvements, ...settings }: StepSettings): StepSettings => settings;
   const same =
-    current !== null && STEP_IDS.every((step) => configId(step, current[step]) === rule.chosen[step]?.configId);
-  print(same ? `${PATHS.stepsConfig} already holds exactly this.` : `${PATHS.stepsConfig} does NOT hold this yet.`);
+    current !== null &&
+    STEP_IDS.every((step) => configId(step, sweptOnly(current[step])) === rule.chosen[step]?.configId);
+  const switchedOn = current
+    ? STEP_IDS.flatMap((step) => (current[step].improvements ?? []).map((name) => `${name} (${step})`))
+    : [];
+  print(
+    same
+      ? `${PATHS.stepsConfig} already holds exactly this` +
+          (switchedOn.length ? `, with switched on afterwards: ${switchedOn.join(', ')}.` : '.')
+      : `${PATHS.stepsConfig} does NOT hold this yet.`,
+  );
   if (options.apply) {
-    await writeFile(PATHS.stepsConfig, `${JSON.stringify({ steps: chosenSettings(rule) }, null, 2)}\n`);
-    print(`Wrote ${PATHS.stepsConfig}.`);
+    const chosen = chosenSettings(rule);
+    await writeFile(PATHS.chosenConfig, `${JSON.stringify({ steps: chosen }, null, 2)}\n`);
+    // An improvement already switched on in the app's settings stays on.
+    const inForce: Partial<Record<StepId, StepSettings>> = {};
+    for (const step of STEP_IDS) {
+      const settings = chosen[step];
+      if (!settings) continue;
+      const improvements = current?.[step].improvements;
+      inForce[step] = improvements?.length ? { ...settings, improvements } : settings;
+    }
+    await writeFile(PATHS.stepsConfig, `${JSON.stringify({ steps: inForce }, null, 2)}\n`);
+    print(`Wrote ${PATHS.chosenConfig} and ${PATHS.stepsConfig}.`);
   }
 }

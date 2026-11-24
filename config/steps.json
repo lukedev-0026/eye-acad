@@ -78,7 +78,10 @@
       },
       "maxOutputTokens": 3300,
       "numCtx": 8192,
-      "timeoutMs": 60000
+      "timeoutMs": 60000,
+      "improvements": [
+        "check-against-key-point"
+      ]
     }
   }
 }

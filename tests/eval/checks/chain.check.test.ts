@@ -45,7 +45,7 @@ let improved: StepsConfig;
 beforeAll(async () => {
   model = scriptModel();
   ctx = await loadContext();
-  chosen = await loadStepsConfig('config/steps.json');
+  chosen = await loadStepsConfig('config/steps.chosen.json');
   improved = await loadStepsConfig('config/steps.improved.json');
 });
 afterAll(() => {

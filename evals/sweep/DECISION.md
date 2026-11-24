@@ -61,10 +61,78 @@ Nothing else was overridden. `pnpm sweep:report` prints the same five configurat
 - The two probes of the repetition penalty and the optional third block were cut.
 - No Claude model was run. That route is written and has never been run.
 
+## The improvement, chosen and frozen
+
+Added on 24 November 2026 at 13:20 UTC, **before the held-back cases were opened**. The tag
+`improvement-frozen` marks the point.
+
+**Where it goes.** The written order is: most costly errors, then most failed cases, then most
+fallbacks, then the slowest stage of a spoken turn. On three runs per tuning case under the
+settings above (`CHECKS.md`, run `check-2026-11-24T12-34-37`):
+
+| Step | Runs with a costly error | Cases that did not pass every run | Fallbacks |
+|---|---|---|---|
+| Menu-picker | 3 of 168 | 3 of 56 | 0 |
+| Follow-up writer | 0 of 15 | 1 of 5 | 2 |
+| Coverage judge | 0 of 7 | 1 of 7 | 0 |
+| Revision step, alone | 3 of 24 | 4 of 8 | 7 |
+| Support check, alone | 0 of 30 | 0 of 10 | 0 |
+| Revision step and support check together | 1 of 24 | 3 of 8 | 2 |
+
+The menu-picker and the revision step tie on the first test: each made the same costly error on
+one case in all three runs. The second test separates them: the revision step failed 4 of its 8
+cases, the menu-picker 3 of 56. So the improvement goes to the revision step, which is also what
+the one-run sweep pointed to. The menu-picker's fault is real and is not fixed; it is first on the
+list in `HANDOVER.md`.
+
+**What it is.** The revision step's costly error always has the same shape. With the supporting
+passage out of reach, it quotes a sentence from another condition's section ("Avoid acetazolamide,
+which is itself a sulfonamide.", p. 8) and rewrites the advice to fit, sometimes into the
+quotation's own words. The support check is then asked whether the quotation backs advice that
+was written to match it, and agrees. It never sees the key point the trainee actually missed.
+
+The change (`check-against-key-point`, switched on for the support check in the settings file):
+when the revision step has written its own sentence, the support check is asked a second
+question, about the same quotation and the **original key point**. If the answer is no, the
+trainee is told no support was found. No prompt and no other setting is changed.
+
+**What it costs.** One more support-check call, about ten seconds with thinking on, whenever the
+model's own sentence is used. It runs after the conversation is over. It is also one more call
+that can run out of time, in which case the trainee is asked to try again.
+
+**What the tuning cases show**, three runs per case (`check-2026-11-24T12-34-37` without it,
+`check-2026-11-24T12-49-46` with it):
+
+| | Without | With |
+|---|---|---|
+| End to end: runs that showed a quotation that does not back the advice | 1 of 24 | 0 of 24 |
+| "No support" check with the passages removed: the same | 2 of 3 | 0 of 3 |
+| End to end: cases passing every run, counting a cut-off run as a failure | 5 of 8 | 5 of 8 |
+| Runs where a step was cut off and the trainee is asked to try again | 2 of 24 | 2 of 24 |
+| Cases that passed without it and failed with it | | 0 |
+
+**That table does not prove the change is the cause.** The saved traces show the new check ran
+four times in the end-to-end runs, each time on a correct quotation, and agreed each time. The
+runs it exists for did not come up again: in this run the first support check happened to refuse
+them itself. With a model that varies from run to run, three wrong quotations in 27 runs against
+none in 27 is within what chance alone could do.
+
+What does show it works is narrower:
+
+- With a stand-in for the model that reproduces the fault exactly, the quotation is shown without
+  the change and refused with it (`tests/eval/checks/chain.check.test.ts`).
+- The question it asks is one the support check has been measured on: given the key point and
+  that page 8 sentence as a fixed pair, it refused in 3 runs of 3 on these settings.
+
+**The decision.** The app runs with it switched on. `config/steps.json` is the rule's choice plus
+this one switch; `config/steps.chosen.json` is the rule's choice alone. The reason is the kind of
+error: showing a trainee a quotation that does not back the advice is the worst thing this panel
+can do, and the price is a longer wait after the viva has ended. This is decided here, on the
+tuning cases. The held-back cases report on it and do not change it.
+
 ## What happens next
 
-The held-back cases are still closed. The improvement is chosen by the written order (most costly
-errors first, which on these numbers is the revision step), built from tuning-case failures, and
-frozen in the project history. Only then are the held-back cases opened, once, for three runs:
-the starting settings, these settings, and these settings with the improvement. Nothing is
-re-chosen afterwards, whatever they show.
+The held-back cases are opened once, for three runs in one sitting: the starting settings
+(`config/steps.start.json`), the chosen settings (`config/steps.chosen.json`), and the chosen
+settings with the improvement (`config/steps.improved.json`, the same as the app's own file).
+Nothing is re-chosen afterwards, whatever they show.

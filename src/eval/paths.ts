@@ -25,7 +25,10 @@ export const PATHS = {
   voiceClipsDir: 'evals/voice-clips',
 
   // The settings the app runs on, and two fixed points of comparison.
+  // What the app runs on: the sweep's choice, with any improvement switched on.
   stepsConfig: 'config/steps.json',
+  // The sweep's choice exactly as the rule made it.
+  chosenConfig: 'config/steps.chosen.json',
   startConfig: 'config/steps.start.json',
   smallConfig: 'config/steps.small.json',
 

@@ -292,6 +292,11 @@ try {
       planned.push({ step, settings: at({ prompt: 'examples' }), block: 'block2' })
       planned.push({ step, settings: at({ temperature: 0 }), block: 'block2' })
     }
+    // The one step where thinking was both affordable and useful on the small
+    // model was the support check, so it gets a thinking-on run here too.
+    if (steps.includes('verifier')) {
+      planned.push({ step: 'verifier', settings: settingsFor('verifier', { size: 'medium', thinking: true, forceFormat: true }), block: 'block1' })
+    }
     for (const step of steps) planned.push({ step, settings: settingsFor(step, { size: 'large', thinking: false, forceFormat: true }), block: 'block1' })
     for (const size of sizes) {
       if (size === 'medium') await sentinel('A')

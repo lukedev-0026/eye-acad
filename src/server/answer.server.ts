@@ -169,6 +169,9 @@ export async function prepareRevision(uid: string, attemptId: string): Promise<R
     verifier: working.verifier
       ? { model: working.verifier.call.model, ms: working.verifier.call.ms, value: working.verifier.call.value ?? null }
       : null,
+    keyPointCheck: working.keyPointCheck
+      ? { ms: working.keyPointCheck.call.ms, value: working.keyPointCheck.call.value ?? null }
+      : null,
   })
   return card
 }

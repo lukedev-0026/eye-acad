@@ -81,12 +81,20 @@ export function checksMarkdown(all: Array<Record<string, unknown>>): string {
     '|---|---|---|---|---|---|---|---|',
   )
   const steps = [...new Set(results.map((r) => r.step))]
+  const NAME: Record<string, string> = {
+    selector: 'Menu-picker',
+    followup: 'Follow-up writer',
+    coverage: 'Coverage judge',
+    revision: 'Revision step, alone',
+    verifier: 'Support check, alone',
+    chain: 'Revision step and support check together',
+  }
   for (const step of steps) {
     const rows = results.filter((r) => r.step === step)
     const s = summarise(rows)
     const st = selfTests.find((x) => x.step === step)
     out.push(
-      `| ${step} | **${s.casesAllPass} of ${s.cases}** (${s.trialsPerCase} run${s.trialsPerCase === 1 ? '' : 's'} each) | ${s.casesFlipped} | ${s.costly} | ${s.fallbacks} | ${s.truncated + s.schemaInvalid + s.refusals} | ${s.medianMs ?? '–'} ms (${s.minMs ?? '–'}–${s.maxMs ?? '–'}) | ${st ? `${st.constantPass} of ${st.cases} (${st.constantName})` : '–'} |`,
+      `| ${NAME[step] ?? step} | **${s.casesAllPass} of ${s.cases}** (${s.trialsPerCase} run${s.trialsPerCase === 1 ? '' : 's'} each) | ${s.casesFlipped} | ${s.costly} | ${s.fallbacks} | ${s.truncated + s.schemaInvalid + s.refusals} | ${s.medianMs ?? '–'} ms (${s.minMs ?? '–'}–${s.maxMs ?? '–'}) | ${st ? `${st.constantPass} of ${st.cases} (${st.constantName})` : '–'} |`,
     )
   }
   out.push('')
@@ -102,7 +110,7 @@ export function checksMarkdown(all: Array<Record<string, unknown>>): string {
     const failing = [...byCase.entries()].filter(([, rows]) => rows.some((r) => !r.pass))
     if (!failing.length) continue
     any = true
-    out.push(`**${step}**`, '', '| Case | Type | Passed | Costly | What happened (a failing run) |', '|---|---|---|---|---|')
+    out.push(`**${NAME[step] ?? step}**`, '', '| Case | Type | Passed | Costly | What happened (a failing run) |', '|---|---|---|---|---|')
     for (const [id, rows] of failing) {
       const bad = rows.find((r) => !r.pass)!
       out.push(`| ${id} | ${bad.caseType} | ${rows.filter((r) => r.pass).length} of ${rows.length} | ${rows.some((r) => r.costly) ? 'yes' : ''} | ${cell(clip(bad.detail, 260))} |`)

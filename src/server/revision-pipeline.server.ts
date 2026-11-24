@@ -24,7 +24,12 @@ export type RevisionTrace = {
   retrieval: Retrieval | null
   revision: RevisionResult | null
   verifier: VerifierResult | null
+  // The improvement, when it is switched on: see below.
+  keyPointCheck: VerifierResult | null
 }
+
+// A named change to the logic, switched on per step in config/steps.json.
+export const CHECK_AGAINST_KEY_POINT = 'check-against-key-point'
 
 export type RevisionInput = {
   notes: ExaminerNotes
@@ -47,7 +52,7 @@ export async function produceRevision(
   // For the "no support" checks: passages to leave out of the search.
   options: { exclude?: Array<string>; pinnedTarget?: { id: string; kind: 'diagnosis' | 'key_point'; text: string } } = {},
 ): Promise<{ card: RevisionCard; trace: RevisionTrace }> {
-  const trace: RevisionTrace = { coverage: null, target: null, retrieval: null, revision: null, verifier: null }
+  const trace: RevisionTrace = { coverage: null, target: null, retrieval: null, revision: null, verifier: null, keyPointCheck: null }
   const now = () => Date.now()
 
   let target: { id: string; kind: 'diagnosis' | 'key_point' | 'follow_up'; text: string }
@@ -134,6 +139,30 @@ export async function produceRevision(
   // No second attempt with other passages: in the walk-through, retrying after
   // a rejection led straight to the wrong-section quote.
   if (!verifier.supported) return { card: noSupport(), trace }
+
+  // The improvement. The check above compares the quotation with the advice
+  // the model wrote. If the model reworded the advice to suit a passage about
+  // something else, the two agree and the check passes. So the quotation is
+  // also checked against the key point itself, which the model cannot
+  // reword. It applies to key points only: the diagnosis is a compound
+  // statement that no single sentence of a note is meant to back.
+  if (
+    config.steps.verifier.improvements?.includes(CHECK_AGAINST_KEY_POINT) &&
+    target.kind === 'key_point' &&
+    revision.point !== target.text
+  ) {
+    const keyPointCheck = await runVerifier(
+      target.text,
+      revision.citation.chunk,
+      revision.citation.sentences.map((s) => s.id),
+      config.steps.verifier,
+    )
+    trace.keyPointCheck = keyPointCheck
+    if (keyPointCheck.call.outcome !== 'ok') {
+      throw new RevisionUnavailable(`key point check: ${keyPointCheck.call.outcome} ${keyPointCheck.call.error ?? ''}`)
+    }
+    if (!keyPointCheck.supported) return { card: noSupport(), trace }
+  }
 
   return {
     card: {

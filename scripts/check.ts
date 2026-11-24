@@ -12,6 +12,7 @@ import { loadStepsConfig } from '../src/server/config.server'
 import { STEP_IDS } from '../src/server/llm/types'
 import type { StepId } from '../src/server/llm/types'
 import { checksMarkdown } from '../src/eval/checks-report'
+import { runChain } from '../src/eval/chain'
 import { loadContext } from '../src/eval/context'
 import { captureEnv, modelInfo } from '../src/eval/env'
 import { STEP_EVALS } from '../src/eval/registry'
@@ -107,6 +108,21 @@ for (const step of steps) {
     `\n  ${s.casesAllPass} of ${s.cases} cases passed every run (${s.casesFlipped} flipped). Costly errors: ${s.costly}. Fallbacks: ${s.fallbacks}. ` +
       `Unusable replies: ${s.truncated + s.schemaInvalid + s.refusals}. Median ${s.medianMs} ms (${s.minMs}–${s.maxMs}).`,
   )
+}
+
+// The revision step and the support check together, as the app runs them.
+if (!args.steps && args.only !== 'required' && split !== 'all') {
+  console.log('\nrevision step and support check together')
+  const rows = await runChain(ctx, config, {
+    runId,
+    stage: 'check',
+    split,
+    trials,
+    label: 'configured',
+    onRow: (row) => process.stdout.write(row.pass ? '.' : row.costly ? 'C' : 'x'),
+  })
+  const s = summarise(rows)
+  console.log(`\n  ${s.casesAllPass} of ${s.cases} cases passed every run (${s.casesFlipped} flipped). Costly errors: ${s.costly}.`)
 }
 
 if (!args['no-report']) {

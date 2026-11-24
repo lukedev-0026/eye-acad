@@ -20,6 +20,34 @@ export const TURN_LABEL: Record<TurnState, string> = {
   speaking: 'Examiner is speaking',
 };
 
+// What the trainee is doing: asking for findings, writing the answer, or
+// replying to the follow-up question.
+export type VivaMode = 'asking' | 'answering' | 'follow_up';
+
+const HINT: Record<VivaMode, Record<TurnState, string>> = {
+  asking: {
+    your_turn: 'Hold the button and ask for a finding, or type a request.',
+    listening: 'Release the button when you have finished.',
+    thinking: 'Please wait.',
+    speaking: 'Please wait until the examiner has finished.',
+  },
+  answering: {
+    your_turn: 'Give your diagnosis and immediate management, then submit.',
+    listening: 'Release the button when you have finished.',
+    thinking: 'Please wait.',
+    speaking: 'Please wait until the examiner has finished.',
+  },
+  follow_up: {
+    your_turn: 'Reply to the follow-up question, then send.',
+    listening: 'Release the button when you have finished.',
+    thinking: 'Please wait.',
+    speaking: 'Please wait until the examiner has finished.',
+  },
+};
+
+// The one line of guidance under the turn label.
+export const hintFor = (mode: VivaMode, state: TurnState): string => HINT[mode][state];
+
 export function nextTurnState(state: TurnState, event: TurnEvent): TurnState {
   switch (event.type) {
     case 'START_LISTENING':

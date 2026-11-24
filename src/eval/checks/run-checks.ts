@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import { errorMessage } from '@/common/errors/to-error';
 import type { StepId } from '@/domain/llm/step-settings.schema';
@@ -34,8 +35,8 @@ export interface CheckOptions {
   readonly chain: boolean;
   readonly trials: number;
   readonly split: 'tune' | 'holdout' | 'all';
-  // Regenerate CHECKS.md from this run's rows.
-  readonly report: boolean;
+  // Where to write the report built from this run's rows, or null for none.
+  readonly report: string | null;
 }
 
 const mark = (row: { pass: boolean; costly?: boolean }): string => (row.pass ? '.' : row.costly ? 'C' : 'x');
@@ -115,8 +116,9 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
   }
 
   if (options.report) {
-    await writeFile(PATHS.checksMarkdown, `${checksMarkdown(await readCheckRun(resultsFile(runId)))}\n`);
-    print(`\nWrote ${PATHS.checksMarkdown} from ${resultsFile(runId)}`);
+    await mkdir(path.dirname(options.report), { recursive: true });
+    await writeFile(options.report, `${checksMarkdown(await readCheckRun(resultsFile(runId)))}\n`);
+    print(`\nWrote ${options.report} from ${resultsFile(runId)}`);
   }
 }
 

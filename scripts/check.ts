@@ -4,7 +4,7 @@
 //   pnpm check                      everything, on the tuning cases
 //   pnpm check --only required      just the brief's three checks
 //   pnpm check --steps selector     just one step's case set
-//   pnpm check --config config/steps.start.json --trials 1
+//   pnpm check --config config/steps.start.json --report evals/checks/start.md
 import { parseArgs } from 'node:util';
 
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
@@ -22,6 +22,8 @@ await runCli(async () => {
       trials: { type: 'string', default: '3' },
       split: { type: 'string', default: 'tune' },
       required: { type: 'string' },
+      // Where the report goes. CHECKS.md is the one for the app's own settings.
+      report: { type: 'string', default: PATHS.checksMarkdown },
       'no-report': { type: 'boolean', default: false },
     },
   });
@@ -35,7 +37,7 @@ await runCli(async () => {
       chain: !values.steps && !onlyRequired,
       trials: parseWholeNumber('trials', values.trials),
       split: parseChoice('split', values.split, ['tune', 'holdout', 'all']),
-      report: !values['no-report'],
+      report: values['no-report'] ? null : values.report,
     },
     console.log,
     toStdout,

@@ -27,7 +27,8 @@ if (!data.results.length) {
   process.exit(1)
 }
 // Every stored reply is scored against the case files as they are now.
-const regraded = await regrade(data, await loadContext())
+const ctx = await loadContext()
+const regraded = await regrade(data, ctx)
 if (regraded.changed) {
   console.log(`Note: ${regraded.changed} stored verdicts differ from the ones recorded at run time, because an expected answer has been corrected since. Corrections are listed in evals/cases/CORRECTIONS.md.`)
 }
@@ -189,7 +190,7 @@ if (sentinels.length) {
   console.log(`Timing reference: ${driftNote}\n`)
 }
 const confirmedSteps = stepsWithData.filter((step) => ranked[step].some((c) => data.results.some((r) => r.configId === c.configId && r.stage === 'confirm')))
-await writeFile('evals/sweep/RESULTS.md', `${sweepMarkdown(data, ranked, chosen, { changed, drift: driftNote, confirmedSteps })}\n`)
+await writeFile('evals/sweep/RESULTS.md', `${sweepMarkdown(data, ranked, chosen, { changed, drift: driftNote, confirmedSteps, suppliedQuestions: ctx.notes.follow_up_ideas })}\n`)
 
 for (const step of stepsWithData) {
   const list = ranked[step]

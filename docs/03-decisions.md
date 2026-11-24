@@ -41,10 +41,13 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
   its output, the expected cost is more fallbacks to pre-written text, not wrong facts.
 - **Honest limit:** the Claude route is only described as working once it has actually been run
   with a key. Until then the write-up says "written, not run".
-- **A claim under test:** an earlier version of this entry said a local model "can be set to
-  give the same answer every time". That has not been tested. It is tested in the pre-check
-  before the sweep (file 07), and this entry will be corrected to match what is found.
-- **How sure:** Judgement. The quality difference has not been measured.
+- **A claim that was tested:** an earlier version of this entry said a local model "can be set
+  to give the same answer every time". The pre-check tested it on 24 November: with temperature
+  0 and a fixed seed, 10 of 10 requests gave the identical reply three times running, on both
+  the small and the medium model. So the claim holds for those settings on this machine. It does
+  not hold at any higher temperature, which is why those settings are run several times.
+- **How sure:** the repeatability is Measured. The quality difference from Claude is still a
+  Judgement: the Claude route has not been run.
 
 ### One model family in three sizes
 - **What:** the local models are the small, medium and large versions of one family, called
@@ -192,19 +195,31 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
   rejects its choice if that point was in fact covered.
 - **How sure:** Judgement.
 
-### The search uses the missed key point, plus the trainee's own words
+### The search uses the missed key point alone
 - **Why:** adding the diagnosis to the search pushed the right passage from 1st place down to 9th,
   22nd and 98th for three key points. Using the key point alone found it first every time.
+- **Changed by measurement:** the plan was to add the trainee's own words to the search as well.
+  The comparison table tested that on ten targets: the right passage ranked better for 1, worse
+  for 1 and the same for 8. With no consistent gain, the trainee's words are left out. The
+  answer still decides *which* key point is searched for.
 - **Turned down:** searching with the raw transcript, which is noisy; a brand name such as
   "Diamox" matches nothing in the note.
-- **How sure:** Measured.
+- **How sure:** Measured (`evals/retrieval-table.md`).
 
-### A firm rule for "no support found"
-- **Why:** a search always returns something, even for a topic the note never covers. So before
-  any AI is involved, code checks that at least one passage genuinely overlaps with the key
-  point, by words or by meaning. If none does, the trainee is told plainly.
-- **How sure:** Measured that a score alone cannot decide; the exact cut-off will be set from the
-  comparison table.
+### A code rule for "no support found" does not work on this note
+- **What was planned:** a search always returns something, even for a topic the note never
+  covers. So before any AI was involved, code would check that at least one passage genuinely
+  overlapped with the key point, by words or by meaning, and tell the trainee plainly if none did.
+- **What measuring showed:** it cannot be done with search scores on this note. Key points the
+  note does cover score between 0.62 and 0.86 for closeness of meaning; invented key points it
+  does not cover score between 0.60 and 0.68. The two ranges overlap, and word overlap does no
+  better ("Stop the chlorphenamine" shares one content word with its supporting passage). No
+  cut-off separates them.
+- **What is done instead:** the code rule is kept only as a guard against a point that is wholly
+  off-topic. The real decision is made by the step that picks the supporting sentence (it may
+  answer "no support") and by the separate support check. How reliably they make it is measured
+  in the checks, including with the supporting passages deliberately removed.
+- **How sure:** Measured (`evals/retrieval-table.md`).
 
 ### The model picks sentence numbers; code copies the quote
 - **Why:** the quote is guaranteed to be word-for-word from the note, and the page number is the

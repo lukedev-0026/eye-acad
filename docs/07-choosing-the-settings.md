@@ -96,9 +96,10 @@ only tens of cases, running more different cases tells us more than repeating th
 Then the best three configurations for each step, plus the starting one, are run three times on
 each case. The choosing rule is applied to those confirmed results.
 
-**Stopping early.** A configuration whose first ten calls take more than twice its time limit
-is stopped, and shown on the chart as "stopped: too slow". Five technical failures in a row stop
-the whole run.
+**Stopping early.** A configuration is stopped, and shown on the chart as "stopped: too slow",
+when its first three calls all take more than twice its time limit, or the middle value of its
+first five does. (The plan said ten calls; it was shortened to bound the time spent on settings
+that could never be chosen.) Five technical failures in a row stop the whole run.
 
 **What is not swept.** Checks with no AI in them do not change with these settings, so they are
 run once: reading out findings, the search comparison table, the read-back check, privacy and
@@ -152,7 +153,8 @@ accepted answer comes back, including any retry.
 - One reference configuration is re-run at the start, middle and end of the night. If its time
   drifts by more than a fifth, that night's timings are flagged.
 - For each configuration the middle value (the median), the fastest and the slowest are kept.
-- A call that runs past two minutes, or is cut off before finishing, counts as a failed run.
+- A call that runs past four times the step's time limit (and at least 30 seconds), or is cut
+  off before finishing, counts as a failed run.
   A technical failure, such as the model server not answering, is kept out of the count and
   listed separately.
 - The computer's power mode and swap use are saved with every timing. On 24 November this Mac

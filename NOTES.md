@@ -13,6 +13,10 @@ Planning and research happened before this and are described in
 | 24 Nov 06:36 | Steps 3, 4 and 6 committed: typed viva works end to end in the browser, with follow-up and revision card. Voice written but not yet tried (no Deepgram key). |
 | 24 Nov 06:42 | First run of the brief's three required checks, on the starting settings (`evals/results/check-2026-11-24T06-42-22.jsonl`). |
 | 24 Nov 07:00 | Check harness, case sets, `evals/sweep/RULE.md` and the sweep scripts committed. No configuration other than the starting one has been run at this point. |
+| 24 Nov 07:10 | Sweep started on the small and medium models (the large one was still downloading). The Mac had been switched from Low Power to High Power a few minutes earlier; every sweep row is in High Power. |
+| 24 Nov 07:14 | Deepgram key in place. Voice works end to end; `pnpm readback` written and run. |
+| 24 Nov 07:25 | Choosing rule's tie-break amended (speeds within 10% count as equal). See `evals/sweep/RULE.md`. Sweep restarted; finished work is skipped. |
+| 24 Nov 07:29 | Fault found and fixed: a model call that ran out of time was recorded as a machine error (`infra_error`), which would have left it out of the counts. It is now recorded as a failed run (`truncated`). Two rows from one far-too-slow configuration (follow-up writer, small model, thinking on, format not forced) were recorded the old way and are left as they are. |
 
 ## Things seen before the sweep
 

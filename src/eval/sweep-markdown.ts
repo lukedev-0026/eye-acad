@@ -44,7 +44,7 @@ export function sweepMarkdown(
   data: SweepData,
   ranked: Partial<Record<StepId, Array<Ranked>>>,
   chosen: Partial<Record<StepId, Ranked>>,
-  notes: { changed: Array<StepId>; drift: string | null; confirmedSteps: Array<StepId> },
+  notes: { changed: Array<StepId>; drift: string | null; confirmedSteps: Array<StepId>; suppliedQuestions: Array<string> },
 ): string {
   const run = data.rows.find((r) => r.type === 'run') as { at?: string; env?: Record<string, unknown> } | undefined
   const out: Array<string> = []
@@ -109,6 +109,22 @@ export function sweepMarkdown(
       )
     }
     out.push('')
+
+    // An accepted follow-up question may simply repeat one of the case file's
+    // own questions word for word. That is allowed, but it is not the same as
+    // a question in the model's own words, so it is counted.
+    if (step === 'followup') {
+      const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+      const supplied = new Set(notes.suppliedQuestions.map(squash))
+      out.push('| Configuration | Questions accepted | Of those, word for word one of the case file\'s own |', '|---|---|---|')
+      for (const cfg of configs) {
+        const accepted = data.results.filter((r) => r.configId === cfg.configId && r.step === step && r.split === 'tune' && r.pass)
+        if (!accepted.length) continue
+        const echoes = accepted.filter((r) => supplied.has(squash(String((r.observed as { question?: string } | null)?.question ?? ''))))
+        out.push(`| ${describe(cfg.settings)} | ${accepted.length} | ${echoes.length} |`)
+      }
+      out.push('')
+    }
 
     // Is the chosen configuration really better than the others, or only tied?
     if (pick) {

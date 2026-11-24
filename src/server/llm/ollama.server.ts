@@ -66,7 +66,12 @@ export async function callOllama(
       }
     }
   } catch (e) {
-    return { ...empty, outcome: 'infra_error', error: String(e) }
+    // Running out of time is the model's failure, not the machine's: the reply
+    // was cut off by the time limit, so it is a failed run and it is counted.
+    const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError')
+    return timedOut
+      ? { ...empty, outcome: 'truncated', error: `no reply within ${settings.timeoutMs} ms` }
+      : { ...empty, outcome: 'infra_error', error: String(e) }
   }
 
   return {

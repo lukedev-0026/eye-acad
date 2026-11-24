@@ -1,0 +1,425 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="viz" viewBox="0 0 1200 786" width="1200" height="786" role="img" aria-labelledby="t d">
+<title id="t">Accuracy against model call time for each configuration of each AI step</title>
+<desc id="d">Five scatter panels, one per AI step. Each dot is one configuration. Across: median model call time in seconds on a log scale. Up: tuning cases passed. Every value is also in evals/sweep/results.csv.</desc>
+<style>
+  .viz { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+         --small:#2a78d6; --medium:#eb6834; --large:#1baf7a; }
+  @media (prefers-color-scheme: dark) {
+    .viz { --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
+           --small:#3987e5; --medium:#d95926; --large:#199e70; }
+  }
+  text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--ink2); font-size: 11px; }
+  .title { font-size: 17px; font-weight: 700; fill: var(--ink); }
+  .subtitle { font-size: 12px; }
+  .panel-title { font-size: 13px; font-weight: 700; fill: var(--ink); }
+  .muted, .tick, .ref-label { fill: var(--muted); font-size: 10.5px; }
+  .tick { font-variant-numeric: tabular-nums; }
+  .legend { fill: var(--ink2); font-size: 11.5px; }
+  .direct { fill: var(--ink); font-size: 11px; font-weight: 600; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+  .grid { stroke: var(--grid); stroke-width: 1; }
+  .axis { stroke: var(--axis); stroke-width: 1; }
+  .ref { stroke: var(--axis); stroke-width: 1; }
+  .whisker { stroke: var(--muted); stroke-width: 1; opacity: 0.55; }
+  .solid { stroke: var(--surface); stroke-width: 2; }
+  .hollow { fill: var(--surface); stroke-width: 2; }
+  .solid.s-small { fill: var(--small); } .solid.s-medium { fill: var(--medium); } .solid.s-large { fill: var(--large); }
+  .hollow.s-small { stroke: var(--small); } .hollow.s-medium { stroke: var(--medium); } .hollow.s-large { stroke: var(--large); }
+  .slash, .cross { stroke: var(--ink); stroke-width: 1.5; fill: none; stroke-linecap: round; }
+  .chosen-ring { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  .hit { fill: transparent; }
+</style>
+<rect width="1200" height="786" fill="var(--surface)"/>
+<text class="title" x="30" y="34">Accuracy against response time: one dot per configuration</text>
+<text class="subtitle" x="30" y="56">Each AI step measured on its own tuning cases, one run per case. Up: cases passed. Across: median time for one model call.</text>
+<text class="muted" x="30" y="74">Local Ollama models, 2026-11-24, Ollama 0.40.5, power mode: high power. Dots that would coincide are nudged apart. Hover a dot for its settings; every value is in results.csv.</text>
+<text class="panel-title" x="30" y="108">Menu-picker</text>
+<text class="muted" x="388" y="108" text-anchor="end">12 configurations · 56 cases</text>
+<line class="grid" x1="74" x2="388" y1="320.0" y2="320.0"/>
+<text class="tick" x="68" y="323.5" text-anchor="end">0</text>
+<line class="grid" x1="74" x2="388" y1="285.4" y2="285.4"/>
+<text class="tick" x="68" y="288.9" text-anchor="end">10</text>
+<line class="grid" x1="74" x2="388" y1="250.7" y2="250.7"/>
+<text class="tick" x="68" y="254.2" text-anchor="end">20</text>
+<line class="grid" x1="74" x2="388" y1="216.1" y2="216.1"/>
+<text class="tick" x="68" y="219.6" text-anchor="end">30</text>
+<line class="grid" x1="74" x2="388" y1="181.4" y2="181.4"/>
+<text class="tick" x="68" y="184.9" text-anchor="end">40</text>
+<line class="grid" x1="74" x2="388" y1="146.8" y2="146.8"/>
+<text class="tick" x="68" y="150.3" text-anchor="end">50</text>
+<line class="grid" x1="74" x2="388" y1="126.0" y2="126.0"/>
+<text class="tick" x="68" y="129.5" text-anchor="end">56</text>
+<text class="tick" x="82.1" y="335" text-anchor="middle">0.2</text>
+<text class="tick" x="127.6" y="335" text-anchor="middle">0.5</text>
+<text class="tick" x="162.1" y="335" text-anchor="middle">1</text>
+<text class="tick" x="196.5" y="335" text-anchor="middle">2</text>
+<text class="tick" x="242.0" y="335" text-anchor="middle">5</text>
+<text class="tick" x="276.5" y="335" text-anchor="middle">10</text>
+<text class="tick" x="310.9" y="335" text-anchor="middle">20</text>
+<text class="tick" x="365.5" y="335" text-anchor="middle">60</text>
+<line class="axis" x1="74" x2="388" y1="320" y2="320"/>
+<line class="ref" x1="196.5" x2="196.5" y1="126" y2="320"/>
+<text class="ref-label" x="200.5" y="314.0">ceiling 2 s</text>
+<line class="ref" x1="74" x2="388" y1="306.1" y2="306.1"/>
+<text class="ref-label" x="388" y="302.1" text-anchor="end">floor 4: never reveal anything</text>
+<text class="ref-label" x="68" y="367.5" text-anchor="end">stopped</text>
+<line class="grid" x1="74" x2="388" y1="364" y2="364"/>
+<g><line class="whisker" x1="103.7" x2="217.8" y1="136.4" y2="136.4"/><circle class="solid s-small" cx="131.1" cy="136.4" r="5"/><path class="cross" d="M136.1 124.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="131.1" cy="136.4" r="13"><title>Menu-picker — small (4b), thinking off, forced format on, temperature 0.7, minimal prompt
+53 of 56 cases passed
+costly errors 2, fallbacks 0, unusable replies 0
+median 536 ms (range 309–3073), 56 calls</title></circle></g>
+<g><line class="whisker" x1="100.2" x2="225.7" y1="147.3" y2="147.3"/><circle class="solid s-small" cx="129.5" cy="147.3" r="5"/><line class="slash" x1="123.5" y1="153.3" x2="135.5" y2="141.3"/><path class="cross" d="M134.5 135.3 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="129.5" cy="147.3" r="13"><title>Menu-picker — small (4b), thinking off, forced format off, temperature 0.7, minimal prompt
+51 of 56 cases passed
+costly errors 2, fallbacks 0, unusable replies 2
+median 519 ms (range 288–3598), 56 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="322.0" cy="364.0" r="5"/><circle class="hit" cx="322.0" cy="364.0" r="13"><title>Menu-picker — small (4b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 0
+median 24967 ms (range 16819–29660), 3 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="303.2" cy="364.0" r="5"/><line class="slash" x1="297.2" y1="370.0" x2="309.2" y2="358.0"/><circle class="hit" cx="303.2" cy="364.0" r="13"><title>Menu-picker — small (4b), thinking on, forced format off, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 0
+median 17127 ms (range 9632–20578), 3 calls</title></circle></g>
+<g><line class="whisker" x1="97.4" x2="172.9" y1="127.4" y2="127.4"/><rect class="solid s-medium" x="117.3" y="122.4" width="10" height="10" rx="1.5"/><path class="cross" d="M127.3 115.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="122.3" cy="127.4" r="13"><title>Menu-picker — medium (9b), thinking off, forced format on, temperature 0.7, minimal prompt
+53 of 56 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 449 ms (range 272–1244), 56 calls</title></circle></g>
+<g><rect class="hollow s-medium" x="249.0" y="359.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="254.0" cy="364.0" r="13"><title>Menu-picker — medium (9b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 5 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 0
+median 6366 ms (range 1423–9587), 5 calls</title></circle></g>
+<g><rect class="hollow s-medium" x="275.6" y="359.0" width="10" height="10" rx="1.5"/><line class="slash" x1="274.6" y1="370.0" x2="286.6" y2="358.0"/><circle class="hit" cx="280.6" cy="364.0" r="13"><title>Menu-picker — medium (9b), thinking on, forced format off, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 1
+median 10856 ms (range 7606–30001), 3 calls</title></circle></g>
+<g><line class="whisker" x1="101.2" x2="180.6" y1="144.4" y2="144.4"/><rect class="solid s-medium" x="124.0" y="139.4" width="10" height="10" rx="1.5"/><path class="cross" d="M134.0 132.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="129.0" cy="144.4" r="13"><title>Menu-picker — medium (9b), thinking off, forced format on, temperature 0.7, rules prompt
+53 of 56 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 514 ms (range 294–1451), 56 calls</title></circle></g>
+<g><line class="whisker" x1="90.1" x2="187.8" y1="140.9" y2="140.9"/><rect class="solid s-medium" x="124.9" y="135.9" width="10" height="10" rx="1.5"/><path class="cross" d="M134.9 128.9 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="129.9" cy="140.9" r="13"><title>Menu-picker — medium (9b), thinking off, forced format on, temperature 0.7, examples prompt
+54 of 56 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 524 ms (range 235–1679), 56 calls</title></circle></g>
+<g><line class="whisker" x1="98.1" x2="164.6" y1="144.4" y2="144.4"/><rect class="solid s-medium" x="117.3" y="139.4" width="10" height="10" rx="1.5"/><path class="cross" d="M127.3 132.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="122.3" cy="144.4" r="13"><title>Menu-picker — medium (9b), thinking off, forced format on, temperature 0, minimal prompt
+53 of 56 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 449 ms (range 276–1053), 56 calls</title></circle></g>
+<g><line class="whisker" x1="151.6" x2="244.1" y1="129.5" y2="129.5"/><path class="solid s-large" d="M205.1 123.2 L211.4 134.5 L198.9 134.5 Z"/><circle class="hit" cx="205.1" cy="129.5" r="13"><title>Menu-picker — large (27b), thinking off, forced format on, temperature 0.7, minimal prompt
+55 of 56 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2378 ms (range 810–5212), 56 calls</title></circle></g>
+<g><line class="whisker" x1="87.0" x2="149.3" y1="140.9" y2="140.9"/><circle class="chosen-ring" cx="119.9" cy="140.9" r="11"/><rect class="solid s-medium" x="114.9" y="135.9" width="10" height="10" rx="1.5"/><line class="slash" x1="113.9" y1="146.9" x2="125.9" y2="134.9"/><circle class="hit" cx="119.9" cy="140.9" r="13"><title>Menu-picker — medium (9b), thinking off, forced format off, temperature 0.7, minimal prompt
+54 of 56 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 428 ms (range 221–774), 56 calls</title></circle></g>
+<text class="direct" x="140.3" y="131.4" text-anchor="start">start: 53 of 56</text>
+<text class="direct" x="137.9" y="144.9" text-anchor="start">chosen: 54 of 56</text>
+<text class="muted" x="231" y="351" text-anchor="middle">median model call time, seconds (log scale)</text>
+<text class="panel-title" x="430" y="108">Follow-up writer</text>
+<text class="muted" x="788" y="108" text-anchor="end">12 configurations · 5 cases</text>
+<line class="grid" x1="474" x2="788" y1="320.0" y2="320.0"/>
+<text class="tick" x="468" y="323.5" text-anchor="end">0</text>
+<line class="grid" x1="474" x2="788" y1="242.4" y2="242.4"/>
+<text class="tick" x="468" y="245.9" text-anchor="end">2</text>
+<line class="grid" x1="474" x2="788" y1="164.8" y2="164.8"/>
+<text class="tick" x="468" y="168.3" text-anchor="end">4</text>
+<line class="grid" x1="474" x2="788" y1="126.0" y2="126.0"/>
+<text class="tick" x="468" y="129.5" text-anchor="end">5</text>
+<text class="tick" x="482.1" y="335" text-anchor="middle">0.2</text>
+<text class="tick" x="527.6" y="335" text-anchor="middle">0.5</text>
+<text class="tick" x="562.1" y="335" text-anchor="middle">1</text>
+<text class="tick" x="596.5" y="335" text-anchor="middle">2</text>
+<text class="tick" x="642.0" y="335" text-anchor="middle">5</text>
+<text class="tick" x="676.5" y="335" text-anchor="middle">10</text>
+<text class="tick" x="710.9" y="335" text-anchor="middle">20</text>
+<text class="tick" x="765.5" y="335" text-anchor="middle">60</text>
+<line class="axis" x1="474" x2="788" y1="320" y2="320"/>
+<line class="ref" x1="642.0" x2="642.0" y1="126" y2="320"/>
+<text class="ref-label" x="646.0" y="314.0">ceiling 5 s</text>
+<line class="ref" x1="474" x2="788" y1="320.0" y2="320.0"/>
+<text class="ref-label" x="788" y="316.0" text-anchor="end">floor 0: always use a supplied question</text>
+<text class="ref-label" x="468" y="367.5" text-anchor="end">stopped</text>
+<line class="grid" x1="474" x2="788" y1="364" y2="364"/>
+<g><line class="whisker" x1="517.9" x2="581.9" y1="203.6" y2="203.6"/><circle class="solid s-small" cx="565.2" cy="203.6" r="5"/><circle class="hit" cx="565.2" cy="203.6" r="13"><title>Follow-up writer — small (4b), thinking off, forced format on, temperature 0.7, minimal prompt
+3 of 5 cases passed
+costly errors 0, fallbacks 2, unusable replies 0
+median 1065 ms (range 411–1491), 5 calls</title></circle></g>
+<g><line class="whisker" x1="511.1" x2="578.3" y1="203.6" y2="203.6"/><circle class="solid s-small" cx="556.0" cy="203.6" r="5"/><line class="slash" x1="550.0" y1="209.6" x2="562.0" y2="197.6"/><circle class="hit" cx="556.0" cy="203.6" r="13"><title>Follow-up writer — small (4b), thinking off, forced format off, temperature 0.7, minimal prompt
+3 of 5 cases passed
+costly errors 0, fallbacks 2, unusable replies 0
+median 886 ms (range 359–1386), 5 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="769.2" cy="364.0" r="5"/><circle class="hit" cx="769.2" cy="364.0" r="13"><title>Follow-up writer — small (4b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 3, unusable replies 3
+median 64558 ms (range 64528–64794), 3 calls</title></circle></g>
+<g><line class="whisker" x1="770.7" x2="775.0" y1="320.0" y2="320.0"/><circle class="hollow s-small" cx="772.9" cy="320.0" r="5"/><line class="slash" x1="766.9" y1="326.0" x2="778.9" y2="314.0"/><circle class="hit" cx="772.9" cy="320.0" r="13"><title>Follow-up writer — small (4b), thinking on, forced format off, temperature 1, minimal prompt
+0 of 2 cases passed
+costly errors 0, fallbacks 2, unusable replies 2
+median 69586 ms (range 66631–72541), 2 calls</title></circle></g>
+<g><line class="whisker" x1="531.4" x2="613.8" y1="194.6" y2="194.6"/><rect class="solid s-medium" x="542.2" y="189.6" width="10" height="10" rx="1.5"/><circle class="hit" cx="547.2" cy="194.6" r="13"><title>Follow-up writer — medium (9b), thinking off, forced format on, temperature 0.7, minimal prompt
+3 of 5 cases passed
+costly errors 0, fallbacks 2, unusable replies 0
+median 741 ms (range 540–2832), 5 calls</title></circle></g>
+<g><line class="whisker" x1="529.0" x2="594.1" y1="203.6" y2="203.6"/><rect class="solid s-medium" x="583.5" y="198.6" width="10" height="10" rx="1.5"/><line class="slash" x1="582.5" y1="209.6" x2="594.5" y2="197.6"/><circle class="hit" cx="588.5" cy="203.6" r="13"><title>Follow-up writer — medium (9b), thinking off, forced format off, temperature 0.7, minimal prompt
+3 of 5 cases passed
+costly errors 0, fallbacks 2, unusable replies 0
+median 1701 ms (range 514–1905), 5 calls</title></circle></g>
+<g><rect class="hollow s-medium" x="760.5" y="350.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="765.5" cy="355.0" r="13"><title>Follow-up writer — medium (9b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 3, unusable replies 3
+median 60005 ms (range 60003–60005), 3 calls</title></circle></g>
+<g><line class="whisker" x1="765.5" x2="765.5" y1="311.0" y2="311.0"/><rect class="hollow s-medium" x="760.5" y="306.0" width="10" height="10" rx="1.5"/><line class="slash" x1="759.5" y1="317.0" x2="771.5" y2="305.0"/><circle class="hit" cx="765.5" cy="311.0" r="13"><title>Follow-up writer — medium (9b), thinking on, forced format off, temperature 1, minimal prompt
+0 of 2 cases passed
+costly errors 0, fallbacks 2, unusable replies 2
+median 60006 ms (range 60003–60008), 2 calls</title></circle></g>
+<g><line class="whisker" x1="537.6" x2="593.9" y1="126.0" y2="126.0"/><rect class="solid s-medium" x="571.1" y="121.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="576.1" cy="126.0" r="13"><title>Follow-up writer — medium (9b), thinking off, forced format on, temperature 0.7, rules prompt
+5 of 5 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 1326 ms (range 611–1897), 5 calls</title></circle></g>
+<g><line class="whisker" x1="529.9" x2="595.3" y1="164.8" y2="164.8"/><rect class="solid s-medium" x="544.9" y="159.8" width="10" height="10" rx="1.5"/><circle class="hit" cx="549.9" cy="164.8" r="13"><title>Follow-up writer — medium (9b), thinking off, forced format on, temperature 0, minimal prompt
+4 of 5 cases passed
+costly errors 0, fallbacks 1, unusable replies 0
+median 783 ms (range 524–1954), 5 calls</title></circle></g>
+<g><line class="whisker" x1="593.5" x2="629.9" y1="126.0" y2="126.0"/><path class="solid s-large" d="M603.5 119.8 L609.7 131.0 L597.2 131.0 Z"/><circle class="hit" cx="603.5" cy="126.0" r="13"><title>Follow-up writer — large (27b), thinking off, forced format on, temperature 0.7, minimal prompt
+5 of 5 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2301 ms (range 1884–3919), 5 calls</title></circle></g>
+<g><line class="whisker" x1="534.6" x2="576.0" y1="126.0" y2="126.0"/><circle class="chosen-ring" cx="544.3" cy="126.0" r="11"/><rect class="solid s-medium" x="539.3" y="121.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="544.3" cy="126.0" r="13"><title>Follow-up writer — medium (9b), thinking off, forced format on, temperature 0.7, examples prompt
+5 of 5 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 700 ms (range 576–1324), 5 calls</title></circle></g>
+<text class="direct" x="565.2" y="198.6" text-anchor="start">start: 3 of 5</text>
+<text class="direct" x="562.3" y="130.0" text-anchor="start">chosen: 5 of 5</text>
+<text class="muted" x="631" y="351" text-anchor="middle">median model call time, seconds (log scale)</text>
+<text class="panel-title" x="830" y="108">Coverage judge</text>
+<text class="muted" x="1188" y="108" text-anchor="end">10 configurations · 7 cases</text>
+<line class="grid" x1="874" x2="1188" y1="320.0" y2="320.0"/>
+<text class="tick" x="868" y="323.5" text-anchor="end">0</text>
+<line class="grid" x1="874" x2="1188" y1="264.6" y2="264.6"/>
+<text class="tick" x="868" y="268.1" text-anchor="end">2</text>
+<line class="grid" x1="874" x2="1188" y1="209.1" y2="209.1"/>
+<text class="tick" x="868" y="212.6" text-anchor="end">4</text>
+<line class="grid" x1="874" x2="1188" y1="153.7" y2="153.7"/>
+<text class="tick" x="868" y="157.2" text-anchor="end">6</text>
+<line class="grid" x1="874" x2="1188" y1="126.0" y2="126.0"/>
+<text class="tick" x="868" y="129.5" text-anchor="end">7</text>
+<text class="tick" x="882.1" y="335" text-anchor="middle">0.2</text>
+<text class="tick" x="927.6" y="335" text-anchor="middle">0.5</text>
+<text class="tick" x="962.1" y="335" text-anchor="middle">1</text>
+<text class="tick" x="996.5" y="335" text-anchor="middle">2</text>
+<text class="tick" x="1042.0" y="335" text-anchor="middle">5</text>
+<text class="tick" x="1076.5" y="335" text-anchor="middle">10</text>
+<text class="tick" x="1110.9" y="335" text-anchor="middle">20</text>
+<text class="tick" x="1165.5" y="335" text-anchor="middle">60</text>
+<line class="axis" x1="874" x2="1188" y1="320" y2="320"/>
+<line class="ref" x1="1096.6" x2="1096.6" y1="126" y2="320"/>
+<text class="ref-label" x="1100.6" y="314.0">ceiling 15 s</text>
+<line class="ref" x1="874" x2="1188" y1="320.0" y2="320.0"/>
+<text class="ref-label" x="1188" y="316.0" text-anchor="end">floor 0: always &quot;nothing covered&quot;</text>
+<text class="ref-label" x="868" y="367.5" text-anchor="end">stopped</text>
+<line class="grid" x1="874" x2="1188" y1="364" y2="364"/>
+<g><line class="whisker" x1="1004.0" x2="1028.1" y1="236.9" y2="236.9"/><circle class="solid s-small" cx="1018.3" cy="236.9" r="5"/><circle class="hit" cx="1018.3" cy="236.9" r="13"><title>Coverage judge — small (4b), thinking off, forced format on, temperature 0.7, minimal prompt
+3 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 3098 ms (range 2327–3777), 7 calls</title></circle></g>
+<g><line class="whisker" x1="1002.7" x2="1018.9" y1="227.9" y2="227.9"/><circle class="solid s-small" cx="1016.3" cy="227.9" r="5"/><line class="slash" x1="1010.3" y1="233.9" x2="1022.3" y2="221.9"/><circle class="hit" cx="1016.3" cy="227.9" r="13"><title>Coverage judge — small (4b), thinking off, forced format off, temperature 0.7, minimal prompt
+3 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2980 ms (range 2265–3136), 7 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="1146.2" cy="364.0" r="5"/><circle class="hit" cx="1146.2" cy="364.0" r="13"><title>Coverage judge — small (4b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 6 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 4
+median 40686 ms (range 27426–47167), 6 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="1145.9" cy="355.0" r="5"/><line class="slash" x1="1139.9" y1="361.0" x2="1151.9" y2="349.0"/><circle class="hit" cx="1145.9" cy="355.0" r="13"><title>Coverage judge — small (4b), thinking on, forced format off, temperature 1, minimal prompt
+stopped after 3 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 3
+median 40453 ms (range 40370–40638), 3 calls</title></circle></g>
+<g><line class="whisker" x1="997.2" x2="1038.0" y1="153.7" y2="153.7"/><rect class="solid s-medium" x="1012.4" y="148.7" width="10" height="10" rx="1.5"/><circle class="hit" cx="1017.4" cy="153.7" r="13"><title>Coverage judge — medium (9b), thinking off, forced format on, temperature 0.7, minimal prompt
+6 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 3048 ms (range 2027–4606), 7 calls</title></circle></g>
+<g><line class="whisker" x1="994.3" x2="1016.7" y1="181.4" y2="181.4"/><rect class="solid s-medium" x="1007.4" y="176.4" width="10" height="10" rx="1.5"/><line class="slash" x1="1006.4" y1="187.4" x2="1018.4" y2="175.4"/><circle class="hit" cx="1012.4" cy="181.4" r="13"><title>Coverage judge — medium (9b), thinking off, forced format off, temperature 0.7, minimal prompt
+5 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2754 ms (range 1914–3000), 7 calls</title></circle></g>
+<g><line class="whisker" x1="1003.6" x2="1028.0" y1="126.0" y2="126.0"/><rect class="solid s-medium" x="1017.1" y="121.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="1022.1" cy="126.0" r="13"><title>Coverage judge — medium (9b), thinking off, forced format on, temperature 0.7, rules prompt
+7 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 3346 ms (range 2309–3769), 7 calls</title></circle></g>
+<g><line class="whisker" x1="1009.1" x2="1036.9" y1="144.7" y2="144.7"/><rect class="solid s-medium" x="1010.0" y="139.7" width="10" height="10" rx="1.5"/><circle class="hit" cx="1015.0" cy="144.7" r="13"><title>Coverage judge — medium (9b), thinking off, forced format on, temperature 0.7, examples prompt
+6 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2903 ms (range 2577–4510), 7 calls</title></circle></g>
+<g><line class="whisker" x1="1088.9" x2="1094.4" y1="126.0" y2="126.0"/><path class="solid s-large" d="M1091.8 119.8 L1098.0 131.0 L1085.5 131.0 Z"/><circle class="hit" cx="1091.8" cy="126.0" r="13"><title>Coverage judge — large (27b), thinking off, forced format on, temperature 0.7, minimal prompt
+7 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 13597 ms (range 12850–14351), 7 calls</title></circle></g>
+<g><line class="whisker" x1="993.1" x2="1018.8" y1="153.7" y2="153.7"/><circle class="chosen-ring" cx="1008.0" cy="153.7" r="11"/><rect class="solid s-medium" x="1003.0" y="148.7" width="10" height="10" rx="1.5"/><circle class="hit" cx="1008.0" cy="153.7" r="13"><title>Coverage judge — medium (9b), thinking off, forced format on, temperature 0, minimal prompt
+6 of 7 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 2522 ms (range 1866–3132), 7 calls</title></circle></g>
+<text class="direct" x="1035.4" y="157.7" text-anchor="start">start: 6 of 7</text>
+<text class="direct" x="1026.0" y="157.7" text-anchor="start">chosen: 6 of 7</text>
+<text class="muted" x="1031" y="351" text-anchor="middle">median model call time, seconds (log scale)</text>
+<text class="panel-title" x="30" y="448">Revision step</text>
+<text class="muted" x="388" y="448" text-anchor="end">10 configurations · 8 cases</text>
+<line class="grid" x1="74" x2="388" y1="660.0" y2="660.0"/>
+<text class="tick" x="68" y="663.5" text-anchor="end">0</text>
+<line class="grid" x1="74" x2="388" y1="611.5" y2="611.5"/>
+<text class="tick" x="68" y="615.0" text-anchor="end">2</text>
+<line class="grid" x1="74" x2="388" y1="563.0" y2="563.0"/>
+<text class="tick" x="68" y="566.5" text-anchor="end">4</text>
+<line class="grid" x1="74" x2="388" y1="514.5" y2="514.5"/>
+<text class="tick" x="68" y="518.0" text-anchor="end">6</text>
+<line class="grid" x1="74" x2="388" y1="466.0" y2="466.0"/>
+<text class="tick" x="68" y="469.5" text-anchor="end">8</text>
+<text class="tick" x="82.1" y="675" text-anchor="middle">0.2</text>
+<text class="tick" x="127.6" y="675" text-anchor="middle">0.5</text>
+<text class="tick" x="162.1" y="675" text-anchor="middle">1</text>
+<text class="tick" x="196.5" y="675" text-anchor="middle">2</text>
+<text class="tick" x="242.0" y="675" text-anchor="middle">5</text>
+<text class="tick" x="276.5" y="675" text-anchor="middle">10</text>
+<text class="tick" x="310.9" y="675" text-anchor="middle">20</text>
+<text class="tick" x="365.5" y="675" text-anchor="middle">60</text>
+<line class="axis" x1="74" x2="388" y1="660" y2="660"/>
+<line class="ref" x1="296.6" x2="296.6" y1="466" y2="660"/>
+<text class="ref-label" x="300.6" y="654.0">ceiling 15 s</text>
+<line class="ref" x1="74" x2="388" y1="563.0" y2="563.0"/>
+<text class="ref-label" x="388" y="559.0" text-anchor="end">floor 4: always &quot;no support&quot;</text>
+<text class="ref-label" x="68" y="707.5" text-anchor="end">stopped</text>
+<line class="grid" x1="74" x2="388" y1="704" y2="704"/>
+<g><line class="whisker" x1="132.6" x2="160.3" y1="563.0" y2="563.0"/><circle class="solid s-small" cx="151.7" cy="563.0" r="5"/><path class="cross" d="M156.7 551.0 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="151.7" cy="563.0" r="13"><title>Revision step — small (4b), thinking off, forced format on, temperature 0.7, minimal prompt
+4 of 8 cases passed
+costly errors 1, fallbacks 3, unusable replies 0
+median 812 ms (range 553–965), 8 calls</title></circle></g>
+<g><circle class="hollow s-small" cx="337.5" cy="704.0" r="5"/><circle class="hit" cx="337.5" cy="704.0" r="13"><title>Revision step — small (4b), thinking on, forced format on, temperature 1, minimal prompt
+stopped after 5 calls: far over the speed ceiling
+costly errors 0, fallbacks 0, unusable replies 3
+median 34114 ms (range 12171–34176), 5 calls</title></circle></g>
+<g><line class="whisker" x1="286.1" x2="338.5" y1="587.3" y2="587.3"/><circle class="hollow s-small" cx="337.9" cy="587.3" r="5"/><line class="slash" x1="331.9" y1="593.3" x2="343.9" y2="581.3"/><circle class="hit" cx="337.9" cy="587.3" r="13"><title>Revision step — small (4b), thinking on, forced format off, temperature 1, minimal prompt
+3 of 8 cases passed
+costly errors 0, fallbacks 0, unusable replies 5
+median 34395 ms (range 12133–34824), 8 calls</title></circle></g>
+<g><line class="whisker" x1="132.5" x2="187.3" y1="538.8" y2="538.8"/><rect class="solid s-medium" x="171.7" y="533.8" width="10" height="10" rx="1.5"/><path class="cross" d="M181.7 526.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="176.7" cy="538.8" r="13"><title>Revision step — medium (9b), thinking off, forced format on, temperature 0.7, minimal prompt
+5 of 8 cases passed
+costly errors 2, fallbacks 1, unusable replies 0
+median 1342 ms (range 552–1663), 8 calls</title></circle></g>
+<g><line class="whisker" x1="90.3" x2="147.8" y1="563.0" y2="563.0"/><rect class="solid s-medium" x="121.6" y="558.0" width="10" height="10" rx="1.5"/><line class="slash" x1="120.6" y1="569.0" x2="132.6" y2="557.0"/><path class="cross" d="M131.6 551.0 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="126.6" cy="563.0" r="13"><title>Revision step — medium (9b), thinking off, forced format off, temperature 0.7, minimal prompt
+4 of 8 cases passed
+costly errors 2, fallbacks 1, unusable replies 1
+median 490 ms (range 236–750), 8 calls</title></circle></g>
+<g><line class="whisker" x1="132.6" x2="187.6" y1="529.8" y2="529.8"/><rect class="solid s-medium" x="168.9" y="524.8" width="10" height="10" rx="1.5"/><path class="cross" d="M178.9 517.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="173.9" cy="529.8" r="13"><title>Revision step — medium (9b), thinking off, forced format on, temperature 0.7, rules prompt
+5 of 8 cases passed
+costly errors 2, fallbacks 1, unusable replies 0
+median 1269 ms (range 553–1673), 8 calls</title></circle></g>
+<g><line class="whisker" x1="135.4" x2="189.0" y1="546.8" y2="546.8"/><rect class="solid s-medium" x="165.3" y="541.8" width="10" height="10" rx="1.5"/><path class="cross" d="M175.3 534.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="170.3" cy="546.8" r="13"><title>Revision step — medium (9b), thinking off, forced format on, temperature 0.7, examples prompt
+5 of 8 cases passed
+costly errors 1, fallbacks 1, unusable replies 0
+median 1181 ms (range 585–1720), 8 calls</title></circle></g>
+<g><line class="whisker" x1="88.4" x2="140.6" y1="538.8" y2="538.8"/><rect class="solid s-medium" x="122.6" y="533.8" width="10" height="10" rx="1.5"/><path class="cross" d="M132.6 526.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="127.6" cy="538.8" r="13"><title>Revision step — medium (9b), thinking off, forced format on, temperature 0, minimal prompt
+5 of 8 cases passed
+costly errors 2, fallbacks 1, unusable replies 0
+median 500 ms (range 227–649), 8 calls</title></circle></g>
+<g><line class="whisker" x1="207.7" x2="252.0" y1="538.8" y2="538.8"/><path class="solid s-large" d="M242.1 532.5 L248.3 543.8 L235.8 543.8 Z"/><path class="cross" d="M247.1 526.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="242.1" cy="538.8" r="13"><title>Revision step — large (27b), thinking off, forced format on, temperature 0.7, minimal prompt
+5 of 8 cases passed
+costly errors 1, fallbacks 2, unusable replies 0
+median 5004 ms (range 2504–6107), 8 calls</title></circle></g>
+<g><line class="whisker" x1="88.6" x2="137.2" y1="554.0" y2="554.0"/><circle class="chosen-ring" cx="122.6" cy="554.0" r="11"/><circle class="solid s-small" cx="122.6" cy="554.0" r="5"/><line class="slash" x1="116.6" y1="560.0" x2="128.6" y2="548.0"/><path class="cross" d="M127.6 542.0 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="122.6" cy="554.0" r="13"><title>Revision step — small (4b), thinking off, forced format off, temperature 0.7, minimal prompt
+4 of 8 cases passed
+costly errors 1, fallbacks 3, unusable replies 0
+median 452 ms (range 228–607), 8 calls</title></circle></g>
+<text class="direct" x="194.7" y="542.8" text-anchor="start">start: 5 of 8</text>
+<text class="direct" x="140.6" y="558.0" text-anchor="start">chosen: 4 of 8</text>
+<text class="muted" x="231" y="691" text-anchor="middle">median model call time, seconds (log scale)</text>
+<text class="panel-title" x="430" y="448">Support check</text>
+<text class="muted" x="788" y="448" text-anchor="end">11 configurations · 10 cases</text>
+<line class="grid" x1="474" x2="788" y1="660.0" y2="660.0"/>
+<text class="tick" x="468" y="663.5" text-anchor="end">0</text>
+<line class="grid" x1="474" x2="788" y1="582.4" y2="582.4"/>
+<text class="tick" x="468" y="585.9" text-anchor="end">4</text>
+<line class="grid" x1="474" x2="788" y1="504.8" y2="504.8"/>
+<text class="tick" x="468" y="508.3" text-anchor="end">8</text>
+<line class="grid" x1="474" x2="788" y1="466.0" y2="466.0"/>
+<text class="tick" x="468" y="469.5" text-anchor="end">10</text>
+<text class="tick" x="482.1" y="675" text-anchor="middle">0.2</text>
+<text class="tick" x="527.6" y="675" text-anchor="middle">0.5</text>
+<text class="tick" x="562.1" y="675" text-anchor="middle">1</text>
+<text class="tick" x="596.5" y="675" text-anchor="middle">2</text>
+<text class="tick" x="642.0" y="675" text-anchor="middle">5</text>
+<text class="tick" x="676.5" y="675" text-anchor="middle">10</text>
+<text class="tick" x="710.9" y="675" text-anchor="middle">20</text>
+<text class="tick" x="765.5" y="675" text-anchor="middle">60</text>
+<line class="axis" x1="474" x2="788" y1="660" y2="660"/>
+<line class="ref" x1="696.6" x2="696.6" y1="466" y2="660"/>
+<text class="ref-label" x="700.6" y="654.0">ceiling 15 s</text>
+<line class="ref" x1="474" x2="788" y1="543.6" y2="543.6"/>
+<text class="ref-label" x="788" y="539.6" text-anchor="end">floor 6: always &quot;not supported&quot;</text>
+<g><line class="whisker" x1="515.9" x2="545.0" y1="485.4" y2="485.4"/><circle class="solid s-small" cx="532.0" cy="485.4" r="5"/><path class="cross" d="M537.0 473.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="532.0" cy="485.4" r="13"><title>Support check — small (4b), thinking off, forced format on, temperature 0.7, minimal prompt
+9 of 10 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 546 ms (range 395–709), 10 calls</title></circle></g>
+<g><line class="whisker" x1="497.7" x2="530.8" y1="621.2" y2="621.2"/><circle class="solid s-small" cx="515.9" cy="621.2" r="5"/><line class="slash" x1="509.9" y1="627.2" x2="521.9" y2="615.2"/><path class="cross" d="M520.9 609.2 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="515.9" cy="621.2" r="13"><title>Support check — small (4b), thinking off, forced format off, temperature 0.7, minimal prompt
+2 of 10 cases passed
+costly errors 1, fallbacks 0, unusable replies 7
+median 395 ms (range 274–533), 10 calls</title></circle></g>
+<g><line class="whisker" x1="630.6" x2="724.5" y1="466.0" y2="466.0"/><circle class="hollow s-small" cx="674.6" cy="466.0" r="5"/><circle class="hit" cx="674.6" cy="466.0" r="13"><title>Support check — small (4b), thinking on, forced format on, temperature 1, minimal prompt
+10 of 10 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 9627 ms (range 3969–26288), 10 calls</title></circle></g>
+<g><line class="whisker" x1="509.2" x2="564.1" y1="504.8" y2="504.8"/><rect class="solid s-medium" x="533.1" y="499.8" width="10" height="10" rx="1.5"/><path class="cross" d="M543.1 492.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="538.1" cy="504.8" r="13"><title>Support check — medium (9b), thinking off, forced format on, temperature 0.7, minimal prompt
+8 of 10 cases passed
+costly errors 2, fallbacks 0, unusable replies 0
+median 617 ms (range 345–1041), 10 calls</title></circle></g>
+<g><line class="whisker" x1="518.2" x2="537.7" y1="504.8" y2="504.8"/><rect class="solid s-medium" x="517.9" y="499.8" width="10" height="10" rx="1.5"/><line class="slash" x1="516.9" y1="510.8" x2="528.9" y2="498.8"/><path class="cross" d="M527.9 492.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="522.9" cy="504.8" r="13"><title>Support check — medium (9b), thinking off, forced format off, temperature 0.7, minimal prompt
+8 of 10 cases passed
+costly errors 2, fallbacks 0, unusable replies 0
+median 455 ms (range 414–613), 10 calls</title></circle></g>
+<g><line class="whisker" x1="514.2" x2="553.9" y1="476.4" y2="476.4"/><rect class="solid s-medium" x="534.2" y="471.4" width="10" height="10" rx="1.5"/><path class="cross" d="M544.2 464.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="539.2" cy="476.4" r="13"><title>Support check — medium (9b), thinking off, forced format on, temperature 0.7, rules prompt
+9 of 10 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 631 ms (range 382–849), 10 calls</title></circle></g>
+<g><line class="whisker" x1="500.7" x2="550.7" y1="495.8" y2="495.8"/><rect class="solid s-medium" x="525.6" y="490.8" width="10" height="10" rx="1.5"/><path class="cross" d="M535.6 483.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="530.6" cy="495.8" r="13"><title>Support check — medium (9b), thinking off, forced format on, temperature 0.7, examples prompt
+8 of 10 cases passed
+costly errors 2, fallbacks 0, unusable replies 0
+median 531 ms (range 291–795), 10 calls</title></circle></g>
+<g><line class="whisker" x1="510.7" x2="531.7" y1="495.8" y2="495.8"/><rect class="solid s-medium" x="513.8" y="490.8" width="10" height="10" rx="1.5"/><path class="cross" d="M523.8 483.8 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="518.8" cy="495.8" r="13"><title>Support check — medium (9b), thinking off, forced format on, temperature 0, minimal prompt
+8 of 10 cases passed
+costly errors 2, fallbacks 0, unusable replies 0
+median 419 ms (range 356–543), 10 calls</title></circle></g>
+<g><line class="whisker" x1="657.0" x2="716.6" y1="457.0" y2="457.0"/><rect class="hollow s-medium" x="666.6" y="452.0" width="10" height="10" rx="1.5"/><circle class="hit" cx="671.6" cy="457.0" r="13"><title>Support check — medium (9b), thinking on, forced format on, temperature 1, minimal prompt
+10 of 10 cases passed
+costly errors 0, fallbacks 0, unusable replies 0
+median 9071 ms (range 6759–22423), 10 calls</title></circle></g>
+<g><line class="whisker" x1="583.1" x2="622.4" y1="485.4" y2="485.4"/><path class="solid s-large" d="M606.9 479.1 L613.1 490.4 L600.6 490.4 Z"/><path class="cross" d="M611.9 473.4 l6 6 m0 -6 l-6 6"/><circle class="hit" cx="606.9" cy="485.4" r="13"><title>Support check — large (27b), thinking off, forced format on, temperature 0.7, minimal prompt
+9 of 10 cases passed
+costly errors 1, fallbacks 0, unusable replies 0
+median 2463 ms (range 1527–3371), 10 calls</title></circle></g>
+<g><line class="whisker" x1="628.5" x2="729.9" y1="485.4" y2="485.4"/><circle class="chosen-ring" cx="667.9" cy="485.4" r="11"/><circle class="hollow s-small" cx="667.9" cy="485.4" r="5"/><line class="slash" x1="661.9" y1="491.4" x2="673.9" y2="479.4"/><circle class="hit" cx="667.9" cy="485.4" r="13"><title>Support check — small (4b), thinking on, forced format off, temperature 1, minimal prompt
+9 of 10 cases passed
+costly errors 0, fallbacks 0, unusable replies 1
+median 8413 ms (range 3806–29285), 10 calls</title></circle></g>
+<text class="direct" x="556.1" y="508.8" text-anchor="start">start: 8 of 10</text>
+<text class="direct" x="685.9" y="489.4" text-anchor="start">chosen: 9 of 10</text>
+<text class="muted" x="631" y="691" text-anchor="middle">median model call time, seconds (log scale)</text>
+<text class="panel-title" x="842" y="448">How to read it</text>
+<circle class="solid s-small" cx="852.0" cy="474.0" r="5"/>
+<text class="legend" x="872" y="478">small (4b) model</text>
+<rect class="solid s-medium" x="847.0" y="492.0" width="10" height="10" rx="1.5"/>
+<text class="legend" x="872" y="501">medium (9b) model</text>
+<path class="solid s-large" d="M852.0 513.8 L858.3 525.0 L845.8 525.0 Z"/>
+<text class="legend" x="872" y="524">large (27b) model</text>
+<circle class="hollow s-small" cx="852.0" cy="543.0" r="5"/>
+<text class="legend" x="872" y="547">hollow: thinking on (filled: off)</text>
+<circle class="solid s-small" cx="852.0" cy="566.0" r="5"/><line class="slash" x1="846" y1="572" x2="858" y2="560"/>
+<text class="legend" x="872" y="570">slash: output format not forced</text>
+<path class="cross" d="M849 586 l6 6 m0 -6 l-6 6"/>
+<text class="legend" x="872" y="593">cross: made a costly error</text>
+<circle class="chosen-ring" cx="852" cy="612" r="9"/><rect class="solid s-medium" x="848.0" y="608.0" width="8" height="8" rx="1.5"/>
+<text class="legend" x="872" y="616">ring: the configuration chosen</text>
+<line class="whisker" x1="842" x2="862" y1="635" y2="635"/>
+<text class="legend" x="872" y="639">thin line: fastest to slowest call</text>
+<line class="ref" x1="842" x2="862" y1="658" y2="658"/>
+<text class="legend" x="872" y="662">grey lines: speed ceiling, and the floor</text>
+<text class="muted" x="842" y="691">Up is more accurate. Left is faster.</text>
+<text class="muted" x="842" y="707">Temperature and prompt wording are in</text>
+<text class="muted" x="842" y="722">results.csv, not on the chart.</text>
+</svg>

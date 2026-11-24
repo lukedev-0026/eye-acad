@@ -4,7 +4,7 @@
       "provider": "ollama",
       "model": "qwen3.5:9b",
       "thinking": false,
-      "forceFormat": true,
+      "forceFormat": false,
       "promptVariant": "minimal",
       "temperature": 0.7,
       "sampling": {
@@ -12,25 +12,25 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 400,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 400
+      "timeoutMs": 30000
     },
     "followup": {
       "provider": "ollama",
       "model": "qwen3.5:9b",
       "thinking": false,
       "forceFormat": true,
-      "promptVariant": "minimal",
+      "promptVariant": "examples",
       "temperature": 0.7,
       "sampling": {
         "top_p": 0.8,
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 600,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 600
+      "timeoutMs": 30000
     },
     "coverage": {
       "provider": "ollama",
@@ -38,21 +38,21 @@
       "thinking": false,
       "forceFormat": true,
       "promptVariant": "minimal",
-      "temperature": 0.7,
+      "temperature": 0,
       "sampling": {
         "top_p": 0.8,
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 1500,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 1500
+      "timeoutMs": 60000
     },
     "revision": {
       "provider": "ollama",
-      "model": "qwen3.5:9b",
+      "model": "qwen3.5:4b",
       "thinking": false,
-      "forceFormat": true,
+      "forceFormat": false,
       "promptVariant": "minimal",
       "temperature": 0.7,
       "sampling": {
@@ -60,25 +60,25 @@
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 800,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 800
+      "timeoutMs": 60000
     },
     "verifier": {
       "provider": "ollama",
-      "model": "qwen3.5:9b",
-      "thinking": false,
-      "forceFormat": true,
+      "model": "qwen3.5:4b",
+      "thinking": true,
+      "forceFormat": false,
       "promptVariant": "minimal",
-      "temperature": 0.7,
+      "temperature": 1,
       "sampling": {
-        "top_p": 0.8,
+        "top_p": 0.95,
         "top_k": 20,
         "presence_penalty": 1.5
       },
+      "maxOutputTokens": 3300,
       "numCtx": 8192,
-      "timeoutMs": 120000,
-      "maxOutputTokens": 300
+      "timeoutMs": 60000
     }
   }
 }

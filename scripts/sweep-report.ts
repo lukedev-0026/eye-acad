@@ -77,7 +77,7 @@ const { chosen, changed } =
 
 const COLUMNS = [
   'run_id', 'date_utc', 'commit', 'stage', 'split', 'provider', 'step', 'config_id', 'block', 'model', 'model_digest', 'engine', 'size',
-  'temperature', 'sampling', 'thinking', 'median_thinking_chars', 'forced_format', 'format_canary', 'prompt', 'prompt_file_hash',
+  'temperature', 'sampling', 'thinking', 'median_thinking_chars', 'forced_format', 'format_canary', 'prompt', 'prompt_fingerprint',
   'num_ctx', 'output_cap', 'cases_n', 'runs_per_case', 'cases_all_pass_k', 'cases_flipped', 'runs_passed', 'runs_counted',
   'costly_errors', 'fallbacks', 'truncated', 'schema_invalid', 'refusals', 'infra_errors', 'second_count_k', 'second_count_n',
   'left_out_as_either', 'human_graded', 'timed_calls', 'median_ms', 'min_ms', 'max_ms', 'median_output_tokens', 'cold_load_ms',
@@ -92,10 +92,16 @@ const medianOf = (v: Array<number>) => (v.length ? [...v].sort((a, b) => a - b)[
 
 const lines: Array<string> = [COLUMNS.join(',')]
 const caseHash: Record<string, string> = {}
-const promptHash: Record<string, string> = {}
-for (const step of STEP_IDS) {
-  caseHash[step] = await hashFile(`evals/cases/${step}.jsonl`)
-  promptHash[step] = await hashFile(`src/server/prompts/${step}.ts`)
+for (const step of STEP_IDS) caseHash[step] = await hashFile(`evals/cases/${step}.jsonl`)
+// A fingerprint of the prompts as the model receives them, for each step and
+// wording. It comes from the golden file, which a check (`pnpm golden`) holds
+// equal to what the code sends. Hashing the prompt's source file would change
+// whenever that file was reformatted or moved, with the prompt unchanged.
+let promptFingerprints: Record<string, Record<string, string>> = {}
+try {
+  promptFingerprints = (JSON.parse(await readFile('tests/golden/golden.json', 'utf8')) as { promptFingerprints: typeof promptFingerprints }).promptFingerprints
+} catch {
+  // no golden file
 }
 
 function addRow(cfgId: string, stage: string, split: string, rows: Array<ResultRow>, s: Summary) {
@@ -127,7 +133,7 @@ function addRow(cfgId: string, stage: string, split: string, rows: Array<ResultR
     forced_format: st.forceFormat ? 'on' : 'off',
     format_canary: preflight.models?.[st.model]?.canaries?.[canaryKey]?.outcome ?? '',
     prompt: st.promptVariant,
-    prompt_file_hash: promptHash[step],
+    prompt_fingerprint: promptFingerprints[step]?.[st.promptVariant] ?? '',
     num_ctx: st.numCtx ?? '',
     output_cap: st.maxOutputTokens,
     cases_n: s.cases,

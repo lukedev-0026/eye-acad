@@ -57,6 +57,8 @@ export const RevisionCardSchema = z.object({
   retrievedPages: z.array(z.number()),
   retrievalMode: z.enum(['hybrid', 'keyword_only']),
   message: z.string().nullable(),
+  // The reference note's own statement of what it is.
+  noteLine: z.string().nullable().default(null),
   atMs: z.number(),
 })
 export type RevisionCard = z.infer<typeof RevisionCardSchema>

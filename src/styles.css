@@ -336,3 +336,96 @@ textarea:focus-visible {
 .finding-value {
   font-weight: 600;
 }
+
+.row.end {
+  justify-content: flex-end;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.composer {
+  gap: 0.75rem;
+}
+
+.button.talk {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.05rem;
+  border-width: 3px;
+  touch-action: none;
+  user-select: none;
+}
+
+.button.talk.talk-on {
+  background: var(--ink);
+  color: var(--paper);
+  border-style: double;
+  border-width: 6px;
+  padding: calc(1rem - 3px);
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.revision {
+  margin-bottom: 1rem;
+  border: 2px solid var(--accent);
+}
+
+.revision p {
+  margin: 0 0 0.9rem;
+}
+
+.revision-point {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.revision-message {
+  font-weight: 600;
+}
+
+.excerpt {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 4px solid var(--accent);
+  background: var(--paper);
+  border-radius: 0 6px 6px 0;
+}
+
+.excerpt blockquote {
+  margin: 0 0 0.4rem;
+  font-style: italic;
+}
+
+.excerpt figcaption {
+  font-size: 0.9rem;
+}
+
+.timing {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.timing-table {
+  overflow-x: auto;
+  padding: 0.6rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.8rem;
+}

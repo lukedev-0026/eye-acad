@@ -25,16 +25,116 @@ const AskInput = z.object({
   text: z.string().max(2000),
 })
 
+const audioOut = (speech: { audioBase64: string; mimeType: string } | null) =>
+  speech ? { base64: speech.audioBase64, mimeType: speech.mimeType } : null
+
 export const askTyped = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AskInput)
   .handler(async ({ context, data }) => {
     const { handleRequest } = await import('./turn.server')
-    const result = await handleRequest(context.uid, data.attemptId, data.text, 'typed')
+    const result = await handleRequest(context.uid, data.attemptId, { text: data.text })
     return {
       kind: result.reply.kind,
+      heard: result.heard,
       lines: result.reply.lines,
-      speech: result.reply.speech,
+      // Returned inside this authenticated reply. A separate audio address
+      // could not carry the sign-in token, so it would have to be open.
+      audio: audioOut(result.speech),
       timings: result.timings,
     }
+  })
+
+// Roughly 2.4 MB of audio once decoded: ample for a 90-second answer.
+const AudioInput = z.object({
+  attemptId: z.string().min(1).max(64),
+  audioBase64: z.string().min(1).max(3_300_000),
+  mimeType: z.string().max(100),
+})
+
+export const askSpoken = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(AudioInput)
+  .handler(async ({ context, data }) => {
+    const { handleRequest } = await import('./turn.server')
+    const result = await handleRequest(context.uid, data.attemptId, {
+      audio: Buffer.from(data.audioBase64, 'base64'),
+      mimeType: data.mimeType,
+    })
+    return {
+      kind: result.reply.kind,
+      heard: result.heard,
+      lines: result.reply.lines,
+      audio: audioOut(result.speech),
+      timings: result.timings,
+    }
+  })
+
+const AttemptOnly = z.object({ attemptId: z.string().min(1).max(64) })
+
+export const speakOpening = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(AttemptOnly)
+  .handler(async ({ context, data }) => {
+    const { openingSpeech } = await import('./turn.server')
+    return { audio: audioOut(await openingSpeech(context.uid, data.attemptId)) }
+  })
+
+// Turns a recording into text and nothing else, for the spoken answer and the
+// spoken reply to the follow-up. The text comes back to be shown before it is
+// submitted.
+export const transcribeOnly = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(AudioInput)
+  .handler(async ({ data }) => {
+    const { transcribe } = await import('./voice.server')
+    const result = await transcribe(Buffer.from(data.audioBase64, 'base64'), data.mimeType, [])
+    return result.ok ? { ok: true as const, text: result.text } : { ok: false as const, text: '' }
+  })
+
+const TextInput = z.object({
+  attemptId: z.string().min(1).max(64),
+  text: z.string().max(8000),
+  via: z.enum(['typed', 'voice']).default('typed'),
+})
+const AttemptInput = z.object({ attemptId: z.string().min(1).max(64) })
+
+// The only function that ends the questioning. It is called by the
+// "Give my answer" button, never inferred from what the trainee says.
+export const giveAnswer = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(TextInput)
+  .handler(async ({ context, data }) => {
+    const { handleAnswer } = await import('./answer.server')
+    const { synthesise } = await import('./voice.server')
+    const followUp = await handleAnswer(context.uid, data.attemptId, data.text, data.via)
+    return { ...followUp, audio: audioOut(await synthesise(followUp.speech)) }
+  })
+
+export const retryFollowUp = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(AttemptInput)
+  .handler(async ({ context, data }) => {
+    const { ensureFollowUp } = await import('./answer.server')
+    const { synthesise } = await import('./voice.server')
+    const followUp = await ensureFollowUp(context.uid, data.attemptId)
+    return { ...followUp, audio: audioOut(await synthesise(followUp.speech)) }
+  })
+
+export const replyToFollowUp = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(TextInput)
+  .handler(async ({ context, data }) => {
+    const { handleFollowUpReply } = await import('./answer.server')
+    const card = await handleFollowUpReply(context.uid, data.attemptId, data.text, data.via)
+    return { outcome: card.outcome }
+  })
+
+export const retryRevision = createServerFn({ method: 'POST' })
+  .middleware([requireUser])
+  .validator(AttemptInput)
+  .handler(async ({ context, data }) => {
+    const { prepareRevision } = await import('./answer.server')
+    const card = await prepareRevision(context.uid, data.attemptId)
+    return { outcome: card.outcome }
   })

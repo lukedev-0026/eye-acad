@@ -42,6 +42,8 @@ export const CaseFileSchema = z
     patient: z.record(z.string(), PatientValue.nullable()),
     findings: z.array(FindingSchema).min(1),
     examiner_notes: ExaminerNotesSchema,
+    // The case author's own instruction on how to cite the reference note.
+    reference_source: z.looseObject({ note: z.string().optional() }).optional(),
   })
   .refine(
     (c) => new Set(c.findings.map((f) => f.id)).size === c.findings.length,

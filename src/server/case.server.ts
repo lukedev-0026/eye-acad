@@ -59,3 +59,9 @@ export async function loadExaminerNotes(): Promise<ExaminerNotes> {
   const { data } = await readCaseFile()
   return data.examiner_notes
 }
+
+// The case author's note on which part of the reference note to cite from.
+export async function loadCitationGuidance(): Promise<string | null> {
+  const { data } = await readCaseFile()
+  return data.reference_source?.note ?? null
+}

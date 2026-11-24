@@ -39,8 +39,10 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
   down: local only, with no way to switch.
 - **Risk we accept:** a local model is likely weaker at the judging steps. Because code checks
   its output, the expected cost is more fallbacks to pre-written text, not wrong facts.
-- **Honest limit:** the Claude route is only described as working once it has actually been run
-  with a key. Until then the write-up says "written, not run".
+- **Honest limit:** the Claude route has been written from the documentation but never run. On
+  24 November Luke decided to stay with local models only for this submission, and to explain
+  that choice and its results. So nothing in the write-up is a Claude result, and the file that
+  holds the Claude code says at the top that it is untested.
 - **A claim that was tested:** an earlier version of this entry said a local model "can be set
   to give the same answer every time". The pre-check tested it on 24 November: with temperature
   0 and a fixed seed, 10 of 10 requests gave the identical reply three times running, on both

@@ -21,22 +21,30 @@ settings, which file 07 explains.
 | 10. The improvement | One fix for the weakest measured area, built from failures on the tuning cases, then frozen. | The fix is saved in the project history before the held-back cases are opened. |
 | 11. Held-back cases | Opened once and run three ways: starting settings, chosen settings, and chosen settings with the improvement. | The three sets of counts are recorded and nothing is re-chosen. |
 | 12. Finish | A run from a clean start, the write-up, a final search for leaked hidden answers, and these documents updated to match. | The write-up claims only what the last run showed. |
-| Later | Running the Claude route and a smaller comparison on it. Only if a key is supplied. | Its own results rows and chart, inside a fixed spend limit. |
+| Not done | Running the Claude route. The code for it is written from the documentation but has never been run, by decision: the project stays on local models. |
 
 ## Timetable
 
-All times are GMT. The deadline is 23:59 on Wednesday 25 November 2026. On the morning of
-24 November about 42 hours remained and the app was not yet built, so the timetable is tight.
+All times are GMT. The deadline is 23:59 on Wednesday 25 November 2026.
 
-| When | What |
+**The plan** was to build during the day on 24 November and run the sweep unattended overnight.
+
+**What happened** was faster, so the sweep was brought forward. The exact times are in
+`NOTES.md`; in outline:
+
+| When (24 Nov) | What |
 |---|---|
-| 24 Nov, daytime | Steps 0 to 7. The medium model is downloaded first; the other two download in the background. |
-| 24 Nov, evening | Luke reads the expected answers, switches Low Power Mode off and restarts the Mac. |
-| 24 Nov, evening to 25 Nov 06:00 | Step 8. The sweep runs unattended overnight. |
-| 25 Nov 06:00 to 09:00 | Step 9. |
-| 25 Nov 09:00 to 13:00 | Steps 10 and 11. |
-| 25 Nov 13:00 to 19:00 | Luke's spoken runs and blind read of the follow-up questions. Step 12. |
-| 25 Nov 19:00 to 23:59 | Margin. Luke publishes and submits. |
+| 05:58 | Build starts from the planning documents alone. |
+| 06:16 to 06:36 | Steps 0 to 6: the app works end to end by typing. |
+| 06:42 | First run of the brief's three required checks, on the starting settings. |
+| 07:00 | Step 7: test cases for all five AI steps, the checks, and the choosing rule, saved before any other settings were tried. |
+| 07:10 | Step 8: the sweep starts on the small and medium models. Luke had switched the Mac to High Power a few minutes before. |
+| 07:14 | Luke supplies the Deepgram key. Voice works; the read-back check is run. |
+| 07:30 to 07:40 | Ten spoken turns timed in the browser. Speech synthesis found to be the slow part and changed (see file 03). |
+| 07:49 | The large model has finished downloading. The pre-check passes on all three sizes and the sweep continues with all of them. |
+
+Steps 9 to 12 follow once the sweep finishes. The rest of 24 November and all of 25 November
+remain as margin.
 
 ## If the build runs late
 
@@ -69,10 +77,10 @@ These are replacements for things that fail, not ways of saving time.
 | Item | Why |
 |---|---|
 | A Deepgram account and key, by the time voice is built on 24 November | For speech. Its pricing page says $200 free credit with no payment card. It is the only key the build needs. |
-| No paid keys | Nothing is paid for. A Claude key is needed only if the Claude phase is wanted before submission, and it would run under a fixed spend limit of £8. |
+| No paid keys | Nothing is paid for. On 24 November Luke decided to stay with local models only and to explain that choice and its results in the write-up. The Claude route stays in the project, labelled as written but never run. |
 | Agreement to three model downloads, about 33 GB in total | The small, medium and large local models. The machine had 99 GB free when checked. |
-| Low Power Mode switched off, and a restart, before the overnight run | The Mac reports a power setting that reads as Low Power Mode even when plugged in, and about 5 GB of swap in use. Both would distort timings. System settings are Luke's to change. |
-| The machine left on overnight on 24 November, plugged in, with nothing else using Ollama | So the timings are clean. |
+| Low Power Mode switched off before the timed runs | Done by Luke at about 07:05 on 24 November: every sweep result was recorded in High Power mode. A restart was also advised because of swap in use; on checking, 74% of memory was free with one model loaded, so it was not needed. The power mode and swap figure are recorded with every run. |
+| The machine left alone while the sweep runs, plugged in, with nothing else using Ollama | So the timings are clean. |
 | About 45 minutes reading the expected answers, before the sweep starts | Roughly 40 questions for the menu-picker, 12 sample answers with 7 judgements each, and 16 support-check pairs. These are judgement calls, and the sweep is scored against them. |
 | A blind read of the follow-up questions from the three confirmed settings | Two yes-or-no questions each. Whether a question fits is a human judgement. |
 | The spoken test runs, on the afternoon of 25 November | The AI building this cannot use a microphone: one spoken run per required check, and ten timed turns. |
@@ -89,7 +97,7 @@ These are replacements for things that fail, not ways of saving time.
 | `pnpm readback` | The check on what is actually said aloud. |
 | `pnpm sweep:preflight` | The pre-check: the graders pass their own expected answers, and each setting is shown to take effect on each model. |
 | `pnpm sweep --plan` | Prints which configurations would run, how many calls that is, and a time estimate from a short timing test. Runs nothing. |
-| `pnpm sweep` | The overnight run. Stopping and restarting skips finished work. |
+| `pnpm sweep` | The sweep itself. Stopping and restarting skips finished work. |
 | `pnpm sweep:report`, then `pnpm sweep:chart` | The results table and the chart, built from the raw results only. The report re-applies the choosing rule and must print the same settings the app is using. |
 | Switch test | Change one step's model in the settings file, run `pnpm check`, and confirm the results name the new model. |
 | A full session by voice | Refresh, reopen from the list, sign in as the second user and confirm refusal. |
@@ -102,5 +110,5 @@ These are replacements for things that fail, not ways of saving time.
 - The marker at four hours shows what a strict four-hour build would have contained.
 - The hours the computer spends running the sweep unattended are reported separately from
   hands-on time.
-- The estimate for the overnight run, four to six hours, rests on assumed speeds. It is replaced
-  by a measured estimate before the run starts.
+- The first estimate for the sweep, four to six hours, rested on assumed speeds. The real run
+  time is in `NOTES.md` and `SWEEP.md`.

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { callAnthropic } from './anthropic.server';
 import { extractJson } from './json';
 import { callOllama } from './ollama.server';
 import type { CallResult, Prompt, RawCall, StepSettings } from './types';
@@ -24,7 +25,6 @@ export async function callStep<T>(
   if (settings.provider === 'ollama') {
     raw = await callOllama(settings, prompt, jsonSchema);
   } else {
-    const { callAnthropic } = await import('./anthropic.server');
     raw = await callAnthropic(settings, prompt, schema);
   }
 

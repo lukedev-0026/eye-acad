@@ -40,6 +40,12 @@ export default defineConfig([
         },
       ],
       'import-x/no-default-export': 'error',
+      // Every import is at the top of its file, where it can be seen.
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'ImportExpression', message: 'No dynamic import(). Import at the top of the file.' },
+        { selector: 'TSImportType', message: "No inline import('…') types. Use `import type` at the top of the file." },
+      ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },

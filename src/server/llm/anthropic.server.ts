@@ -1,3 +1,5 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 
 import { loadEnv } from '../env.server';
@@ -35,8 +37,6 @@ export async function callAnthropic(settings: StepSettings, prompt: Prompt, sche
     return { ...empty, outcome: 'infra_error', error: 'ANTHROPIC_API_KEY is not set.' };
   }
 
-  const { default: Anthropic } = await import('@anthropic-ai/sdk');
-  const { zodOutputFormat } = await import('@anthropic-ai/sdk/helpers/zod');
   const client = new Anthropic({ timeout: settings.timeoutMs, maxRetries: 1 });
 
   try {

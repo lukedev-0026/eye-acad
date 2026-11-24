@@ -1,7 +1,7 @@
 import { PublicAttemptSchema } from '../lib/attempt-types';
 import type { PublicAttempt, RevealedItem, Turn } from '../lib/attempt-types';
 import type { PublicCase } from './case-schema';
-import { adminDb } from './firebase-admin.server';
+import { getFirebaseAdmin } from './firebase-admin.server';
 import type { RenderedItem } from './render';
 
 // All writes to an attempt happen here, with the Admin SDK, at a path built
@@ -12,7 +12,7 @@ export const MAX_ATTEMPTS_PER_USER = 100;
 
 export class AttemptError extends Error {}
 
-const attemptsOf = (uid: string) => adminDb.collection('users').doc(uid).collection('attempts');
+const attemptsOf = (uid: string) => getFirebaseAdmin().db.collection('users').doc(uid).collection('attempts');
 
 export const attemptRef = (uid: string, attemptId: string) => attemptsOf(uid).doc(attemptId);
 
@@ -62,7 +62,7 @@ export async function updateAttempt<T>(
   change: (attempt: PublicAttempt) => T,
 ): Promise<T> {
   const ref = attemptRef(uid, attemptId);
-  return adminDb.runTransaction(async (tx) => {
+  return getFirebaseAdmin().db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     if (!snap.exists) throw new AttemptError('Attempt not found.');
     const attempt = PublicAttemptSchema.parse(snap.data());

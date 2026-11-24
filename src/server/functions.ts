@@ -1,12 +1,19 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 
+import { ensureFollowUp, handleAnswer, handleFollowUpReply, prepareRevision } from './answer.server';
+import { createAttempt } from './attempts.server';
 import { requireUser } from './auth-middleware';
+import { loadCase } from './case.server';
+import { handleRequest, openingSpeech } from './turn.server';
+import { speakParts, transcribe } from './voice.server';
 
 // The browser's only way in. Every function checks the caller's token first
-// and takes the uid from that check, never from the request body. Server-only
-// modules are imported inside the handlers so none of their code can be pulled
-// into the browser bundle.
+// and takes the uid from that check, never from the request body.
+//
+// The server-only modules above are imported in the ordinary way. When the
+// browser bundle is built, each handler below is replaced by a call to the
+// server, and the imports only a handler used are dropped with it.
 
 export const whoAmI = createServerFn({ method: 'POST' })
   .middleware([requireUser])
@@ -15,8 +22,6 @@ export const whoAmI = createServerFn({ method: 'POST' })
 export const startAttempt = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .handler(async ({ context }) => {
-    const { loadCase } = await import('./case.server');
-    const { createAttempt } = await import('./attempts.server');
     const attemptId = await createAttempt(context.uid, await loadCase());
     return { attemptId };
   });
@@ -34,7 +39,6 @@ export const askTyped = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AskInput)
   .handler(async ({ context, data }) => {
-    const { handleRequest } = await import('./turn.server');
     const result = await handleRequest(context.uid, data.attemptId, { text: data.text });
     return {
       kind: result.reply.kind,
@@ -58,7 +62,6 @@ export const askSpoken = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AudioInput)
   .handler(async ({ context, data }) => {
-    const { handleRequest } = await import('./turn.server');
     const result = await handleRequest(context.uid, data.attemptId, {
       audio: Buffer.from(data.audioBase64, 'base64'),
       mimeType: data.mimeType,
@@ -78,7 +81,6 @@ export const speakOpening = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptOnly)
   .handler(async ({ context, data }) => {
-    const { openingSpeech } = await import('./turn.server');
     return { audio: audioOut(await openingSpeech(context.uid, data.attemptId)) };
   });
 
@@ -89,7 +91,6 @@ export const transcribeOnly = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AudioInput)
   .handler(async ({ data }) => {
-    const { transcribe } = await import('./voice.server');
     const result = await transcribe(Buffer.from(data.audioBase64, 'base64'), data.mimeType, []);
     return result.ok ? { ok: true as const, text: result.text } : { ok: false as const, text: '' };
   });
@@ -107,8 +108,6 @@ export const giveAnswer = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(TextInput)
   .handler(async ({ context, data }) => {
-    const { handleAnswer } = await import('./answer.server');
-    const { speakParts } = await import('./voice.server');
     const followUp = await handleAnswer(context.uid, data.attemptId, data.text, data.via);
     return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
   });
@@ -117,8 +116,6 @@ export const retryFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
-    const { ensureFollowUp } = await import('./answer.server');
-    const { speakParts } = await import('./voice.server');
     const followUp = await ensureFollowUp(context.uid, data.attemptId);
     return { ...followUp, audio: audioOut(await speakParts([followUp.speech])) };
   });
@@ -127,7 +124,6 @@ export const replyToFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(TextInput)
   .handler(async ({ context, data }) => {
-    const { handleFollowUpReply } = await import('./answer.server');
     const card = await handleFollowUpReply(context.uid, data.attemptId, data.text, data.via);
     return { outcome: card.outcome };
   });
@@ -136,7 +132,6 @@ export const retryRevision = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(AttemptInput)
   .handler(async ({ context, data }) => {
-    const { prepareRevision } = await import('./answer.server');
     const card = await prepareRevision(context.uid, data.attemptId);
     return { outcome: card.outcome };
   });

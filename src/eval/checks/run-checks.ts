@@ -118,7 +118,8 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
       split: options.split,
       trials: options.trials,
       label: 'configured',
-      onRow: (row) => {
+      onRow: async (row) => {
+        await appendRow(runId, row);
         progress(mark(row));
       },
     });

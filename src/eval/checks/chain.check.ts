@@ -8,7 +8,6 @@ import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval
 import { InvalidEvalCaseError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext, Graded } from '@/eval/eval.types';
 import type { ChainRow } from '@/eval/run/result-row';
-import { appendRow } from '@/eval/run/results.store';
 import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision.eval';
 
 // The revision step and the support check, run together as the app runs them:
@@ -83,7 +82,8 @@ export async function runChain(
     split: 'tune' | 'holdout';
     trials: number;
     label: string;
-    onRow?: (row: ChainRow) => void;
+    // Called with each row as it is made, for saving it and showing progress.
+    onRow: (row: ChainRow) => Promise<void>;
   },
 ): Promise<Array<ChainRow>> {
   const cases = (await chainCases()).filter((c) => c.split === o.split);
@@ -189,8 +189,7 @@ export async function runChain(
         raw: '',
       };
       rows.push(row);
-      await appendRow(o.runId, row);
-      o.onRow?.(row);
+      await o.onRow(row);
     }
   }
   return rows;

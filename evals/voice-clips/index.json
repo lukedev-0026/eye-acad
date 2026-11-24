@@ -1,0 +1,54 @@
+{
+  "voice": "aura-2-pandora-en",
+  "note": "Synthetic speech, generated for testing the spoken path without a microphone.",
+  "clips": [
+    {
+      "file": "q01.mp3",
+      "says": "What is the intraocular pressure in the right eye?"
+    },
+    {
+      "file": "q02.mp3",
+      "says": "Can I have gonioscopy of the right eye?"
+    },
+    {
+      "file": "q03.mp3",
+      "says": "What is the visual acuity in both eyes?"
+    },
+    {
+      "file": "q04.mp3",
+      "says": "What does the cornea look like in the right eye?"
+    },
+    {
+      "file": "q05.mp3",
+      "says": "What are the pupils doing?"
+    },
+    {
+      "file": "q06.mp3",
+      "says": "Is there a relative afferent pupillary defect?"
+    },
+    {
+      "file": "q07.mp3",
+      "says": "Does she have any allergies?"
+    },
+    {
+      "file": "q08.mp3",
+      "says": "What medications is she taking?"
+    },
+    {
+      "file": "q09.mp3",
+      "says": "What is the anterior chamber depth?"
+    },
+    {
+      "file": "q10.mp3",
+      "says": "What is the blood pressure?"
+    },
+    {
+      "file": "q11.mp3",
+      "says": "What is the central corneal thickness?"
+    },
+    {
+      "file": "q12.mp3",
+      "says": "What does the left optic disc look like?"
+    }
+  ]
+}

@@ -40,6 +40,13 @@ describe('the choosing rule', () => {
     expect(r.map((c) => c.configId)).toEqual(['19-fast', '20-slow', '17-fastest'])
     expect(r[2].tier).toBeGreaterThan(1)
   })
+  it('a few milliseconds do not decide a tie: the next tie-break does', () => {
+    const r = rank('selector', [
+      cand('unforced-519', { size: 'small', thinking: false, forceFormat: false }, { casesAllPass: 19, medianMs: 519 }),
+      cand('forced-536', { size: 'small', thinking: false, forceFormat: true }, { casesAllPass: 19, medianMs: 536 }),
+    ])
+    expect(r[0].configId).toBe('forced-536')
+  })
   it('a clear difference in accuracy beats speed', () => {
     const r = rank('selector', [
       cand('fast-weak', { size: 'small', thinking: false, forceFormat: true }, { casesAllPass: 14, medianMs: 300 }),

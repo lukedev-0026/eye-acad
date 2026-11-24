@@ -12,6 +12,7 @@ import { configId, summarise } from '../src/eval/run'
 import type { ResultRow, Summary } from '../src/eval/run'
 import { loadContext } from '../src/eval/context'
 import { candidatesFor, loadSweep, regrade } from '../src/eval/sweep-data'
+import { sweepMarkdown } from '../src/eval/sweep-markdown'
 import { loadStepsConfig } from '../src/server/config.server'
 import { STEP_IDS } from '../src/server/llm/types'
 import type { StepId, StepSettings } from '../src/server/llm/types'
@@ -180,11 +181,15 @@ await writeFile('evals/sweep/results.csv', `${lines.join('\n')}\n`)
 console.log(`Sweep ${runId}: ${data.results.length} calls, ${data.configs.size} configurations. Wrote evals/sweep/results.csv (${lines.length - 1} rows).\n`)
 
 const sentinels = [...new Set(data.results.filter((r) => r.stage.startsWith('sentinel')).map((r) => r.stage))].sort()
+let driftNote: string | null = null
 if (sentinels.length) {
   const medians = sentinels.map((stage) => summarise(data.results.filter((r) => r.stage === stage)).medianMs ?? 0)
   const drift = Math.round(((Math.max(...medians) - Math.min(...medians)) / Math.min(...medians)) * 100)
-  console.log(`Timing reference (the same ten calls, repeated): ${sentinels.map((s, i) => `${s.replace('sentinel-', '')} ${medians[i]} ms`).join(', ')}. Drift ${drift}%${drift > 20 ? ' — OVER 20%: timings are flagged' : ''}.\n`)
+  driftNote = `the same ten calls, repeated through the run: ${sentinels.map((s, i) => `${s.replace('sentinel-', '')} ${medians[i]} ms`).join(', ')}. Drift ${drift}%${drift > 20 ? ' — over 20%, so timings are flagged' : ''}.`
+  console.log(`Timing reference: ${driftNote}\n`)
 }
+const confirmedSteps = stepsWithData.filter((step) => ranked[step].some((c) => data.results.some((r) => r.configId === c.configId && r.stage === 'confirm')))
+await writeFile('evals/sweep/RESULTS.md', `${sweepMarkdown(data, ranked, chosen, { changed, drift: driftNote, confirmedSteps })}\n`)
 
 for (const step of stepsWithData) {
   const list = ranked[step]

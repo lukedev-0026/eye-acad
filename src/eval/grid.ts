@@ -56,7 +56,9 @@ export function settingsFor(
     sampling: { ...card.sampling, ...(o.presencePenalty === undefined ? {} : { presence_penalty: o.presencePenalty }) },
     maxOutputTokens: OUTPUT_CAP[step] + (o.thinking ? THINKING_ALLOWANCE : 0),
     numCtx: NUM_CTX,
-    timeoutMs: 120_000,
+    // A call that takes four times the step's ceiling could never be chosen,
+    // so it is cut off there and counted as a failed run.
+    timeoutMs: Math.max(30_000, 4 * CEILING_MS[step]),
   }
 }
 

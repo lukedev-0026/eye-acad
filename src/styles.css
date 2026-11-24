@@ -429,3 +429,12 @@ textarea:focus-visible {
   border-radius: 6px;
   font-size: 0.8rem;
 }
+
+.clip summary {
+  cursor: pointer;
+}
+
+.clip label {
+  display: block;
+  margin-top: 0.4rem;
+}

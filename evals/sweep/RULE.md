@@ -47,7 +47,8 @@ Applied per step, to the confirmation runs (three runs per case) on the tuning c
    them honestly.
 
 3. **Ties go to the simpler configuration**, in this order: faster; smaller model; thinking
-   off; forced format on; temperature 0; the minimal prompt.
+   off; forced format on; temperature 0; the minimal prompt. Speeds within about 10% of each
+   other count as the same speed (see the amendment below).
 
 4. **At most two models across the five steps**, so the app fits in memory and there is less
    to download. If the per-step winners need three, the step on the least-used model takes its
@@ -82,3 +83,19 @@ give-away is not eligible.
 ## If the rule is overridden
 
 Any departure from this rule is written in `DECISION.md` with its reason.
+
+## Amendments
+
+**24 November 2026, 07:25 UTC.** "Faster" in rule 3 now treats speeds within about 10% of each
+other as equal (median times are sorted into 10% bands). Reason: on the first results, two
+configurations that differed only in forced format had medians of 519 ms and 536 ms, and the rule
+as first written would have let that 17 ms decide between them. What had been seen when this was
+changed: the screening run of eight configurations of the small model, for the menu-picker and
+the follow-up writer only (133 calls). No medium or large configuration, and no other step, had
+run. The change is to the tie-break only; eligibility and the accuracy comparison are untouched.
+
+The per-call time limit was also shortened at the same point, from 120 seconds to four times
+the step's ceiling (at least 30 seconds), and a configuration is now stopped as "too slow" after
+three calls that all exceed twice the ceiling, or five whose median does. Both changes only
+affect configurations that are far too slow to be eligible; they bound the machine time spent
+on them.

@@ -21,9 +21,12 @@ export type Ranked = Candidate & {
 export const tieBand = (cases: number) => Math.max(1, Math.round(cases * 0.05))
 
 // Simpler wins a tie: faster, then smaller model, thinking off, forced format
-// on, temperature 0, the minimal prompt.
+// on, temperature 0, the minimal prompt. Speeds within about 10% of each other
+// count as the same speed (they are sorted into 10% bands), so that a few
+// milliseconds of noise never decides between two configurations.
 function simpler(a: Candidate, b: Candidate): number {
-  const ms = (c: Candidate) => c.summary.medianMs ?? Number.POSITIVE_INFINITY
+  const ms = (c: Candidate) =>
+    c.summary.medianMs === null ? Number.POSITIVE_INFINITY : Math.round(Math.log(Math.max(1, c.summary.medianMs)) / Math.log(1.1))
   const size = (c: Candidate) => SIZE_ORDER.indexOf(sizeOf(c.settings.model) as never)
   return (
     ms(a) - ms(b) ||

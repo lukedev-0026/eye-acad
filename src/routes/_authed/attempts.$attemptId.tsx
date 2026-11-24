@@ -175,12 +175,35 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
       return
     }
     send({ type: 'STOP_LISTENING' })
+    await sendSpoken(clip, releasedAt)
+  }
+
+  async function sendSpoken(clip: { base64: string; mimeType: string }, releasedAt: number) {
     try {
       const reply = await askSpoken({ data: { attemptId, audioBase64: clip.base64, mimeType: clip.mimeType } })
       await finishTurn(releasedAt, 'voice', reply)
     } catch {
       fail('That did not go through. Please try again, or type your request.')
     }
+  }
+
+  // A recorded question, for a machine with no microphone. It takes exactly
+  // the same path as a held-button recording; the timer starts when the file
+  // is handed over.
+  async function askWithFile(file: File) {
+    if (!canAct) return
+    const releasedAt = performance.now()
+    setProblem(null)
+    send({ type: 'START_LISTENING' })
+    send({ type: 'STOP_LISTENING' })
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
+      reader.onerror = () => resolve('')
+      reader.readAsDataURL(file)
+    })
+    if (!base64) return fail('That file could not be read.')
+    await sendSpoken({ base64, mimeType: file.type || 'audio/mpeg' }, releasedAt)
   }
 
   // For the answer and the reply, speech is turned into text and shown first,
@@ -336,7 +359,23 @@ function Viva({ attemptId, attempt }: { attemptId: string; attempt: PublicAttemp
                   Ask
                 </button>
               </form>
-              <div className="row end">
+              <div className="row between">
+                <details className="clip">
+                  <summary className="small muted">No microphone?</summary>
+                  <label className="small muted">
+                    Send a recorded question{' '}
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      disabled={!canAct}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        e.target.value = ''
+                        if (file) void askWithFile(file)
+                      }}
+                    />
+                  </label>
+                </details>
                 <button className="button primary" disabled={!canAct} onClick={() => setAnswering(true)}>
                   Give my answer
                 </button>

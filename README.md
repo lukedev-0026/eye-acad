@@ -289,6 +289,31 @@ input unless it says spoken. They come from [`CHECKS.md`](CHECKS.md) unless anot
 - **The expected answers behind every count have not been read by a clinician.** They were written with an AI assistant from the case file and the note.
 - **The CI workflow has not run on GitHub.** It mirrors `pnpm verify`, which passes locally.
 
+## The one improvement
+
+**Built, measured, and not borne out.** The weakest measured area was the revision step, which
+could quote a sentence from a different condition's section and reword the advice to fit it. The
+improvement is a second support check, against the key point the trainee actually missed, which
+the model cannot reword.
+
+| End to end, three runs per case | Without it | With it |
+|---|---|---|
+| Tuning cases: a quotation shown that does not back the advice | 1 of 24 runs | 0 of 24 |
+| Held-back cases: the same | 0 of 18 runs | 0 of 18 |
+| Held-back cases passing every run | 4 of 6 | 3 of 6 |
+
+On the cases it was built on, the fault went away, though the saved traces show the new check
+was not what removed it. On cases held back until everything was frozen, it had nothing to
+catch, because the ordinary support check had already refused every wrong quotation, and it cost
+correct answers: it refused two correct quotations and was cut off once. It is still switched
+on, because the decision to ship it was recorded before the held-back cases were opened and
+they are there to report on a choice, not to make it. On this evidence it should come off, which
+is one line in `config/steps.json`. [`HANDOVER.md`](HANDOVER.md) has the reasoning and
+[`SWEEP.md`](SWEEP.md) the detail.
+
+A change that did pay for itself was made earlier, from the first timings: one audio clip per
+sentence, made ahead, took a spoken turn from 5.8 seconds to 1.8 (above).
+
 ## Time, and the four-hour point
 
 The brief sets four hours. This build was not held to that, by choice, and the real figures are:
@@ -300,7 +325,7 @@ All times are GMT on 24 November 2026, and each is a commit time or a line in
 |---|---|
 | Build started | 05:58, from the planning documents alone |
 | The four-hour point | 09:58. The tag `four-hour-mark` is on commit `3b5ef30` (08:25), the last one saved before it |
-| Last change | 15:55 |
+| Last change | 15:57 |
 | Start to finish by the clock | about 10 hours |
 
 That clock time is not hands-on time. It includes about an hour and a quarter of the settings

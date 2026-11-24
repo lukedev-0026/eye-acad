@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Attempts are written by the server only (Admin SDK bypasses these rules).
+// A signed-in trainee may read their own attempts and nothing else.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/attempts/{attemptId} {
+      allow get, list: if request.auth != null && request.auth.uid == uid;
+      allow create, update, delete: if false;
+    }
+
+    // Everything else is closed to browsers. This includes the server-only
+    // working notes at users/{uid}/attempts/{attemptId}/private/trace, which
+    // hold what the answer was judged to have missed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

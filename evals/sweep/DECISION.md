@@ -121,8 +121,9 @@ What does show it works is narrower:
 
 - With a stand-in for the model that reproduces the fault exactly, the quotation is shown without
   the change and refused with it (`tests/eval/checks/chain.check.test.ts`).
-- The question it asks is one the support check has been measured on: given the key point and
-  that page 8 sentence as a fixed pair, it refused in 3 runs of 3 on these settings.
+- The question it asks is close to one the support check has been measured on. Given the
+  statement "Check for sulfonamide allergy before giving acetazolamide." and that page 8 sentence
+  as a fixed pair, it refused in 3 runs of 3 on these settings (`ver-context-avoid-acetazolamide`).
 
 **The decision.** The app runs with it switched on. `config/steps.json` is the rule's choice plus
 this one switch; `config/steps.chosen.json` is the rule's choice alone. The reason is the kind of

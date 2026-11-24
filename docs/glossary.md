@@ -39,3 +39,8 @@
 | Costly error | The kind of mistake that matters most for a step, counted separately from ordinary misses. For example, revealing a finding that was not asked for. |
 | Fallback | Pre-written text the app uses when the model's own text fails a check. Safe, but less tailored. |
 | Swap | Disk space a computer uses as overflow when its memory is full. It slows everything down. |
+| Layer | A group of code with one job (the rules, the outside connections, the pages). Each layer may use only the ones beneath it. |
+| Linter | A tool that reads the code and fails if a house rule is broken, such as a file reaching into the wrong layer. |
+| Golden check | A test that records exactly what the app sends to the model and what it makes of every saved reply, and fails if either changes. Used to prove a tidy-up changed nothing. |
+| Structured log | A record the server keeps of what it did, one line per event, in a form a program can search. |
+| Request reference | A number given to each request to the server. It is shown with an error and appears on every log line for that request. |

@@ -42,9 +42,12 @@ All times are GMT. The deadline is 23:59 on Wednesday 25 November 2026.
 | 07:14 | Luke supplies the Deepgram key. Voice works; the read-back check is run. |
 | 07:30 to 07:40 | Ten spoken turns timed in the browser. Speech synthesis found to be the slow part and changed (see file 03). |
 | 07:49 | The large model has finished downloading. The pre-check passes on all three sizes and the sweep continues with all of them. |
-
-Steps 9 to 12 follow once the sweep finishes. The rest of 24 November and all of 25 November
-remain as margin.
+| 08:17 to 08:20 | The sweep is paused: it was draining the battery faster than the charger could refill it. Luke asks for a shorter version (file 07 says what was cut). |
+| 09:47 | The short sweep finishes: 787 model calls across 55 configurations. |
+| 09:58 | The four-hour point. A marker is on the last piece of work saved before it. |
+| 10:36 | Step 9: the results table, the chart, the rule applied and the settings saved. |
+| 10:40 to 12:22 | A pass over the code itself, at Luke's request, before anything else is measured: the same app, reorganised and checked more strictly. File 03 ("How the code is organised") says what changed and how it was shown that nothing else did. |
+| From 12:23 | Steps 9 to 12 on the reorganised code: the full checks on the starting, all-small and chosen settings, the one improvement, the held-back cases, the timed spoken turns and the write-up. `NOTES.md` has the times. |
 
 ## If the build runs late
 

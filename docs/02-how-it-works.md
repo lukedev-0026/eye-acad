@@ -148,3 +148,21 @@ flowchart LR
 
 Which local model each AI step uses, and how it is set up, is decided by measurement and not by
 argument. [07-choosing-the-settings.md](07-choosing-the-settings.md) explains how.
+
+## Where things live in the code
+
+The code is in layers. Each folder may use only the folders listed after it, and an automatic
+check fails if a file reaches the wrong way.
+
+| Folder | What is in it | Talks to the outside? |
+|---|---|---|
+| `src/routes`, `src/features` | The pages: sign-in, the list of attempts, the viva screen | Only through the server's entry points and its own read-only view of the trainee's attempts |
+| `src/server` | The entry points the browser calls. Each checks who is asking, then hands over | No |
+| `src/application` | The flows (start an attempt, a turn, the answer, the revision point), the five AI steps and their prompts | No: it is handed its connections |
+| `src/infrastructure` | The connections: Ollama, Claude, Deepgram, Firestore, and the files on disk | Yes |
+| `src/domain` | The rules: the menu, the sentence builder, the word checks, the note parser and the search | No |
+| `src/config`, `src/common` | Checked settings; error kinds, logging and small helpers | Settings only |
+| `src/eval`, `scripts` | The measurement harness and its short command-line entry points | Through the same connections the app uses |
+| `tests` | Mirrors `src` | No: a stand-in answers for the model |
+
+The reasons are in [03-decisions.md](03-decisions.md), under "How the code is organised".

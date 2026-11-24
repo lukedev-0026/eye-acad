@@ -128,14 +128,21 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
   prove who was asking.
 - **How sure:** Judgement.
 
-### Each reply's audio is sent whole, not streamed
-- **Why:** each reply is one short sentence, so the wait saved by playing it while it is still
-  being generated is small. A whole clip also cannot be cut off halfway through a number.
-- **Turned down:** streaming, where the audio starts playing while the rest is still being made.
-  It starts sooner, but needs a second secure channel and a player that copes with a stream
-  failing mid-sentence. An ordinary design choice, not held back as "the improvement".
-- **How sure:** Judgement. The size of the saving has not been measured. The timings taken at
-  each stage of a spoken turn will show what the speech step costs.
+### Each sentence of a reply is its own audio clip, made side by side and kept
+- **What:** a reply of three sentences is turned into three short clips at the same time, and
+  the browser plays them in order. A sentence that has been spoken once is kept, so asking for
+  the same finding again costs nothing. Clips for the findings are made in the background when
+  an attempt starts.
+- **Why:** the first version made one clip for the whole reply. Ten spoken turns were timed, and
+  speech synthesis was the slowest part: 3.6 seconds in the middle case, and up to 9 seconds for
+  a long reply, because the wait grew with the length of the text. Splitting by sentence makes
+  the wait the length of the longest sentence, not of the whole reply.
+- **Still not streamed:** each clip arrives whole, so a number can never be cut off halfway.
+  Streaming would start sooner still, but needs a second secure channel and a player that copes
+  with a stream failing mid-sentence.
+- **Kept for comparison:** one setting (`VIVA_SPEECH_MODE=single`) restores the first version, so
+  the two can be timed side by side.
+- **How sure:** Measured. The timings before and after are in the README.
 
 ### A typed box is always available
 - **Why:** the checks need a way to run without a microphone, and the demo keeps working if the
@@ -383,6 +390,80 @@ LangChain is a popular toolkit for building AI apps, and was the starting assump
 - **Turned down:** choosing the improvement in advance, which is a guess about where the app is
   weak.
 - **How sure:** Judgement.
+
+## How the code is organised
+
+Added on 24 November 2026, after the app worked and had been measured. The first version was
+written for speed. This pass changed how the code is laid out and checked, and nothing about what
+the app does.
+
+### The code is in layers, and a tool refuses a wrong turn
+- **What:** the code is sorted into folders by job: pure rules with no outside contact (the
+  sentence builder, the search, the word checks); connections to the outside (the model, speech,
+  the database, files); the steps and flows that use both; the thin server entry points; and the
+  browser's pages. Each folder may use only the ones beneath it.
+- **Why:** it is then obvious where a thing lives, and the clinical rules can be read and tested
+  without a model, a database or a network.
+- **How it is kept true:** an automatic check (the "linter") fails if a file reaches the wrong
+  way, so the layout cannot quietly decay.
+- **Turned down:** copying the full structure of a large production service, with an interface
+  for everything. This app has three real outside connections that are worth swapping out in a
+  test (the model, speech and the attempt store), so only those three have one.
+- **How sure:** Checked. The check runs on every file.
+
+### Nothing the app does was allowed to change
+- **Why:** the settings were chosen from measurements of this code. A tidy-up that changed what
+  is sent to a model, or what is made of a reply, would have made those measurements describe a
+  different program.
+- **How it was held:** before any file was touched, a check was written that records the exact
+  text of every request the app sends to a model for every test case, and replays every reply a
+  model has ever given through the same code. 516 sets of requests and 784 saved replies must
+  come out identical, and did after every step. The reports, the chart and the prepared note
+  were also rebuilt each time and compared byte for byte.
+- **What it found:** the code was unchanged, but the follow-up writer was shown not to give the
+  same answer twice at its temperature. That is a fact about the model, and it weakens one of
+  the sweep's comparisons. It is written up in `evals/repeatability/`.
+- **How sure:** Measured.
+
+### Settings are read in one place and checked at start
+- **What:** every setting that comes from the machine (where the model runs, the speech key,
+  file locations) is read by one file, checked, and given a default. The rest of the code is
+  handed the checked result and cannot read the machine's settings itself.
+- **Why:** before, nine files each read their own settings with their own defaults, and one of
+  them wrote settings back. A mistyped value now stops the app at once with a message naming it.
+- **Secrets:** a key is wrapped so that printing it, or the whole settings object, shows
+  `[REDACTED]`.
+- **How sure:** Checked, by tests.
+
+### Every failure has a named kind, keeps its cause, and is safe to show
+- **What:** each thing that can go wrong has its own kind of error with a short code (attempt
+  not found, attempt already answered, the reference note needs preparing, a model or the
+  database failed). An error that wraps another keeps the original inside it.
+- **At the edge:** one piece of code catches everything on its way to the browser. It logs the
+  full story once, sets the proper status (not found, not allowed, try later), and sends the
+  browser only a code, a reference number, and a message that is either written for the trainee
+  or the general "something went wrong".
+- **Why:** before, a failed request was reported to the browser as a success, logged nowhere,
+  and the original cause was thrown away.
+- **Expected outcomes are not errors.** A model that refuses, runs out of room or answers in the
+  wrong shape is an outcome the app plans for and counts. Those are returned as results, as they
+  were before.
+- **How sure:** Checked in the browser: a second trainee asking about someone else's attempt
+  gets "not found"; a missing prepared note gives its own message in the revision panel.
+
+### One line in the log for each thing that happens, and never the conversation
+- **What:** the server writes a structured line for every request, model call, speech call and
+  failure, each carrying the same reference number for one request.
+- **Never logged:** what the trainee said, the hidden examiner notes, audio, or keys. A test
+  runs a whole turn and searches the log for them.
+- **How sure:** Checked, by that test.
+
+### Data from outside is checked where it comes in
+- **What:** a reply from the model server, a saved result row, a settings file, the case file
+  and a recording all have a written shape, and are checked against it on arrival.
+- **Why:** before, about seventy places simply trusted that outside data had the expected shape.
+- **How sure:** Checked. The strictest setting of the type checker and linter passes with no
+  exceptions made for this code.
 
 ### Honest reporting of time
 - **Decision:** the build is not limited to four hours. The write-up states the real time spent,

@@ -1,6 +1,8 @@
 import type { z } from 'zod';
 
 import { produceRevision } from '@/application/revision/produce-revision';
+import { RevisionUnavailableError } from '@/application/revision/revision.error';
+import type { CallOutcome } from '@/domain/llm/call-result';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
 import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
 import { InvalidEvalCaseError } from '@/eval/eval.error';
@@ -27,14 +29,22 @@ interface Observed {
   selectionOutcome: string | null;
   supportCheck: 'supported' | 'not_supported' | 'not_reached';
   keyPointCheck: 'supported' | 'not_supported' | 'not_run';
+  // When a step could not finish: which one, and how its model call ended.
+  stoppedAt: { step: string; outcome: CallOutcome } | null;
 }
 
 const chainCases = (): Promise<Array<EvalCase<Input, Expect>>> =>
   readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
 
 function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Graded {
-  if (o.outcome === 'unavailable')
-    return { pass: false, costly: false, fallback: false, detail: 'a step could not run' };
+  if (o.outcome === 'unavailable') {
+    // The trainee is told the revision point could not be prepared, and can
+    // try again. Nothing wrong is shown, but nothing is shown either.
+    const what = o.stoppedAt
+      ? `the ${o.stoppedAt.step} step did not finish (${o.stoppedAt.outcome})`
+      : 'a step could not run';
+    return { pass: false, costly: false, fallback: false, detail: `${what}: the trainee is asked to try again` };
+  }
   if (!c.expect.support) {
     return {
       pass: o.outcome === 'no_support',
@@ -127,10 +137,18 @@ export async function runChain(
               ? 'supported'
               : 'not_supported'
             : 'not_run',
+          stoppedAt: null,
         };
-      } catch {
+      } catch (error) {
+        // A model call that was cut off or came back unusable is the
+        // configuration's own doing, and is counted. Anything else is the
+        // machine, and is left out of the counts.
+        const stoppedAt =
+          error instanceof RevisionUnavailableError ? { step: error.step, outcome: error.outcome } : null;
+        if (stoppedAt) calls = 1;
         observed = {
           outcome: 'unavailable',
+          stoppedAt,
           cited: [],
           page: null,
           excerpt: null,
@@ -155,7 +173,7 @@ export async function runChain(
         caseType: c.type,
         trial,
         seed: trial,
-        outcome: observed.outcome === 'unavailable' ? 'infra_error' : 'ok',
+        outcome: observed.outcome === 'unavailable' ? (observed.stoppedAt?.outcome ?? 'infra_error') : 'ok',
         pass: g.pass,
         costly: g.costly,
         fallback: g.fallback,

@@ -4,6 +4,7 @@
 //   pnpm check                      everything, on the tuning cases
 //   pnpm check --only required      just the brief's three checks
 //   pnpm check --steps selector     just one step's case set
+//   pnpm check --only chain         just the revision step and support check together
 //   pnpm check --config config/steps.start.json --report evals/checks/start.md
 import { parseArgs } from 'node:util';
 
@@ -25,19 +26,26 @@ await runCli(async () => {
       // Where the report goes. CHECKS.md is the one for the app's own settings.
       report: { type: 'string', default: PATHS.checksMarkdown },
       'no-report': { type: 'boolean', default: false },
+      // Stop cleanly before the next part of the run if the battery is under this.
+      'min-battery': { type: 'string', default: '15' },
     },
   });
-  const onlyRequired = values.only === 'required';
+  // --only narrows the run to one part: the brief's checks, the five steps'
+  // case sets (with the chain), or the chain alone.
+  const only = values.only === undefined ? null : parseChoice('only', values.only, ['required', 'steps', 'chain']);
+  const stepsRun =
+    only === 'required' || only === 'chain' ? [] : values.steps ? parseSteps(values.steps) : [...STEP_IDS];
   await runChecks(
     {
       configFile: values.config,
-      steps: onlyRequired ? [] : values.steps ? parseSteps(values.steps) : [...STEP_IDS],
-      required: onlyRequired || (!values.steps && values.only !== 'steps'),
+      steps: stepsRun,
+      required: only === 'required' || (only === null && !values.steps),
       requiredNames: values.required?.split(',') ?? null,
-      chain: !values.steps && !onlyRequired,
+      chain: only === 'chain' || (only !== 'required' && !values.steps),
       trials: parseWholeNumber('trials', values.trials),
       split: parseChoice('split', values.split, ['tune', 'holdout', 'all']),
       report: values['no-report'] ? null : values.report,
+      minBatteryPercent: parseWholeNumber('min-battery', values['min-battery']),
     },
     console.log,
     toStdout,

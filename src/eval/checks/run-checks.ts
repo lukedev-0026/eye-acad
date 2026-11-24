@@ -6,7 +6,7 @@ import { errorMessage } from '@/common/errors/to-error';
 import type { StepId } from '@/domain/llm/step-settings.schema';
 import type { Print, Progress } from '@/eval/cli';
 import { loadContext } from '@/eval/eval-context';
-import { EvalRefusedError } from '@/eval/eval.error';
+import { EvalRefusedError, LowBatteryError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext } from '@/eval/eval.types';
 import { PATHS, resultsFile } from '@/eval/paths';
 import { checksMarkdown } from '@/eval/report/checks.report';
@@ -15,7 +15,7 @@ import { appendRow } from '@/eval/run/results.store';
 import { runCases } from '@/eval/run/run-cases';
 import { selfTest } from '@/eval/run/self-test';
 import { summarise } from '@/eval/run/summarise';
-import { captureEnv, modelInfo } from '@/eval/run-env';
+import { batteryState, captureEnv, modelInfo } from '@/eval/run-env';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 
@@ -37,9 +37,19 @@ export interface CheckOptions {
   readonly split: 'tune' | 'holdout' | 'all';
   // Where to write the report built from this run's rows, or null for none.
   readonly report: string | null;
+  // Stop before the next part of the run if the battery is under this.
+  readonly minBatteryPercent: number;
 }
 
 const mark = (row: { pass: boolean; costly?: boolean }): string => (row.pass ? '.' : row.costly ? 'C' : 'x');
+
+// A run can draw more power than a small charger supplies, and has drained a
+// plugged-in laptop to 5%. So the battery is looked at before each part. The
+// rows already saved are kept; the run is started again once it has charged.
+function stopIfBatteryLow(minimum: number): void {
+  const battery = batteryState();
+  if (battery.percent !== null && battery.percent < minimum) throw new LowBatteryError(battery.percent, minimum);
+}
 
 // Runs every AI-backed check through the app's real code on the configured
 // settings, writes one row per model call, and regenerates CHECKS.md from
@@ -53,6 +63,7 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
     );
   }
 
+  stopIfBatteryLow(options.minBatteryPercent);
   const config = await loadStepsConfig(options.configFile);
   const ctx = await loadContext();
   const env = await captureEnv();
@@ -93,11 +104,13 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
   }
 
   for (const step of options.steps) {
+    stopIfBatteryLow(options.minBatteryPercent);
     await runStepCases(step, ctx, { runId, options, settings: config.steps[step] }, print, progress);
   }
 
   // The revision step and the support check together, as the app runs them.
   if (options.chain && options.split !== 'all') {
+    stopIfBatteryLow(options.minBatteryPercent);
     print('\nrevision step and support check together');
     const rows = await runChain(ctx, config, {
       runId,

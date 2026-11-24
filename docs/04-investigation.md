@@ -102,23 +102,46 @@ independently, so its design could be set against ours. Neither ran a model.
 re-verified one by one. Every one the sweep relies on is tested on this machine first, in the
 pre-check.
 
+## Round five: what building and measuring showed
+
+The app was built on 24 November, and things that had only been reasoned about were then
+measured. Several conclusions changed. Each is recorded in the file named.
+
+| What was assumed or planned | What measuring showed | Where |
+|---|---|---|
+| Add the trainee's own words to the search for the right passage | No consistent gain: better for 1 of 10 targets, worse for 1, the same for 8. Left out | `evals/retrieval-table.md` |
+| Searching two ways (words and meaning) and combining them | It works: the right passage is in the top six for 10 of 10 targets, and for 3 of 10 the combination beats either search alone | `evals/retrieval-table.md` |
+| A code rule can decide "the note does not cover this" | It cannot, on this note. Scores for covered topics (0.62 to 0.86) overlap those for invented ones (0.60 to 0.68). The decision moved to the AI steps and is measured there | `evals/retrieval-table.md` |
+| A local model "can be set to give the same answer every time" | True at temperature 0 with a fixed seed: 10 of 10 requests gave the identical reply three times, on all three model sizes | `evals/sweep/preflight.json` |
+| Sending each reply's audio whole costs little | Wrong. Ten spoken turns had a middle time of 5.8 seconds from the end of speech to playback, and speech synthesis was 3.6 seconds of that, growing with the length of the reply | `evals/voice-timing/` |
+| The spoken sentence will carry the eye, number and unit | Mostly: 27 of 32 sentences were heard back correctly on all three runs. The clock time in a method ("23:55") and the word "Snellen" are the fragile parts | `evals/readback.md` |
+| "Thinking" might be worth its wait | Not for the spoken steps: 6 to 60 seconds a call against limits of 2 and 5 seconds. For the support check it did help on the small model | `SWEEP.md` |
+
+Three faults were found in the starting settings by the brief's own required checks, before any
+other settings were tried. They are listed in `NOTES.md` and followed up in `SWEEP.md`:
+
+1. Asked for something that is not in the case (central corneal thickness), the menu-picker
+   substituted the nearest thing it had (the cornea) 8 times in 10.
+2. With the supporting passage removed, the revision step quoted a sentence about a different
+   condition and reworded the advice to match it, and the support check accepted that.
+3. When the thing to revise was the diagnosis, no single sentence of the note backed the whole of
+   it, so the trainee was told "no support" for something the note plainly covers.
+
+The parser for the reference note, by contrast, did what the earlier dry run predicted: 126
+passages, with exactly one running across a page break.
+
 ## What is still not verified
 
-- Nothing has been built or run against a live service.
-- No response time has been measured. All timings so far are estimates. The sweep measures the
-  time of each AI step; the time of a whole spoken turn is measured separately in the browser.
-- How well a local language model handles the judging step is unknown until tested. The sweep
-  measures it for three sizes of one model family.
-- Whether a local model gives the same answer every time at temperature 0 is unknown. The
-  pre-check tests it.
-- Whether thinking, forced output format or worked examples help any step is unknown. The sweep
-  measures each.
-- How long the overnight run will take. Four to six hours is an estimate built on assumed
-  speeds; a short timing test replaces it before the run.
-- The Claude route has not been run. Until it is, it is described as "written, not run".
-- Whether meaning-based search improves on word-matching for this note is unknown until the
-  comparison table is produced.
-- Deepgram's free credit was read from its pricing page, not tested by signing up.
+- **A real human voice.** Spoken turns were timed and checked with recorded questions in a
+  synthetic voice, sent through the same path as a held-button recording. Runs in Luke's own
+  voice are recorded in the README if they were made.
+- **The Claude route.** It is written from the documentation and has never been run. The
+  project stays on local models by decision.
+- **The expected answers.** They were written with an AI assistant. Whether Luke has read them is
+  stated in `SWEEP.md`.
+- **Whether thinking helps the larger models.** Those runs were cut when the sweep was shortened.
+- **Other machines.** Every timing is from one Mac in one power mode.
+- Deepgram's free credit was used, and no charge was seen during the build.
 - One study quoted (98% accurate quotes, 37% fully supported) was read in summary only.
 
 ## Sources worth knowing

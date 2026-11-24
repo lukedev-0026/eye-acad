@@ -45,6 +45,8 @@ export const CaseFileSchema = z
   });
 
 // What the questioning phase is allowed to hold: everything except the notes.
+export type CaseFile = z.infer<typeof CaseFileSchema>;
+
 export type PublicCase = {
   caseId: string;
   title: string;

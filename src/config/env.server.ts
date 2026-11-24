@@ -1,4 +1,7 @@
+import { existsSync } from 'node:fs';
 import path from 'node:path';
+
+import { errorMessage } from '@/common/errors/to-error';
 
 import { InvalidEnvironmentError } from './config.error';
 import { EnvSchema } from './env.schema';
@@ -97,12 +100,29 @@ export function loadConfig(source: EnvSource, projectDir: string = process.cwd()
   };
 }
 
+// Keys live in .env.local, which git ignores. The dev server has already
+// loaded it by the time this runs; the command-line tools have not, so it is
+// loaded here. A variable that is already set is never overwritten. Tests run
+// on defaults alone, so that none can reach a real service.
+function loadLocalEnvFile(projectDir: string): void {
+  const file = path.join(projectDir, '.env.local');
+  if (process.env.NODE_ENV === 'test' || !existsSync(file)) return;
+  try {
+    process.loadEnvFile(file);
+  } catch (error) {
+    throw new InvalidEnvironmentError([`.env.local could not be read: ${errorMessage(error)}`], { cause: error });
+  }
+}
+
 let cached: AppConfig | undefined;
 
 // Read on first use, never when a module loads: the framework requires that,
 // and a script can then fail with a clear message before doing any work.
 export function getConfig(): AppConfig {
-  cached ??= loadConfig(process.env);
+  if (!cached) {
+    loadLocalEnvFile(process.cwd());
+    cached = loadConfig(process.env);
+  }
   return cached;
 }
 

@@ -10,10 +10,11 @@ import { getConfig } from '@/config/env.server';
 import { parseNoteXml } from '@/domain/note/note-parse';
 import { searchText } from '@/domain/note/note.types';
 import type { NoteChunk, NoteIndex } from '@/domain/note/note.types';
-import { NOTE_INDEX, NOTE_PDF, sha256OfFile } from '@/infrastructure/files/note-index.loader';
+import { sha256OfFile } from '@/infrastructure/files/note-index.loader';
 import { createLanguageModelGateway } from '@/infrastructure/llm/language-model.gateway';
 
-const pdf = path.resolve(process.argv[2] ?? NOTE_PDF());
+const { files } = getConfig();
+const pdf = path.resolve(process.argv[2] ?? files.notePdf);
 // Arguments are passed as a list, never through a shell.
 const xml = execFileSync('pdftohtml', ['-xml', '-i', '-stdout', pdf], {
   encoding: 'utf8',
@@ -69,7 +70,7 @@ const index: NoteIndex = {
 const body = index.chunks.map((c) => `    ${JSON.stringify(c)}`).join(',\n');
 const { chunks: _chunks, ...head } = index;
 const text = `${JSON.stringify(head, null, 2).replace(/\n}$/, '')},\n  "chunks": [\n${body}\n  ]\n}\n`;
-await writeFile(NOTE_INDEX(), text);
+await writeFile(files.noteIndex, text);
 
 const sentences = index.chunks.reduce((n, c) => n + c.sentences.length, 0);
 const crossPage = index.chunks.filter((c) => c.pages.length > 1).map((c) => c.id);

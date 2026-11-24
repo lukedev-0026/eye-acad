@@ -89,6 +89,15 @@ export default defineConfig([
         'error',
         { selector: 'ImportExpression', message: 'No dynamic import(). Import at the top of the file.' },
         { selector: 'TSImportType', message: "No inline import('…') types. Use `import type` at the top of the file." },
+        // The environment is read in src/config and nowhere else.
+        {
+          selector: "MemberExpression[object.name='process'][property.name='env']",
+          message: 'Read settings through getConfig() from @/config/env.server.',
+        },
+        {
+          selector: "MemberExpression[object.type='MetaProperty'][property.name='env']",
+          message: 'Read browser settings through getPublicConfig() from @/config/public-env.',
+        },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
@@ -100,6 +109,18 @@ export default defineConfig([
     files: ['src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: { 'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'error' },
+  },
+
+  // The one place the environment is read. The import rules above still apply.
+  {
+    files: ['src/config/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'ImportExpression', message: 'No dynamic import(). Import at the top of the file.' },
+        { selector: 'TSImportType', message: "No inline import('…') types. Use `import type` at the top of the file." },
+      ],
+    },
   },
 
   // Tool configuration files must export a default.

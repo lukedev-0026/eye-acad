@@ -1,17 +1,26 @@
-import { coverageItems, runCoverage } from '@/application/steps/coverage.step';
+import { z } from 'zod';
+
+import { STATUSES, coverageItems, runCoverage } from '@/application/steps/coverage.step';
 import type { Status } from '@/application/steps/coverage.step';
 import { readCases } from '@/eval/eval-context';
 import type { StepEval } from '@/eval/eval.types';
 
-import { asRun } from './selector.eval';
+import { asRun } from './as-run';
 
-type Input = { answer: string };
-type Expect = { acceptableTargets: Array<string>; statuses: Record<string, Status | 'either'> };
+export const CoverageInputSchema = z.object({ answer: z.string() });
+export const CoverageExpectSchema = z.object({
+  // Any of these is a defensible gap to show the trainee.
+  acceptableTargets: z.array(z.string()).min(1),
+  // "either" marks a point the sample answer half-covers: it is left out of the count.
+  statuses: z.record(z.string(), z.enum([...STATUSES, 'either'])),
+});
+type Input = z.infer<typeof CoverageInputSchema>;
+type Expect = z.infer<typeof CoverageExpectSchema>;
 type Observed = { target: string; statuses: Record<string, Status>; chosenBy: string | null };
 
 export const coverageEval: StepEval<Input, Expect, Observed> = {
   step: 'coverage',
-  cases: () => readCases<Input, Expect>('coverage.jsonl'),
+  cases: () => readCases('coverage.jsonl', CoverageInputSchema, CoverageExpectSchema),
 
   async run(c, settings, ctx) {
     const result = await runCoverage(ctx.models, ctx.notes, c.input.answer, settings);

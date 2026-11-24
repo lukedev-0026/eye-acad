@@ -1,16 +1,24 @@
+import { z } from 'zod';
+
 import { runVerifier } from '@/application/steps/verifier.step';
 import { findSentence, readCases } from '@/eval/eval-context';
 import type { StepEval } from '@/eval/eval.types';
 
-import { asRun } from './selector.eval';
+import { asRun } from './as-run';
 
-type Input = { statement: string; cite: string };
-type Expect = { verdict: 'supported' | 'not_supported' };
+export const VerifierInputSchema = z.object({
+  statement: z.string(),
+  // A phrase from the sentence being offered as support.
+  cite: z.string(),
+});
+export const VerifierExpectSchema = z.object({ verdict: z.enum(['supported', 'not_supported']) });
+type Input = z.infer<typeof VerifierInputSchema>;
+type Expect = z.infer<typeof VerifierExpectSchema>;
 type Observed = { supported: boolean; reason: string };
 
 export const verifierEval: StepEval<Input, Expect, Observed> = {
   step: 'verifier',
-  cases: () => readCases<Input, Expect>('verifier.jsonl'),
+  cases: () => readCases('verifier.jsonl', VerifierInputSchema, VerifierExpectSchema),
 
   async run(c, settings, ctx) {
     const { chunk, sentence } = findSentence(ctx.index, c.input.cite);

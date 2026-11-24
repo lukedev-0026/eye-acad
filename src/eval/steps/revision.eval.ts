@@ -1,12 +1,22 @@
+import { z } from 'zod';
+
 import { runRevision } from '@/application/steps/revision.step';
 import { retrieve } from '@/domain/note/retrieve';
 import { findSentence, queryVector, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
+import { InvalidEvalCaseError } from '@/eval/eval.error';
 import type { EvalContext, RetrievalTarget, StepEval, StepRun } from '@/eval/eval.types';
 
-import { asRun } from './selector.eval';
+import { asRun } from './as-run';
 
-type Input = { target: string; exclude: 'none' | 'all_support' };
-type Expect = { support: boolean; targetId?: string };
+export const RevisionInputSchema = z.object({
+  target: z.string(),
+  // all_support: every passage that backs the point is taken out of the
+  // search, to see whether "no support" is then said.
+  exclude: z.enum(['none', 'all_support']),
+});
+export const RevisionExpectSchema = z.object({ support: z.boolean(), targetId: z.string().optional() });
+type Input = z.infer<typeof RevisionInputSchema>;
+type Expect = z.infer<typeof RevisionExpectSchema>;
 type Observed = {
   outcome: 'supported' | 'no_support' | 'unusable';
   cited: Array<string>;
@@ -41,7 +51,7 @@ const NONE: Omit<Observed, 'outcome' | 'retrievedPages' | 'refusedByFloor'> = {
 
 export const revisionEval: StepEval<Input, Expect, Observed> = {
   step: 'revision',
-  cases: () => readCases<Input, Expect>('revision.jsonl'),
+  cases: () => readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema),
 
   // The search is run first, exactly as the app runs it. It involves no model,
   // so every configuration is shown the same six passages for a given case.
@@ -101,7 +111,7 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       };
     }
     const t = spec(ctx, c.expect.targetId);
-    if (!t) throw new Error(`${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`);
+    if (!t) throw new InvalidEvalCaseError(`${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`);
     const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports]);
     const off = sentenceIds(ctx.index, t.offSection ?? []);
     const wrong = sentenceIds(ctx.index, t.distractor);

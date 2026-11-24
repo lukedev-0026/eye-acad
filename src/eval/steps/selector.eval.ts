@@ -1,28 +1,27 @@
+import { z } from 'zod';
+
 import { runSelector } from '@/application/steps/selector.step';
 import { historyLabel } from '@/domain/examiner/render';
-import type { SelectorRequest } from '@/domain/examiner/selector.schema';
-import type { CallResult } from '@/domain/llm/call-result';
+import { REQUEST_EYES } from '@/domain/examiner/selector.schema';
 import { readCases } from '@/eval/eval-context';
-import type { EvalCase, StepEval, StepRun } from '@/eval/eval.types';
+import type { EvalCase, StepEval } from '@/eval/eval.types';
 
-type Input = { utterance: string; previous?: Array<SelectorRequest> };
-type Expect = { kind: string; ids?: Array<string>; acceptKinds?: Array<string>; alsoNotRecorded?: boolean };
+import { asRun } from './as-run';
+
+export const SelectorInputSchema = z.object({
+  utterance: z.string(),
+  // What the trainee asked for on the turn before, for a request like "and the left?".
+  previous: z.array(z.object({ item: z.string(), eye: z.enum(REQUEST_EYES) })).optional(),
+});
+export const SelectorExpectSchema = z.object({
+  kind: z.string(),
+  ids: z.array(z.string()).optional(),
+  acceptKinds: z.array(z.string()).optional(),
+  alsoNotRecorded: z.boolean().optional(),
+});
+type Input = z.infer<typeof SelectorInputSchema>;
+type Expect = z.infer<typeof SelectorExpectSchema>;
 type Observed = { kind: string; ids: Array<string>; alsoNotRecorded: boolean };
-
-export function asRun<O>(call: CallResult<unknown>, observed: O): StepRun<O> {
-  return {
-    outcome: call.outcome,
-    observed,
-    calls: 1,
-    ms: call.ms,
-    modelMs: call.server.evalMs ?? 0,
-    promptTokens: call.server.promptTokens ?? 0,
-    outputTokens: call.server.outputTokens ?? 0,
-    thinkingChars: call.thinkingChars,
-    model: call.model,
-    raw: call.rawText,
-  };
-}
 
 const EYE_WORDS = { right: 'in the right eye', left: 'in the left eye' } as const;
 
@@ -52,7 +51,7 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
         expect: { kind: 'reveal', ids: [`history:${key}`] },
       })),
     ];
-    return [...canonical, ...(await readCases<Input, Expect>('selector.jsonl'))];
+    return [...canonical, ...(await readCases('selector.jsonl', SelectorInputSchema, SelectorExpectSchema))];
   },
 
   async run(c, settings, ctx) {

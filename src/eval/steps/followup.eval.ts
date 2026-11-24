@@ -1,8 +1,14 @@
+import { z } from 'zod';
+
 import { runFollowUp } from '@/application/steps/followup.step';
 import { readCases } from '@/eval/eval-context';
 import type { StepEval } from '@/eval/eval.types';
 
-type Input = { answer: string };
+export const FollowUpInputSchema = z.object({ answer: z.string() });
+// The automatic pass needs no expected answer: see `grade` below.
+export const FollowUpExpectSchema = z.object({});
+type Input = z.infer<typeof FollowUpInputSchema>;
+type Expect = z.infer<typeof FollowUpExpectSchema>;
 type Observed = {
   path: 'written' | 'supplied' | 'fixed';
   question: string;
@@ -11,9 +17,9 @@ type Observed = {
   reasons: Array<string>;
 };
 
-export const followupEval: StepEval<Input, Record<string, never>, Observed> = {
+export const followupEval: StepEval<Input, Expect, Observed> = {
   step: 'followup',
-  cases: () => readCases<Input, Record<string, never>>('followup.jsonl'),
+  cases: () => readCases('followup.jsonl', FollowUpInputSchema, FollowUpExpectSchema),
 
   async run(c, settings, ctx) {
     const result = await runFollowUp(ctx.models, ctx.notes, c.input.answer, settings);

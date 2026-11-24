@@ -1,9 +1,13 @@
+import type { z } from 'zod';
+
 import { produceRevision } from '@/application/revision/produce-revision';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
 import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
+import { InvalidEvalCaseError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext, Graded } from '@/eval/eval.types';
 import type { ResultRow } from '@/eval/run/result-row';
 import { appendRow } from '@/eval/run/results.store';
+import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision.eval';
 
 // The revision step and the support check, run together as the app runs them:
 // search, pick a sentence, word the advice, check the support, and build the
@@ -11,8 +15,8 @@ import { appendRow } from '@/eval/run/results.store';
 // fixed inputs; this is where one step's mistake can be caught, or missed, by
 // the next. It uses the same 14 points to revise as the revision set.
 
-type Input = { target: string; exclude: 'none' | 'all_support' };
-type Expect = { support: boolean; targetId?: string };
+type Input = z.infer<typeof RevisionInputSchema>;
+type Expect = z.infer<typeof RevisionExpectSchema>;
 type Observed = {
   outcome: 'supported' | 'no_support' | 'unavailable';
   cited: Array<string>;
@@ -25,7 +29,7 @@ type Observed = {
   keyPointCheck: 'supported' | 'not_supported' | 'not_run';
 };
 
-export const chainCases = () => readCases<Input, Expect>('revision.jsonl');
+export const chainCases = () => readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
 
 function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Graded {
   if (o.outcome === 'unavailable')
@@ -43,7 +47,7 @@ function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Grade
     };
   }
   const t = ctx.targets.find((x) => x.id === c.expect.targetId);
-  if (!t) throw new Error(`${c.id}: no entry for ${c.expect.targetId} in retrieval.json`);
+  if (!t) throw new InvalidEvalCaseError(`${c.id}: no entry for ${c.expect.targetId} in retrieval.json`);
   const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports]);
   const wrong = sentenceIds(ctx.index, t.distractor);
   const citedGood = o.cited.length > 0 && o.cited.every((id) => good.has(id));

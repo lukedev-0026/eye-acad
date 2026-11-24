@@ -1,9 +1,13 @@
+import type { z } from 'zod';
+
 import type { ExaminerNotes, PublicCase } from '@/domain/case/case.schema';
 import type { Catalogue } from '@/domain/examiner/catalogue';
 import type { CallOutcome } from '@/domain/llm/call-result';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepId, StepSettings } from '@/domain/llm/step-settings.schema';
 import type { NoteIndex } from '@/domain/note/note.schema';
+
+import type { RetrievalTargetSchema } from './eval-case.schema';
 
 // The checks call the app's own step functions. Nothing here re-implements a
 // prompt or a model call: a copy would measure a different system.
@@ -21,14 +25,7 @@ export type EvalCase<I = unknown, E = unknown> = {
   note?: string;
 };
 
-export type RetrievalTarget = {
-  id: string;
-  source: string;
-  gold: Array<string>;
-  alsoSupports: Array<string>;
-  offSection?: Array<string>;
-  distractor: Array<string>;
-};
+export type RetrievalTarget = z.infer<typeof RetrievalTargetSchema>;
 
 export type EvalContext = {
   // The model gateway the steps are called with: the app's own.

@@ -12,6 +12,7 @@ import { startAttempt } from '@/application/attempt/start-attempt.use-case';
 import { RevisionUnavailableError } from '@/application/revision/revision.error';
 import { AttemptPhaseError, EmptyAnswerError } from '@/domain/attempt/attempt.error';
 import { LINES } from '@/domain/examiner/lines';
+import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { InMemoryAttemptRepository } from '@tests/fakes/in-memory-attempt.repository';
 import { NOT_JSON, scriptModel } from '@tests/fakes/scripted-model';
 import type { ScriptedModel } from '@tests/fakes/scripted-model';
@@ -199,6 +200,22 @@ describe('replying to the follow-up', () => {
     expect(attempt.revision).toEqual(card);
     expect(attempt.followUpReply?.text).toBe('Because it is ischaemic.');
     expect(await kinds()).toEqual(['opening', 'answer', 'follow_up', 'follow_up_reply']);
+  });
+
+  it('still cites the note, searching by words alone, when the meaning-based search cannot be reached', async () => {
+    await answered();
+    model.willReply(NOTHING_COVERED, CITE_FIRST_SENTENCE, SUPPORTED);
+    const models: LanguageModelGateway = {
+      callStep: (settings, prompt, schema, options) => deps.models.callStep(settings, prompt, schema, options),
+      embed: () => Promise.resolve(null),
+    };
+
+    const card = await handleFollowUpReply({ ...deps, models }, UID, attemptId, 'A reply', 'typed');
+
+    expect(card.outcome).toBe('supported');
+    expect(card.retrievalMode).toBe('keyword_only');
+    expect(card.page).toMatch(/^pp?\. \d/);
+    expect(NOTE_TEXT).toContain(JSON.stringify(card.excerpt).slice(1, -1));
   });
 
   it('judges the main answer, not the reply to the follow-up', async () => {

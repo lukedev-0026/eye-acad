@@ -1,7 +1,12 @@
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { startAttempt } from '@/application/attempt/start-attempt.use-case';
 import { handleRequest, openingSpeech } from '@/application/turn/turn.use-case';
+import { resetConfig } from '@/config/env.server';
 import { MAX_TURNS, pushTurn } from '@/domain/attempt/attempt';
 import { AttemptPhaseError } from '@/domain/attempt/attempt.error';
 import { LINES } from '@/domain/examiner/lines';
@@ -199,6 +204,37 @@ describe('asking for a finding', () => {
     await expect(handleRequest(deps, 'trainee-b', attemptId, { text: 'Pressure?' })).rejects.toMatchObject({
       code: 'ATTEMPT_NOT_FOUND',
     });
+  });
+});
+
+describe('editing the case file while the app is running', () => {
+  const edited = path.join(tmpdir(), `viva-edited-case-${process.pid}.json`);
+
+  afterAll(() => {
+    rmSync(edited, { force: true });
+    vi.stubEnv('VIVA_CASE_FILE', undefined);
+    resetConfig();
+  });
+
+  it('uses the new value on the next question, in a new attempt, and leaves what was already said as it was', async () => {
+    model.willReply(pick('Intraocular pressure', 'right'));
+    await handleRequest(deps, UID, attemptId, { text: 'Pressure in the right eye?' });
+
+    // What a reviewer might do in the walkthrough: change one value.
+    const original = readFileSync('data/case-EA-VIVA-001.json', 'utf8');
+    const changed = original.replace('"value": 58,', '"value": 61,');
+    expect(changed).not.toBe(original);
+    writeFileSync(edited, changed);
+    vi.stubEnv('VIVA_CASE_FILE', edited);
+    resetConfig();
+
+    const newAttemptId = await startAttempt(deps, UID);
+    const after = await handleRequest(deps, UID, newAttemptId, { text: 'Pressure in the right eye?' });
+    const before = await attempts.read(UID, attemptId);
+
+    expect(after.reply.lines).toEqual(['Right eye · Intraocular pressure: 61 mmHg (Goldmann applanation, 23:55)']);
+    expect(before.revealed[0]).toMatchObject({ id: 'iop_right', value: '58 mmHg' });
+    expect(before.turns[2]?.text).toContain('58 mmHg');
   });
 });
 

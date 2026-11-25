@@ -25,10 +25,18 @@ const deny = [
 // still reachable from the browser bundle after the build has dropped the
 // server-function bodies fails the build. Elsewhere the `.server.ts` suffix
 // marks a single file the same way.
-const serverOnly = ['**/*.server.*', 'src/application/**', 'src/infrastructure/**', 'src/eval/**'];
+const serverOnly = [
+  '**/*.server.*',
+  'src/application/**',
+  'src/infrastructure/**',
+  'src/eval/**',
+];
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   server: { fs: { deny } },
-  plugins: [tanstackStart({ importProtection: { client: { files: serverOnly } } }), viteReact()],
+  plugins: [
+    tanstackStart({ importProtection: { client: { files: serverOnly } } }),
+    viteReact(),
+  ],
 });

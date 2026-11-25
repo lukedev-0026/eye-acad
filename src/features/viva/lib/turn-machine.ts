@@ -1,6 +1,3 @@
-// Whose turn it is. One value drives the on-screen label, whether the
-// microphone and text box are usable, and nothing else can change it.
-
 export type TurnState = 'your_turn' | 'listening' | 'thinking' | 'speaking';
 
 export type TurnEvent =
@@ -20,8 +17,6 @@ export const TURN_LABEL: Record<TurnState, string> = {
   speaking: 'Examiner is speaking',
 };
 
-// What the trainee is doing: asking for findings, writing the answer, or
-// replying to the follow-up question.
 export type VivaMode = 'asking' | 'answering' | 'follow_up';
 
 const HINT: Record<VivaMode, Record<TurnState, string>> = {
@@ -45,8 +40,8 @@ const HINT: Record<VivaMode, Record<TurnState, string>> = {
   },
 };
 
-// The one line of guidance under the turn label.
-export const hintFor = (mode: VivaMode, state: TurnState): string => HINT[mode][state];
+export const hintFor = (mode: VivaMode, state: TurnState): string =>
+  HINT[mode][state];
 
 export function nextTurnState(state: TurnState, event: TurnEvent): TurnState {
   switch (event.type) {
@@ -64,10 +59,10 @@ export function nextTurnState(state: TurnState, event: TurnEvent): TurnState {
       return state === 'thinking' ? 'your_turn' : state;
     case 'SPEECH_ENDED':
       return state === 'speaking' ? 'your_turn' : state;
-    // Any failure hands the turn back, so the trainee is never left waiting.
     case 'FAILED':
       return 'your_turn';
   }
 }
 
-export const canTraineeAct = (state: TurnState): boolean => state === 'your_turn';
+export const canTraineeAct = (state: TurnState): boolean =>
+  state === 'your_turn';

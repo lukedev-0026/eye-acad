@@ -9,7 +9,11 @@ import { LINES } from '@/domain/examiner/lines';
 import type { CallResult } from '@/domain/llm/call-result';
 import type { LanguageModelGateway } from '@/domain/llm/language-model.gateway';
 import type { StepSettings } from '@/domain/llm/step-settings.schema';
-import { checkAnchor, checkFollowUpQuestion, closestIdea } from '@/domain/text/text-checks';
+import {
+  checkAnchor,
+  checkFollowUpQuestion,
+  closestIdea,
+} from '@/domain/text/text-checks';
 import type { CheckResult } from '@/domain/text/text-checks';
 
 function followUpSchema(ideaCount: number) {
@@ -29,21 +33,15 @@ export interface FollowUpAttempt {
 }
 
 export interface FollowUpResult {
-  // Exactly what is shown and spoken.
   question: string;
-  // The trainee's own words it responds to, if a real quotation was found.
   respondingTo: string | null;
-  // written: the model's question passed every check.
-  // supplied: one of the case file's own questions, as written.
-  // fixed: the case file had none.
   path: 'written' | 'supplied' | 'fixed';
   ideaIndex: number | null;
   attempts: Array<FollowUpAttempt>;
 }
 
-// One follow-up question. The model may write it, but it is only used if code
-// finds every meaningful word in the trainee's answer or in the case file's
-// own follow-up questions. Otherwise one of those questions is used verbatim.
+/** The model's question is used only if every meaningful word is in the
+ *  answer or the case file's questions; else a case-file one verbatim. */
 export async function runFollowUp(
   models: LanguageModelGateway,
   notes: ExaminerNotes,
@@ -53,7 +51,13 @@ export async function runFollowUp(
   const answer = rawAnswer.slice(0, MAX_ANSWER_CHARS);
   const ideas = notes.follow_up_ideas;
   if (ideas.length === 0) {
-    return { question: LINES.noFollowUpIdeas, respondingTo: null, path: 'fixed', ideaIndex: null, attempts: [] };
+    return {
+      question: LINES.noFollowUpIdeas,
+      respondingTo: null,
+      path: 'fixed',
+      ideaIndex: null,
+      attempts: [],
+    };
   }
 
   const schema = followUpSchema(ideas.length);
@@ -63,11 +67,14 @@ export async function runFollowUp(
   let lastIdea: number | null = null;
   let goodAnchor: string | null = null;
 
-  // One retry, told why the first attempt could not be used.
   for (let i = 0; i < 2; i++) {
     const call = await models.callStep(
       settings,
-      followUpPrompt(settings.promptVariant, { notes, answer, retryReason }, shape),
+      followUpPrompt(
+        settings.promptVariant,
+        { notes, answer, retryReason },
+        shape,
+      ),
       schema,
       { step: 'followup' },
     );
@@ -79,7 +86,11 @@ export async function runFollowUp(
     }
     lastIdea = Number(call.value.idea.slice(5)) - 1;
     attempt.anchorCheck = checkAnchor(call.value.anchor_quote, answer);
-    attempt.questionCheck = checkFollowUpQuestion(call.value.question, answer, ideas);
+    attempt.questionCheck = checkFollowUpQuestion(
+      call.value.question,
+      answer,
+      ideas,
+    );
     if (attempt.anchorCheck.ok) goodAnchor = call.value.anchor_quote.trim();
     if (attempt.anchorCheck.ok && attempt.questionCheck.ok) {
       return {
@@ -95,14 +106,17 @@ export async function runFollowUp(
       : `the anchor_quote was not copied exactly from the answer`;
   }
 
-  // Fallback: a question from the case file, word for word. If the model never
-  // gave a usable choice, code picks the one closest to what was said.
   const ideaIndex = lastIdea ?? closestIdea(answer, ideas);
-  return { question: itemAt(ideas, ideaIndex), respondingTo: goodAnchor, path: 'supplied', ideaIndex, attempts };
+  return {
+    question: itemAt(ideas, ideaIndex),
+    respondingTo: goodAnchor,
+    path: 'supplied',
+    ideaIndex,
+    attempts,
+  };
 }
 
-// What the examiner says aloud. A supplied question is prefaced with the
-// trainee's own words, so even the fallback responds to what was said.
+/** Prefaces a supplied question with the trainee's own words. */
 export function followUpSpeech(result: FollowUpResult): string {
   return result.path === 'supplied' && result.respondingTo
     ? `You said: ${result.respondingTo}. ${result.question}`

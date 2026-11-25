@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
-// The only settings the browser gets. Vite puts variables that start VITE_
-// into the browser bundle, so nothing secret may ever have that prefix.
+// Vite ships every VITE_ variable to the browser: never use it for a secret.
 
 const PublicEnvSchema = z.object({
   VITE_FIREBASE_PROJECT_ID: z.string().min(1).default('demo-viva'),
-  // The emulator accepts any key. A real project supplies its own.
   VITE_FIREBASE_API_KEY: z.string().min(1).default('demo-api-key'),
 });
 

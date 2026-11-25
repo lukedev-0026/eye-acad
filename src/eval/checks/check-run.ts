@@ -8,10 +8,6 @@ import { RunEnvSchema } from '@/eval/run-env';
 import { RequiredRowSchema } from './required-row.schema';
 import type { RequiredRow } from './required-row.schema';
 
-// One run of `pnpm check`, read back from its results file. CHECKS.md is built
-// from this and from nothing else.
-
-// The first row: the machine and the settings the run was made on.
 const CheckHeaderSchema = z.looseObject({
   type: z.literal('run'),
   runId: z.string(),
@@ -31,7 +27,6 @@ const CheckHeaderSchema = z.looseObject({
 });
 export type CheckHeader = z.infer<typeof CheckHeaderSchema>;
 
-// What a step's grader made of its own expected answers, before any model ran.
 const SelfTestRowSchema = z.object({
   type: z.literal('selftest'),
   step: z.string(),
@@ -48,7 +43,6 @@ const CheckResultRowSchema = z.union([ResultRowSchema, ChainRowSchema]);
 export interface CheckRun {
   readonly header: CheckHeader | null;
   readonly required: Array<RequiredRow>;
-  // One row per model call: a step on its case set, or the revision chain.
   readonly results: Array<ResultRow | ChainRow>;
   readonly selfTests: Array<SelfTestRow>;
 }

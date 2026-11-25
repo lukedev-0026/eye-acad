@@ -13,10 +13,7 @@ import type { DeepgramSpeechService } from '@/infrastructure/speech/deepgram-spe
 import { problemsHeard } from './heard-back';
 
 export interface ReadbackOptions {
-  // The voice and the transcription both vary from run to run, so one pass
-  // proves little.
   readonly runs: number;
-  // One sentence to try on its own, printing what was heard.
   readonly only?: string | undefined;
 }
 
@@ -29,16 +26,23 @@ export interface ReadbackRow {
   readonly heard: string;
 }
 
-// The spoken read-back check. For every finding and history item: turn the
-// spoken sentence into audio, turn that audio back into text, and check that
-// the eye, every number and the unit survived. Text tests cannot show what
-// the voice actually says; this does.
-export async function runReadback(voice: DeepgramSpeechService, options: ReadbackOptions, print: Print): Promise<void> {
+/** Speaks each finding, transcribes it, checks the eye, numbers and unit. */
+export async function runReadback(
+  voice: DeepgramSpeechService,
+  options: ReadbackOptions,
+  print: Print,
+): Promise<void> {
   const c = await loadCase();
   const keyterms = buildCatalogue(c).names;
   const items: Array<{ item: RenderedItem; unit: string | null }> = [
-    ...c.findings.map((f) => ({ item: renderFinding(f), unit: f.available ? f.unit : null })),
-    ...Object.entries(c.patient).map(([k, v]) => ({ item: renderHistory(k, v), unit: null })),
+    ...c.findings.map((f) => ({
+      item: renderFinding(f),
+      unit: f.available ? f.unit : null,
+    })),
+    ...Object.entries(c.patient).map(([k, v]) => ({
+      item: renderHistory(k, v),
+      unit: null,
+    })),
   ].filter((x) => !options.only || x.item.id === options.only);
 
   const runId = `readback-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`;
@@ -49,15 +53,28 @@ export async function runReadback(voice: DeepgramSpeechService, options: Readbac
       const problems: Array<string> = [];
       const speech = await voice.synthesise(item.speech);
       let heard = '';
-      if (!speech) problems.push(`speech could not be produced (${voice.lastError})`);
+      if (!speech)
+        problems.push(`speech could not be produced (${voice.lastError})`);
       else {
-        const stt = await voice.transcribe(Buffer.from(speech.audioBase64, 'base64'), speech.mimeType, keyterms);
-        if (!stt.ok) problems.push(`audio could not be transcribed (${stt.error})`);
+        const stt = await voice.transcribe(
+          Buffer.from(speech.audioBase64, 'base64'),
+          speech.mimeType,
+          keyterms,
+        );
+        if (!stt.ok)
+          problems.push(`audio could not be transcribed (${stt.error})`);
         else heard = stt.text;
       }
       if (heard) problems.push(...problemsHeard(item, unit, heard));
 
-      const row: ReadbackRow = { id: item.id, run, pass: problems.length === 0, problems, said: item.speech, heard };
+      const row: ReadbackRow = {
+        id: item.id,
+        run,
+        pass: problems.length === 0,
+        problems,
+        said: item.speech,
+        heard,
+      };
       rows.push(row);
       await appendRow(runId, {
         type: 'readback',
@@ -68,7 +85,9 @@ export async function runReadback(voice: DeepgramSpeechService, options: Readbac
         ...row,
       });
       if (options.only) {
-        print(`said : ${item.speech}\nheard: ${heard}\n${problems.length ? `PROBLEMS: ${problems.join('; ')}` : 'ok'}`);
+        print(
+          `said : ${item.speech}\nheard: ${heard}\n${problems.length ? `PROBLEMS: ${problems.join('; ')}` : 'ok'}`,
+        );
       } else {
         process.stdout.write(row.pass ? '.' : 'x');
       }
@@ -77,11 +96,17 @@ export async function runReadback(voice: DeepgramSpeechService, options: Readbac
 
   if (options.only) return;
   const summary = summariseReadback(rows);
-  await writeFile(PATHS.readback, readbackMarkdown(rows, { runId, runs: options.runs, voice: voice.voice }));
+  await writeFile(
+    PATHS.readback,
+    readbackMarkdown(rows, { runId, runs: options.runs, voice: voice.voice }),
+  );
   print(
     `\n${summary.everyRun.length} of ${summary.ids.length} sentences passed on every one of ${options.runs} runs (${summary.passedRuns} of ${rows.length} runs). Eye not heard: ${summary.eyeLost.length} runs. No audio: ${summary.noAudio.length} runs. Wrote ${PATHS.readback}`,
   );
-  for (const r of summary.failing) print(`  ${r.id} (run ${r.run}): ${r.problems.join('; ')}\n    heard: ${r.heard}`);
+  for (const r of summary.failing)
+    print(
+      `  ${r.id} (run ${r.run}): ${r.problems.join('; ')}\n    heard: ${r.heard}`,
+    );
 }
 
 function summariseReadback(rows: ReadonlyArray<ReadbackRow>) {
@@ -89,11 +114,15 @@ function summariseReadback(rows: ReadonlyArray<ReadbackRow>) {
   const failing = rows.filter((r) => !r.pass);
   return {
     ids,
-    everyRun: ids.filter((id) => rows.filter((r) => r.id === id).every((r) => r.pass)),
+    everyRun: ids.filter((id) =>
+      rows.filter((r) => r.id === id).every((r) => r.pass),
+    ),
     failing,
     passedRuns: rows.filter((r) => r.pass).length,
     eyeLost: failing.filter((r) => r.problems.some((p) => p.includes('eye'))),
-    noAudio: failing.filter((r) => r.problems.some((p) => p.startsWith('speech could not'))),
+    noAudio: failing.filter((r) =>
+      r.problems.some((p) => p.startsWith('speech could not')),
+    ),
   };
 }
 
@@ -115,7 +144,10 @@ function readbackMarkdown(
       ? [
           '| Row | Run | What went missing | Said | Heard back |',
           '|---|---|---|---|---|',
-          ...s.failing.map((r) => `| ${r.id} | ${r.run} | ${r.problems.join('; ')} | ${r.said} | ${r.heard} |`),
+          ...s.failing.map(
+            (r) =>
+              `| ${r.id} | ${r.run} | ${r.problems.join('; ')} | ${r.said} | ${r.heard} |`,
+          ),
           '',
         ]
       : []),

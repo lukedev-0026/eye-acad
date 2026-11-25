@@ -10,9 +10,10 @@ export interface TestDeps extends VivaDeps {
   readonly speech: NullSpeechService;
 }
 
-// What a use case is handed under test: an attempt store in memory, no speech,
-// and the real model gateway, which talks to whatever stands in for the
-// network (see scripted-model.ts).
+/**
+ * In-memory store, no speech, and the real gateway
+ * (fake the network with scriptModel).
+ */
 export function testDeps(): TestDeps {
   return {
     attempts: new InMemoryAttemptRepository(),

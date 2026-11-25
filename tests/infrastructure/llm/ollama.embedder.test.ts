@@ -4,7 +4,11 @@ import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 import { OllamaEmbedder } from '@/infrastructure/llm/ollama.embedder';
 import { fakeFetch, json } from '@tests/fakes/fake-fetch';
 
-const embedder = () => new OllamaEmbedder(new OllamaClient('http://ollama.test:11434'), 'nomic-embed-text');
+const embedder = () =>
+  new OllamaEmbedder(
+    new OllamaClient('http://ollama.test:11434'),
+    'nomic-embed-text',
+  );
 
 afterEach(() => vi.unstubAllGlobals());
 

@@ -1,8 +1,6 @@
 import { AppError } from '@/common/errors/app.error';
 import type { AppErrorOptions } from '@/common/errors/app.error';
 
-// The app was started with settings it cannot run on. Never shown to the
-// trainee: the fix is in the environment or a settings file.
 export abstract class ConfigError extends AppError {
   readonly status = 500;
 }

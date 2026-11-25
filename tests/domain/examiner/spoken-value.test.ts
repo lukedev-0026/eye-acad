@@ -7,7 +7,9 @@ describe('speakValue', () => {
     expect(speakValue('58 mmHg', 'mmHg')).toBe('58 millimetres of mercury');
   });
   it('says a blood pressure as "over"', () => {
-    expect(speakValue('168/94 mmHg', 'mmHg')).toBe('168 over 94 millimetres of mercury');
+    expect(speakValue('168/94 mmHg', 'mmHg')).toBe(
+      '168 over 94 millimetres of mercury',
+    );
   });
   it('says a Snellen fraction as "over"', () => {
     expect(speakValue('6/36 Snellen', 'Snellen')).toBe('6 over 36 Snellen');

@@ -2,19 +2,31 @@ import { z } from 'zod';
 
 import { runRevision } from '@/application/steps/revision.step';
 import { retrieve } from '@/domain/note/retrieve';
-import { findSentence, queryVector, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
+import {
+  findSentence,
+  queryVector,
+  readCases,
+  resolveTarget,
+  sentenceIds,
+} from '@/eval/eval-context';
 import { InvalidEvalCaseError } from '@/eval/eval.error';
-import type { EvalContext, RetrievalTarget, StepEval, StepRun } from '@/eval/eval.types';
+import type {
+  EvalContext,
+  RetrievalTarget,
+  StepEval,
+  StepRun,
+} from '@/eval/eval.types';
 
 import { asRun } from './as-run';
 
 export const RevisionInputSchema = z.object({
   target: z.string(),
-  // all_support: every passage that backs the point is taken out of the
-  // search, to see whether "no support" is then said.
   exclude: z.enum(['none', 'all_support']),
 });
-export const RevisionExpectSchema = z.object({ support: z.boolean(), targetId: z.string().optional() });
+export const RevisionExpectSchema = z.object({
+  support: z.boolean(),
+  targetId: z.string().optional(),
+});
 type Input = z.infer<typeof RevisionInputSchema>;
 type Expect = z.infer<typeof RevisionExpectSchema>;
 interface Observed {
@@ -26,17 +38,23 @@ interface Observed {
   point: string | null;
   wording: string | null;
   retrievedPages: Array<number>;
-  // True when the code floor refused before any model was called.
   refusedByFloor: boolean;
 }
 
-function spec(ctx: EvalContext, id: string | undefined): RetrievalTarget | undefined {
+function spec(
+  ctx: EvalContext,
+  id: string | undefined,
+): RetrievalTarget | undefined {
   return ctx.targets.find((t) => t.id === id);
 }
 
 function supportChunks(ctx: EvalContext, t: RetrievalTarget): Array<string> {
   return [
-    ...new Set([...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map((p) => findSentence(ctx.index, p).chunk.id)),
+    ...new Set(
+      [...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map(
+        (p) => findSentence(ctx.index, p).chunk.id,
+      ),
+    ),
   ];
 }
 
@@ -51,20 +69,31 @@ const NONE: Omit<Observed, 'outcome' | 'retrievedPages' | 'refusedByFloor'> = {
 
 export const revisionEval: StepEval<Input, Expect, Observed> = {
   step: 'revision',
-  cases: () => readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema),
+  cases: () =>
+    readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema),
 
-  // The search is run first, exactly as the app runs it. It involves no model,
-  // so every configuration is shown the same six passages for a given case.
   async run(c, settings, ctx): Promise<StepRun<Observed>> {
     const target = resolveTarget(ctx, c.input.target);
     const t = spec(ctx, c.expect.targetId);
-    const exclude = c.input.exclude === 'all_support' && t ? supportChunks(ctx, t) : [];
-    const found = retrieve(ctx.index, { target, vector: await queryVector(ctx, target) }, { exclude });
-    const retrievedPages = [...new Set(found.results.flatMap((r) => r.chunk.pages))].sort((a, b) => a - b);
+    const exclude =
+      c.input.exclude === 'all_support' && t ? supportChunks(ctx, t) : [];
+    const found = retrieve(
+      ctx.index,
+      { target, vector: await queryVector(ctx, target) },
+      { exclude },
+    );
+    const retrievedPages = [
+      ...new Set(found.results.flatMap((r) => r.chunk.pages)),
+    ].sort((a, b) => a - b);
     if (found.noSupport) {
       return {
         outcome: 'ok',
-        observed: { ...NONE, outcome: 'no_support', retrievedPages, refusedByFloor: true },
+        observed: {
+          ...NONE,
+          outcome: 'no_support',
+          retrievedPages,
+          refusedByFloor: true,
+        },
         calls: 0,
         ms: 0,
         modelMs: 0,
@@ -89,7 +118,10 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       page: result.citation?.page ?? null,
       pointSource: result.pointSource,
       point: result.point,
-      wording: result.wordingCheck && !result.wordingCheck.ok ? result.wordingCheck.reason : null,
+      wording:
+        result.wordingCheck && !result.wordingCheck.ok
+          ? result.wordingCheck.reason
+          : null,
       retrievedPages,
       refusedByFloor: false,
     });
@@ -100,7 +132,6 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       const pass = observed.outcome === 'no_support';
       return {
         pass,
-        // Quoting the note for a point it does not back.
         costly: observed.outcome === 'supported',
         fallback: false,
         detail: pass
@@ -111,18 +142,20 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
       };
     }
     const t = spec(ctx, c.expect.targetId);
-    if (!t) throw new InvalidEvalCaseError(`${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`);
+    if (!t)
+      throw new InvalidEvalCaseError(
+        `${c.id}: no entry for target ${c.expect.targetId} in retrieval.json`,
+      );
     const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports]);
     const off = sentenceIds(ctx.index, t.offSection ?? []);
     const wrong = sentenceIds(ctx.index, t.distractor);
-    const citedGood = observed.cited.length > 0 && observed.cited.every((id) => good.has(id));
+    const citedGood =
+      observed.cited.length > 0 && observed.cited.every((id) => good.has(id));
     const citedWrong = observed.cited.some((id) => wrong.has(id));
     const written = observed.pointSource === 'written';
     return {
       pass: observed.outcome === 'supported' && citedGood && written,
-      // A quotation about a different condition.
       costly: citedWrong,
-      // The right quotation, but the key point shown in place of the model's sentence.
       fallback: observed.outcome === 'supported' && citedGood && !written,
       detail:
         observed.outcome !== 'supported'
@@ -140,9 +173,18 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
   },
 
   ideal(c, ctx) {
-    if (!c.expect.support) return { ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false };
+    if (!c.expect.support)
+      return {
+        ...NONE,
+        outcome: 'no_support',
+        retrievedPages: [],
+        refusedByFloor: false,
+      };
     const gold = spec(ctx, c.expect.targetId)?.gold[0];
-    if (!gold) throw new InvalidEvalCaseError(`${c.id}: no supporting sentence listed for ${c.expect.targetId}`);
+    if (!gold)
+      throw new InvalidEvalCaseError(
+        `${c.id}: no supporting sentence listed for ${c.expect.targetId}`,
+      );
     const { sentence } = findSentence(ctx.index, gold);
     return {
       outcome: 'supported',
@@ -159,6 +201,11 @@ export const revisionEval: StepEval<Input, Expect, Observed> = {
 
   constant: {
     name: 'always "no support"',
-    observe: () => ({ ...NONE, outcome: 'no_support', retrievedPages: [], refusedByFloor: false }),
+    observe: () => ({
+      ...NONE,
+      outcome: 'no_support',
+      retrievedPages: [],
+      refusedByFloor: false,
+    }),
   },
 };

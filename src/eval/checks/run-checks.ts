@@ -24,37 +24,32 @@ import { readCheckRun } from './check-run';
 import { runRequiredChecks } from './required.check';
 
 export interface CheckOptions {
-  // The settings file to run on. The app's own when not given.
   readonly configFile: string;
-  // Which steps' case sets to run.
   readonly steps: ReadonlyArray<StepId>;
-  // Whether to run the brief's three required checks, and which of them.
   readonly required: boolean;
   readonly requiredNames: ReadonlyArray<string> | null;
-  // Whether to run the revision step and the support check together.
   readonly chain: boolean;
   readonly trials: number;
   readonly split: 'tune' | 'holdout' | 'all';
-  // Where to write the report built from this run's rows, or null for none.
   readonly report: string | null;
-  // Stop before the next part of the run if the battery is under this.
   readonly minBatteryPercent: number;
 }
 
-const mark = (row: { pass: boolean; costly?: boolean }): string => (row.pass ? '.' : row.costly ? 'C' : 'x');
+const mark = (row: { pass: boolean; costly?: boolean }): string =>
+  row.pass ? '.' : row.costly ? 'C' : 'x';
 
-// A run can draw more power than a small charger supplies, and has drained a
-// plugged-in laptop to 5%. So the battery is looked at before each part. The
-// rows already saved are kept; the run is started again once it has charged.
 function stopIfBatteryLow(minimum: number): void {
   const battery = batteryState();
-  if (battery.percent !== null && battery.percent < minimum) throw new LowBatteryError(battery.percent, minimum);
+  if (battery.percent !== null && battery.percent < minimum)
+    throw new LowBatteryError(battery.percent, minimum);
 }
 
-// Runs every AI-backed check through the app's real code on the configured
-// settings, writes one row per model call, and regenerates CHECKS.md from
-// those rows alone.
-export async function runChecks(options: CheckOptions, print: Print, progress: Progress): Promise<void> {
+/** Runs every AI-backed check, one row per call, then rebuilds CHECKS.md. */
+export async function runChecks(
+  options: CheckOptions,
+  print: Print,
+  progress: Progress,
+): Promise<void> {
   // The held-back cases exist to report on a choice, not to make it.
   if (options.split !== 'tune' && !existsSync(PATHS.decision)) {
     throw new EvalRefusedError(
@@ -69,7 +64,9 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
   const env = await captureEnv();
   const runId = `check-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`;
 
-  const modelNames = [...new Set(Object.values(config.steps).map((s) => s.model))];
+  const modelNames = [
+    ...new Set(Object.values(config.steps).map((s) => s.model)),
+  ];
   await appendRow(runId, {
     type: 'run',
     runId,
@@ -79,9 +76,15 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
     trials: options.trials,
     configFile: options.configFile,
     steps: config.steps,
-    models: Object.fromEntries(await Promise.all(modelNames.map(async (m) => [m, await modelInfo(m)] as const))),
+    models: Object.fromEntries(
+      await Promise.all(
+        modelNames.map(async (m) => [m, await modelInfo(m)] as const),
+      ),
+    ),
   });
-  print(`Run ${runId}. Power mode: ${env.powerMode}. Swap in use: ${env.swapUsedMb} MB.`);
+  print(
+    `Run ${runId}. Power mode: ${env.powerMode}. Swap in use: ${env.swapUsedMb} MB.`,
+  );
 
   if (options.required) {
     print('\nRequired checks');
@@ -99,16 +102,23 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
     const names = [...new Set(rows.map((r) => `${r.check}|${r.name}`))];
     for (const name of names) {
       const mine = rows.filter((r) => `${r.check}|${r.name}` === name);
-      print(`  check ${name.replace('|', ' ')}: ${mine.filter((r) => r.pass).length} of ${mine.length}`);
+      print(
+        `  check ${name.replace('|', ' ')}: ${mine.filter((r) => r.pass).length} of ${mine.length}`,
+      );
     }
   }
 
   for (const step of options.steps) {
     stopIfBatteryLow(options.minBatteryPercent);
-    await runStepCases(step, ctx, { runId, options, settings: config.steps[step] }, print, progress);
+    await runStepCases(
+      step,
+      ctx,
+      { runId, options, settings: config.steps[step] },
+      print,
+      progress,
+    );
   }
 
-  // The revision step and the support check together, as the app runs them.
   if (options.chain && options.split !== 'all') {
     stopIfBatteryLow(options.minBatteryPercent);
     print('\nrevision step and support check together');
@@ -131,7 +141,10 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
 
   if (options.report) {
     await mkdir(path.dirname(options.report), { recursive: true });
-    await writeFile(options.report, `${checksMarkdown(await readCheckRun(resultsFile(runId)))}\n`);
+    await writeFile(
+      options.report,
+      `${checksMarkdown(await readCheckRun(resultsFile(runId)))}\n`,
+    );
     print(`\nWrote ${options.report} from ${resultsFile(runId)}`);
   }
 }
@@ -139,7 +152,11 @@ export async function runChecks(options: CheckOptions, print: Print, progress: P
 async function runStepCases(
   step: StepId,
   ctx: EvalContext,
-  run: { runId: string; options: CheckOptions; settings: ResultRow['settings'] },
+  run: {
+    runId: string;
+    options: CheckOptions;
+    settings: ResultRow['settings'];
+  },
   print: Print,
   progress: Progress,
 ): Promise<void> {
@@ -147,7 +164,9 @@ async function runStepCases(
   const { split, trials } = run.options;
   let cases: Array<EvalCase>;
   try {
-    cases = (await evalDef.cases(ctx)).filter((c) => split === 'all' || c.split === split);
+    cases = (await evalDef.cases(ctx)).filter(
+      (c) => split === 'all' || c.split === split,
+    );
   } catch (error) {
     print(`\n${step}: no case set yet (${errorMessage(error).slice(0, 80)})`);
     return;
@@ -157,13 +176,13 @@ async function runStepCases(
   print(
     `\n${step}: ${cases.length} ${split} cases. Graders agree with their own expected answers for ${st.idealPass} of ${st.cases}. Floor (${st.constantName}): ${st.constantPass} of ${st.cases}.`,
   );
-  if (st.wrong.length) print(`  GRADER PROBLEMS: ${st.wrong.slice(0, 5).join(' | ')}`);
+  if (st.wrong.length)
+    print(`  GRADER PROBLEMS: ${st.wrong.slice(0, 5).join(' | ')}`);
 
   const { rows } = await runCases({
     evalDef,
     cases,
     settings: run.settings,
-    // At temperature 0 the same input gives the same output, so repeats add nothing.
     trials: run.settings.temperature === 0 ? 1 : trials,
     ctx,
     runId: run.runId,

@@ -1,14 +1,10 @@
-// Runs the existing checks across many configurations of each AI step, one
-// model call at a time, writing every call to evals/results/<run-id>.jsonl.
-// It can be stopped and restarted: finished work is skipped.
-//
-//   pnpm sweep --plan                 show what would run and a time estimate
-//   pnpm sweep                        screen every configuration, then confirm the best
-//   pnpm sweep --short                the cut-down plan that was actually run
-//   pnpm sweep --budget-minutes 480   stop cleanly at a time budget
-//   pnpm sweep --min-battery 20       stop cleanly before the battery gets low
-//   pnpm sweep --steps selector,verifier --sizes small,medium
-//   pnpm sweep --holdout              (later) the held-back cases, once only
+// pnpm sweep --plan                show what would run and a time estimate
+// pnpm sweep                       screen every config, then confirm the best
+// pnpm sweep --short               the cut-down plan that was actually run
+// pnpm sweep --budget-minutes 480  stop cleanly at a time budget
+// pnpm sweep --min-battery 20      stop cleanly before the battery gets low
+// pnpm sweep --steps selector,verifier --sizes small,medium
+// pnpm sweep --holdout             (later) the held-back cases, once only
 import { parseArgs } from 'node:util';
 
 import { STEP_IDS } from '@/domain/llm/step-settings.schema';
@@ -36,7 +32,10 @@ await runCli(async () => {
       runId: values['run-id'],
       steps: parseSteps(values.steps),
       sizes: parseSizes('sizes', values.sizes),
-      budgetMinutes: parseWholeNumber('budget-minutes', values['budget-minutes']),
+      budgetMinutes: parseWholeNumber(
+        'budget-minutes',
+        values['budget-minutes'],
+      ),
       minBatteryPercent: parseWholeNumber('min-battery', values['min-battery']),
       plan: values.plan,
       holdout: values.holdout,

@@ -2,20 +2,31 @@ import { coverageItems } from '@/application/steps/coverage.step';
 import { headingPath, pageLabel } from '@/domain/note/note-text';
 import { findSentence, readCases, resolveTarget } from '@/eval/eval-context';
 import type { EvalContext, Split } from '@/eval/eval.types';
-import { CoverageExpectSchema, CoverageInputSchema } from '@/eval/steps/coverage.eval';
-import { FollowUpExpectSchema, FollowUpInputSchema } from '@/eval/steps/followup.eval';
-import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision.eval';
-import { SelectorExpectSchema, SelectorInputSchema } from '@/eval/steps/selector.eval';
-import { VerifierExpectSchema, VerifierInputSchema } from '@/eval/steps/verifier.eval';
+import {
+  CoverageExpectSchema,
+  CoverageInputSchema,
+} from '@/eval/steps/coverage.eval';
+import {
+  FollowUpExpectSchema,
+  FollowUpInputSchema,
+} from '@/eval/steps/followup.eval';
+import {
+  RevisionExpectSchema,
+  RevisionInputSchema,
+} from '@/eval/steps/revision.eval';
+import {
+  SelectorExpectSchema,
+  SelectorInputSchema,
+} from '@/eval/steps/selector.eval';
+import {
+  VerifierExpectSchema,
+  VerifierInputSchema,
+} from '@/eval/steps/verifier.eval';
 
-// Every hand-written case with its expected answer, laid out for a person to
-// read and correct. The expected answers are judgement calls, and the settings
-// are chosen against them.
-
-const cell = (text: string): string => text.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
+const cell = (text: string): string =>
+  text.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
 const split = (s: Split): string => (s === 'tune' ? 'tuning' : 'held back');
 
-// What the examiner should do when nothing is to be revealed.
 const NO_REVEAL: Record<string, string> = {
   not_recorded: 'Say it is not recorded',
   too_many: 'Ask for specific findings',
@@ -35,7 +46,11 @@ function introduction(): Array<string> {
 }
 
 async function selectorSection(): Promise<Array<string>> {
-  const cases = await readCases('selector.jsonl', SelectorInputSchema, SelectorExpectSchema);
+  const cases = await readCases(
+    'selector.jsonl',
+    SelectorInputSchema,
+    SelectorExpectSchema,
+  );
   const out = [
     `## 1. Menu-picker: ${cases.length} requests`,
     '',
@@ -52,7 +67,9 @@ async function selectorSection(): Promise<Array<string>> {
       c.expect.kind === 'reveal'
         ? `Reveal: ${(c.expect.ids ?? []).join(', ')}${c.expect.alsoNotRecorded ? ' and say something else is not recorded' : ''}`
         : (NO_REVEAL[c.expect.kind] ?? c.expect.kind) +
-          (c.expect.acceptKinds?.length ? ` (also fine: ${c.expect.acceptKinds.join(', ')})` : '');
+          (c.expect.acceptKinds?.length
+            ? ` (also fine: ${c.expect.acceptKinds.join(', ')})`
+            : '');
     out.push(
       `| ${c.id} | ${split(c.split)} | ${c.type} | ${cell(c.input.utterance)}${prev} | ${expected} | ${cell(c.note ?? '')} |`,
     );
@@ -62,7 +79,11 @@ async function selectorSection(): Promise<Array<string>> {
 
 async function coverageSection(ctx: EvalContext): Promise<Array<string>> {
   const items = coverageItems(ctx.notes);
-  const cases = await readCases('coverage.jsonl', CoverageInputSchema, CoverageExpectSchema);
+  const cases = await readCases(
+    'coverage.jsonl',
+    CoverageInputSchema,
+    CoverageExpectSchema,
+  );
   const out = [
     `## 2. Coverage judge: ${cases.length} sample answers`,
     '',
@@ -70,18 +91,28 @@ async function coverageSection(ctx: EvalContext): Promise<Array<string>> {
     '',
     'The items:',
     '',
-    ...items.map((i) => `- **${i.id}** (${i.kind === 'diagnosis' ? 'the diagnosis' : 'key point'}): ${i.text}`),
+    ...items.map(
+      (i) =>
+        `- **${i.id}** (${i.kind === 'diagnosis' ? 'the diagnosis' : 'key point'}): ${i.text}`,
+    ),
     '',
   ];
   for (const c of cases) {
-    out.push(`### ${c.id} (${split(c.split)}, ${c.type})`, '', `> ${c.input.answer}`, '');
+    out.push(
+      `### ${c.id} (${split(c.split)}, ${c.type})`,
+      '',
+      `> ${c.input.answer}`,
+      '',
+    );
     out.push(
       '| ' + items.map((i) => i.id).join(' | ') + ' | Acceptable gap |',
       '|' + items.map(() => '---').join('|') + '|---|',
     );
     out.push(
       '| ' +
-        items.map((i) => (c.expect.statuses[i.id] ?? '').replace('_', ' ')).join(' | ') +
+        items
+          .map((i) => (c.expect.statuses[i.id] ?? '').replace('_', ' '))
+          .join(' | ') +
         ` | ${c.expect.acceptableTargets.join(', ')} |`,
     );
     if (c.note) out.push('', `_Note: ${c.note}_`);
@@ -91,7 +122,11 @@ async function coverageSection(ctx: EvalContext): Promise<Array<string>> {
 }
 
 async function verifierSection(ctx: EvalContext): Promise<Array<string>> {
-  const cases = await readCases('verifier.jsonl', VerifierInputSchema, VerifierExpectSchema);
+  const cases = await readCases(
+    'verifier.jsonl',
+    VerifierInputSchema,
+    VerifierExpectSchema,
+  );
   const out = [
     `## 3. Support check: ${cases.length} pairs`,
     '',
@@ -109,7 +144,11 @@ async function verifierSection(ctx: EvalContext): Promise<Array<string>> {
   return [...out, ''];
 }
 
-function sentenceList(ctx: EvalContext, title: string, phrases: ReadonlyArray<string>): Array<string> {
+function sentenceList(
+  ctx: EvalContext,
+  title: string,
+  phrases: ReadonlyArray<string>,
+): Array<string> {
   if (!phrases.length) return [];
   return [
     `- ${title}:`,
@@ -121,7 +160,11 @@ function sentenceList(ctx: EvalContext, title: string, phrases: ReadonlyArray<st
 }
 
 async function revisionSection(ctx: EvalContext): Promise<Array<string>> {
-  const cases = await readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
+  const cases = await readCases(
+    'revision.jsonl',
+    RevisionInputSchema,
+    RevisionExpectSchema,
+  );
   const out = [
     `## 4. Revision step: ${cases.length} points to revise`,
     '',
@@ -131,7 +174,12 @@ async function revisionSection(ctx: EvalContext): Promise<Array<string>> {
   for (const c of cases) {
     const text = resolveTarget(ctx, c.input.target);
     const t = ctx.targets.find((x) => x.id === c.expect.targetId);
-    out.push(`### ${c.id} (${split(c.split)}, ${c.type})`, '', `**Point:** ${text}`, '');
+    out.push(
+      `### ${c.id} (${split(c.split)}, ${c.type})`,
+      '',
+      `**Point:** ${text}`,
+      '',
+    );
     out.push(
       `**Expected:** ${c.expect.support ? 'supported, quoting a main-source or also-backs-it sentence' : `no support${c.input.exclude === 'all_support' ? ' (every sentence listed below as backing it is removed from the search first)' : ''}`}`,
       '',
@@ -151,19 +199,26 @@ async function revisionSection(ctx: EvalContext): Promise<Array<string>> {
 }
 
 async function followUpSection(): Promise<Array<string>> {
-  const cases = await readCases('followup.jsonl', FollowUpInputSchema, FollowUpExpectSchema);
+  const cases = await readCases(
+    'followup.jsonl',
+    FollowUpInputSchema,
+    FollowUpExpectSchema,
+  );
   return [
     `## 5. Follow-up writer: ${cases.length} sample answers`,
     '',
     'These have no expected answer. The automatic check is only that a model-written question survives the word check. Whether the question is a good one is read separately.',
     '',
-    ...cases.map((c) => `- **${c.id}** (${split(c.split)}, ${c.type}): ${c.input.answer}`),
+    ...cases.map(
+      (c) => `- **${c.id}** (${split(c.split)}, ${c.type}): ${c.input.answer}`,
+    ),
     '',
   ];
 }
 
-// The whole sheet, as lines.
-export async function casesReviewLines(ctx: EvalContext): Promise<Array<string>> {
+export async function casesReviewLines(
+  ctx: EvalContext,
+): Promise<Array<string>> {
   return [
     ...introduction(),
     ...(await selectorSection()),

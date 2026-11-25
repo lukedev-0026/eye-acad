@@ -8,7 +8,6 @@ interface TranscriptProps {
   followUp: PublicAttempt['followUp'];
 }
 
-// Both sides of the conversation, as saved. The newest turn is kept in view.
 export function Transcript({ turns, followUp }: TranscriptProps): JSX.Element {
   const end = useRef<HTMLLIElement>(null);
   useEffect(() => {
@@ -25,7 +24,9 @@ export function Transcript({ turns, followUp }: TranscriptProps): JSX.Element {
             {t.kind === 'answer' ? ' · your answer' : ''}
           </span>
           {t.kind === 'follow_up' && followUp?.respondingTo ? (
-            <p className="muted small">Responding to: “{followUp.respondingTo}”</p>
+            <p className="muted small">
+              Responding to: “{followUp.respondingTo}”
+            </p>
           ) : null}
           {t.text.split('\n').map((line, i) => (
             <p key={i}>{line}</p>

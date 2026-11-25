@@ -3,9 +3,11 @@ import type { JSX } from 'react';
 import { TalkButton } from '@/features/viva/components/talk-button';
 import type { VivaSession } from '@/features/viva/hooks/use-viva-session';
 
-// Asking for findings: by holding the button and speaking, by typing, or by
-// sending a recorded question. Also where the trainee moves on to the answer.
-export function RequestComposer({ session }: { session: VivaSession }): JSX.Element {
+export function RequestComposer({
+  session,
+}: {
+  session: VivaSession;
+}): JSX.Element {
   const { turn, canAct, request } = session;
   return (
     <div className="composer">
@@ -18,7 +20,9 @@ export function RequestComposer({ session }: { session: VivaSession }): JSX.Elem
           onStop={() => void session.stopAndAsk()}
         />
       ) : (
-        <p className="muted small">This browser cannot record audio. Type your requests instead.</p>
+        <p className="muted small">
+          This browser cannot record audio. Type your requests instead.
+        </p>
       )}
       <form
         className="row"
@@ -63,7 +67,11 @@ export function RequestComposer({ session }: { session: VivaSession }): JSX.Elem
             />
           </label>
         </details>
-        <button className="button primary" disabled={!canAct} onClick={session.beginAnswer}>
+        <button
+          className="button primary"
+          disabled={!canAct}
+          onClick={session.beginAnswer}
+        >
           Give my answer
         </button>
       </div>

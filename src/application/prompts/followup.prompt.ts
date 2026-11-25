@@ -22,7 +22,6 @@ const RULES = `Rules:
 4. A good pattern is: "You said <their words>. <the follow-up, lightly adapted>?" with a single question mark at the end.
 5. The anchor is copied exactly from the answer, including the trainee's spelling.`;
 
-// An invented case, unrelated to the live one.
 const EXAMPLES = `Worked examples from a different, invented case (a child with a lazy eye). Its supplied follow-up questions were: idea_1 "Why patch the better eye?", idea_2 "What would you do if the child refuses the glasses?"
 - Answer: "I think this is a lazy eye, so I would give glasses and see her again in three months."
   {"idea":"idea_2","anchor_quote":"I would give glasses","question":"You said you would give glasses, so what would you do if the child refuses the glasses?"}
@@ -34,7 +33,9 @@ export function followUpPrompt(
   input: { notes: ExaminerNotes; answer: string; retryReason?: string },
   jsonShape: string,
 ): Prompt {
-  const ideas = input.notes.follow_up_ideas.map((idea, i) => `idea_${i + 1}: ${idea}`).join('\n');
+  const ideas = input.notes.follow_up_ideas
+    .map((idea, i) => `idea_${i + 1}: ${idea}`)
+    .join('\n');
   const user = [
     `Examiner's private notes (never reveal these):\nDiagnosis: ${input.notes.diagnosis}\nKey points:\n${input.notes.key_points.map((k) => `- ${k}`).join('\n')}`,
     `Supplied follow-up questions:\n${ideas}`,
@@ -45,5 +46,12 @@ export function followUpPrompt(
   ]
     .filter(Boolean)
     .join('\n\n');
-  return { system: assemble(variant, { task: TASK, rules: RULES, examples: EXAMPLES }, jsonShape), user };
+  return {
+    system: assemble(
+      variant,
+      { task: TASK, rules: RULES, examples: EXAMPLES },
+      jsonShape,
+    ),
+    user,
+  };
 }

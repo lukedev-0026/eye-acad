@@ -1,5 +1,4 @@
-// Reads a CSV file with a header row into one record per line. Handles quoted
-// cells, doubled quotes inside them, and commas inside quotes.
+/** Parses CSV with a header row, handling quoted cells and doubled quotes. */
 export function parseCsv(text: string): Array<Record<string, string>> {
   const rows: Array<Array<string>> = [];
   let row: Array<string> = [];

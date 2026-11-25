@@ -2,8 +2,6 @@ import { z } from 'zod';
 
 import { ValidationError } from '@/common/errors/validation.error';
 
-// What the browser may send to each server function, with its limits.
-
 const attemptId = z.string().min(1).max(64);
 
 export const AttemptInput = z.object({ attemptId });
@@ -13,7 +11,7 @@ export const AskInput = z.object({
   text: z.string().max(2000),
 });
 
-// Roughly 2.4 MB of audio once decoded: ample for a 90-second answer.
+/** About 2.4 MB of audio once decoded: ample for a 90-second answer. */
 export const AudioInput = z.object({
   attemptId,
   audioBase64: z.string().min(1).max(3_300_000),
@@ -26,9 +24,7 @@ export const TextInput = z.object({
   via: z.enum(['typed', 'voice']).default('typed'),
 });
 
-// Checks a request against its schema. A request that does not fit raises a
-// ValidationError, which the browser receives as INVALID_INPUT, in place of
-// the framework's own bare Error carrying a list of issues as its message.
+/** Throws ValidationError (INVALID_INPUT in the browser), not a bare Error. */
 export function validated<S extends z.ZodType>(schema: S) {
   return (input: z.input<S>): z.output<S> => {
     const parsed = schema.safeParse(input);

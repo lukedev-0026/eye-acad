@@ -27,12 +27,24 @@ const EXAMPLES = `Worked examples from a different, invented note.
 
 export function verifierPrompt(
   variant: PromptVariant,
-  input: { statement: string; heading: string; leadIn: string | null; marked: string },
+  input: {
+    statement: string;
+    heading: string;
+    leadIn: string | null;
+    marked: string;
+  },
   jsonShape: string,
 ): Prompt {
   const user = [
     `Statement:\n${input.statement}`,
     `Passage — ${input.heading}${input.leadIn ? ` — ${input.leadIn}` : ''}:\n${input.marked}`,
   ].join('\n\n');
-  return { system: assemble(variant, { task: TASK, rules: RULES, examples: EXAMPLES }, jsonShape), user };
+  return {
+    system: assemble(
+      variant,
+      { task: TASK, rules: RULES, examples: EXAMPLES },
+      jsonShape,
+    ),
+    user,
+  };
 }

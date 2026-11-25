@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { canTraineeAct, hintFor, nextTurnState } from '@/features/viva/lib/turn-machine';
+import {
+  canTraineeAct,
+  hintFor,
+  nextTurnState,
+} from '@/features/viva/lib/turn-machine';
 
 describe('whose turn it is', () => {
   it('follows a spoken turn from start to finish', () => {
@@ -14,8 +18,12 @@ describe('whose turn it is', () => {
     expect(s).toBe('your_turn');
   });
   it('does not let the trainee start while the examiner is thinking or speaking', () => {
-    expect(nextTurnState('thinking', { type: 'START_LISTENING' })).toBe('thinking');
-    expect(nextTurnState('speaking', { type: 'START_LISTENING' })).toBe('speaking');
+    expect(nextTurnState('thinking', { type: 'START_LISTENING' })).toBe(
+      'thinking',
+    );
+    expect(nextTurnState('speaking', { type: 'START_LISTENING' })).toBe(
+      'speaking',
+    );
     expect(nextTurnState('speaking', { type: 'SUBMIT_TEXT' })).toBe('speaking');
     expect(canTraineeAct('speaking')).toBe(false);
     expect(canTraineeAct('thinking')).toBe(false);
@@ -27,12 +35,22 @@ describe('whose turn it is', () => {
     }
   });
   it('returns to the trainee when there is text but no audio', () => {
-    expect(nextTurnState('thinking', { type: 'REPLY_SILENT' })).toBe('your_turn');
+    expect(nextTurnState('thinking', { type: 'REPLY_SILENT' })).toBe(
+      'your_turn',
+    );
   });
   it('tells the trainee what to do next, by what they are doing', () => {
-    expect(hintFor('asking', 'your_turn')).toBe('Hold the button and ask for a finding, or type a request.');
-    expect(hintFor('answering', 'your_turn')).toBe('Give your diagnosis and immediate management, then submit.');
-    expect(hintFor('follow_up', 'your_turn')).toBe('Reply to the follow-up question, then send.');
-    expect(hintFor('asking', 'speaking')).toBe('Please wait until the examiner has finished.');
+    expect(hintFor('asking', 'your_turn')).toBe(
+      'Hold the button and ask for a finding, or type a request.',
+    );
+    expect(hintFor('answering', 'your_turn')).toBe(
+      'Give your diagnosis and immediate management, then submit.',
+    );
+    expect(hintFor('follow_up', 'your_turn')).toBe(
+      'Reply to the follow-up question, then send.',
+    );
+    expect(hintFor('asking', 'speaking')).toBe(
+      'Please wait until the examiner has finished.',
+    );
   });
 });

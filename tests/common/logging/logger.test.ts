@@ -13,13 +13,14 @@ import { Secret } from '@/config/secret';
 
 type Line = Record<string, unknown>;
 
-// A logger that writes into an array, so a test can read what was written.
 function capture(level: LogLevel = 'debug') {
   const lines: Array<Line> = [];
   const logger = createLogger({
     level,
     format: 'json',
-    destination: { write: (text: string) => void lines.push(JSON.parse(text) as Line) },
+    destination: {
+      write: (text: string) => void lines.push(JSON.parse(text) as Line),
+    },
   });
   return { logger, lines };
 }
@@ -28,7 +29,10 @@ describe('the logger', () => {
   it('writes one JSON object per line: level as a word, an ISO time, the facts, the message', () => {
     const { logger, lines } = capture();
 
-    logger.info({ actionResult: 'SUCCESS', step: 'selector', durationMs: 412 }, 'callStep.completed');
+    logger.info(
+      { actionResult: 'SUCCESS', step: 'selector', durationMs: 412 },
+      'callStep.completed',
+    );
 
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatchObject({
@@ -38,7 +42,9 @@ describe('the logger', () => {
       durationMs: 412,
       msg: 'callStep.completed',
     });
-    expect(lines[0]?.time).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(lines[0]?.time).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+    );
     expect(lines[0]).not.toHaveProperty('pid');
     expect(lines[0]).not.toHaveProperty('hostname');
   });
@@ -63,15 +69,24 @@ describe('the logger', () => {
   it('logs an error with its code, its details and the whole chain of causes', () => {
     const { logger, lines } = capture();
     const error = new InternalError({
-      cause: new ModelProviderError('ollama', 'The model could not be reached.', {
-        cause: new TypeError('fetch failed'),
-        details: { model: 'qwen3.5:9b' },
-      }),
+      cause: new ModelProviderError(
+        'ollama',
+        'The model could not be reached.',
+        {
+          cause: new TypeError('fetch failed'),
+          details: { model: 'qwen3.5:9b' },
+        },
+      ),
     });
 
     logger.error({ err: error }, 'askForFindings.failed');
 
-    const err = lines[0]?.err as { type: string; code: string; stack: string; cause: Line & { cause: Line } };
+    const err = lines[0]?.err as {
+      type: string;
+      code: string;
+      stack: string;
+      cause: Line & { cause: Line };
+    };
     expect(err.type).toBe('InternalError');
     expect(err.code).toBe('INTERNAL');
     expect(err.stack).toContain('InternalError');
@@ -81,7 +96,10 @@ describe('the logger', () => {
       service: 'ollama',
       details: { service: 'ollama', model: 'qwen3.5:9b' },
     });
-    expect(err.cause.cause).toMatchObject({ type: 'TypeError', message: 'fetch failed' });
+    expect(err.cause.cause).toMatchObject({
+      type: 'TypeError',
+      message: 'fetch failed',
+    });
   });
 
   it('replaces a token, key, password or recording that reaches a line', () => {
@@ -91,7 +109,11 @@ describe('the logger', () => {
       {
         authorization: 'Bearer abc',
         headers: { authorization: 'Bearer abc' },
-        request: { headers: { authorization: 'Bearer abc' }, audioBase64: 'AAAA', token: 't' },
+        request: {
+          headers: { authorization: 'Bearer abc' },
+          audioBase64: 'AAAA',
+          token: 't',
+        },
         deepgram: { apiKey: 'dg-secret' },
         account: { password: 'demo-password' },
       },
@@ -99,7 +121,13 @@ describe('the logger', () => {
     );
 
     const text = JSON.stringify(lines[0]);
-    for (const secret of ['Bearer abc', 'AAAA', 'dg-secret', 'demo-password', '"t"']) {
+    for (const secret of [
+      'Bearer abc',
+      'AAAA',
+      'dg-secret',
+      'demo-password',
+      '"t"',
+    ]) {
       expect(text).not.toContain(secret);
     }
     expect(text).toContain('[REDACTED]');
@@ -108,7 +136,10 @@ describe('the logger', () => {
   it('cannot print a wrapped secret even where no path is listed for it', () => {
     const { logger, lines } = capture();
 
-    logger.info({ somewhere: { unexpected: new Secret('dg-secret') } }, 'config.loaded');
+    logger.info(
+      { somewhere: { unexpected: new Secret('dg-secret') } },
+      'config.loaded',
+    );
 
     expect(JSON.stringify(lines[0])).not.toContain('dg-secret');
   });
@@ -127,7 +158,12 @@ describe('the request context', () => {
     logger.info('outside');
 
     expect(lines[0]).toMatchObject({ requestId: 'req-42', msg: 'first' });
-    expect(lines[1]).toMatchObject({ requestId: 'req-42', uid: 'user-1', attemptId: 'attempt-9', msg: 'second' });
+    expect(lines[1]).toMatchObject({
+      requestId: 'req-42',
+      uid: 'user-1',
+      attemptId: 'attempt-9',
+      msg: 'second',
+    });
     expect(lines[2]).not.toHaveProperty('requestId');
   });
 

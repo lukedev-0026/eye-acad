@@ -4,9 +4,7 @@ import type { ErrorCode } from './error-codes';
 export type ErrorDetails = Readonly<Record<string, unknown>>;
 
 export interface AppErrorOptions {
-  // Whatever was caught. Kept whole, so the log shows the full chain.
   readonly cause?: unknown;
-  // Facts about the failure that are safe to log: ids, counts, names.
   readonly details?: ErrorDetails;
 }
 
@@ -18,14 +16,9 @@ export interface SerialisedError {
   readonly cause?: SerialisedError;
 }
 
-// The root of every error this project throws on purpose.
-//
-// A subclass says what went wrong (`code`), what the HTTP reply should be
-// (`status`), and whether its message was written for the trainee to read
-// (`expose`). Whatever was caught on the way is kept as `cause`.
+/** Root of every deliberate error. `expose` marks a message safe to show. */
 export abstract class AppError extends Error {
-  // A literal in every subclass. Class names are shortened when the browser
-  // bundle is built, so `constructor.name` cannot be relied on there.
+  // A literal per subclass: minified builds break `constructor.name`.
   abstract override readonly name: string;
   abstract readonly code: ErrorCode;
   abstract readonly status: number;
@@ -33,11 +26,13 @@ export abstract class AppError extends Error {
   readonly details: ErrorDetails | undefined;
 
   protected constructor(message: string, options: AppErrorOptions = {}) {
-    super(message, options.cause === undefined ? undefined : { cause: options.cause });
+    super(
+      message,
+      options.cause === undefined ? undefined : { cause: options.cause },
+    );
     this.details = options.details;
   }
 
-  // The first thing that went wrong, however many times it was wrapped.
   get rootCause(): unknown {
     return deepestCause(this);
   }
@@ -58,7 +53,6 @@ function deepestCause(error: Error): unknown {
   return current;
 }
 
-// An error, and the chain of causes under it, as plain data.
 export function serialiseError(value: unknown, depth = 0): SerialisedError {
   if (!(value instanceof Error)) {
     return { name: 'NonError', message: describeValue(value) };
@@ -69,6 +63,8 @@ export function serialiseError(value: unknown, depth = 0): SerialisedError {
     message: value.message,
     ...(isApp ? { code: value.code } : {}),
     ...(isApp && value.details ? { details: value.details } : {}),
-    ...(value.cause !== undefined && depth < MAX_CAUSE_DEPTH ? { cause: serialiseError(value.cause, depth + 1) } : {}),
+    ...(value.cause !== undefined && depth < MAX_CAUSE_DEPTH
+      ? { cause: serialiseError(value.cause, depth + 1) }
+      : {}),
   };
 }

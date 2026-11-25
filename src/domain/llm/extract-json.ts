@@ -1,6 +1,3 @@
-// Pulls one JSON object out of a model reply. With forced format the reply is
-// already pure JSON; without it, models often wrap it in a code fence or add a
-// sentence either side.
 export function extractJson(text: string): unknown {
   const trimmed = text.trim();
   try {

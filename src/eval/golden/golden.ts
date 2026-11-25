@@ -10,54 +10,39 @@ import type { ResultRow } from '@/eval/run/result-row';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { PROMPTS, settingsFor } from '@/eval/sweep/grid';
 
-// A safety net for changes that must not alter what the app does. The network
-// is replaced by a recorder, so nothing here needs a model:
-//
-//   1. Requests. Every tuning case goes through every step in every prompt
-//      wording, and the exact body that would be sent to the model is hashed.
-//      That body is everything the model sees.
-//   2. Replays. Every reply a model really gave, as saved by the sweep, is fed
-//      back through its step. What the app makes of it, and how it is graded,
-//      is hashed.
-//
-// The hashes are committed. If a later change moves any of them, either the
-// change is wrong or it was meant, and the file says which cases moved.
-
 export interface Golden {
-  // step -> prompt wording -> request shape -> case id -> hash of the chat request bodies
-  requests: Record<string, Record<string, Record<string, Record<string, string>>>>;
-  // Every distinct request for a query embedding, hashed together.
+  requests: Record<
+    string,
+    Record<string, Record<string, Record<string, string>>>
+  >;
   embedRequests: string;
-  // step -> prompt wording -> a short fingerprint of the rendered prompts
   promptFingerprints: Record<string, Record<string, string>>;
-  // "step|configId" -> the replayed outcomes of that configuration's saved replies
   replays: Record<string, { rows: number; digest: string }>;
   skipped: { infraErrors: number; unknownCases: number };
 }
 
-// The two request shapes cover both branches of each setting: format forced or
-// described in words, thinking off or on.
 const SHAPES = {
   'forced, thinking off': { thinking: false, forceFormat: true },
   'not forced, thinking on': { thinking: true, forceFormat: false },
 } as const;
 
-const sha256 = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const sha256 = (value: unknown) =>
+  createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
-// What the app sends to the model, as far as the recorder reads it. A request
-// is checked against this and then kept exactly as it was sent, because it is
-// the sent form that is hashed.
+// Validated, but kept exactly as sent: the sent form is what is hashed.
 const ChatBodySchema = z.looseObject({
   model: z.string(),
   messages: z.array(z.looseObject({ role: z.string(), content: z.string() })),
   format: z.unknown().optional(),
 });
 export type ChatBody = z.infer<typeof ChatBodySchema>;
-const isChatBody = (body: unknown): body is ChatBody => ChatBodySchema.safeParse(body).success;
+const isChatBody = (body: unknown): body is ChatBody =>
+  ChatBodySchema.safeParse(body).success;
 
-const EmbedBodySchema = z.looseObject({ input: z.array(z.string()).optional() });
+const EmbedBodySchema = z.looseObject({
+  input: z.array(z.string()).optional(),
+});
 
-// The query vectors kept with the tests: the text searched for, and its vector.
 export const PinnedVectorsSchema = z.record(z.string(), z.array(z.number()));
 
 export interface Recorder {
@@ -65,19 +50,21 @@ export interface Recorder {
   embeds: Map<string, unknown>;
   missingVectors: Set<string>;
   replies: Array<string>;
-  // When set, decides each reply from the request, in place of `replies`.
   responder: ((body: ChatBody) => string) | null;
   doneReason: 'stop' | 'length';
   restore: () => void;
 }
 
-// Replaces `fetch` for the length of a golden run. Chat requests are recorded
-// and answered from `replies`. Embedding requests are answered from the pinned
-// vectors, so the search behaves identically on every run.
+/**
+ * Replaces `fetch`: chat requests are recorded and answered from `replies`,
+ * embeddings from the pinned vectors.
+ */
 export function installRecorder(
   vectors: Map<string, Array<number>>,
-  // Only when the pinned vectors are being captured: the real network.
-  capture?: (texts: Array<string>, body: Record<string, unknown>) => Promise<Array<Array<number>> | null>,
+  capture?: (
+    texts: Array<string>,
+    body: Record<string, unknown>,
+  ) => Promise<Array<Array<number>> | null>,
 ): Recorder {
   const original = globalThis.fetch;
   const recorder: Recorder = {
@@ -91,11 +78,24 @@ export function installRecorder(
       globalThis.fetch = original;
     },
   };
-  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-    const body: unknown = JSON.parse(typeof init?.body === 'string' ? init.body : 'null');
+  globalThis.fetch = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> => {
+    const url =
+      typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    const body: unknown = JSON.parse(
+      typeof init?.body === 'string' ? init.body : 'null',
+    );
     if (url.endsWith('/api/chat')) {
-      if (!isChatBody(body)) throw new EvalRefusedError(`The app sent a chat request the recorder cannot read: ${url}`);
+      if (!isChatBody(body))
+        throw new EvalRefusedError(
+          `The app sent a chat request the recorder cannot read: ${url}`,
+        );
       recorder.chat.push(body);
       const content = recorder.responder
         ? recorder.responder(body)
@@ -127,18 +127,23 @@ export function installRecorder(
       }
       const found = texts.map((t) => vectors.get(t));
       if (found.some((v) => !v)) {
-        for (const t of texts) if (!vectors.has(t)) recorder.missingVectors.add(t);
+        for (const t of texts)
+          if (!vectors.has(t)) recorder.missingVectors.add(t);
         return new Response('no pinned vector', { status: 503 });
       }
       return Response.json({ embeddings: found });
     }
-    throw new EvalRefusedError(`The golden run made a network call it should not have: ${url}`);
+    throw new EvalRefusedError(
+      `The golden run made a network call it should not have: ${url}`,
+    );
   };
   return recorder;
 }
 
 function keyed<T>(entries: Array<[string, T]>): Record<string, T> {
-  return Object.fromEntries([...entries].sort(([a], [b]) => a.localeCompare(b)));
+  return Object.fromEntries(
+    [...entries].sort(([a], [b]) => a.localeCompare(b)),
+  );
 }
 
 async function recordRequests(
@@ -155,7 +160,10 @@ async function recordRequests(
     for (const variant of PROMPTS) {
       requests[step][variant] = {};
       for (const [shape, flags] of Object.entries(SHAPES)) {
-        const settings: StepSettings = { ...settingsFor(step, { size: 'medium', ...flags, prompt: variant }), seed: 1 };
+        const settings: StepSettings = {
+          ...settingsFor(step, { size: 'medium', ...flags, prompt: variant }),
+          seed: 1,
+        };
         const perCase: Array<[string, string]> = [];
         const prompts: Array<unknown> = [];
         for (const c of cases) {
@@ -167,7 +175,8 @@ async function recordRequests(
           prompts.push(recorder.chat.map((body) => body.messages));
         }
         requests[step][variant][shape] = keyed(perCase);
-        if (flags.forceFormat) promptFingerprints[step][variant] = sha256(prompts).slice(0, 10);
+        if (flags.forceFormat)
+          promptFingerprints[step][variant] = sha256(prompts).slice(0, 10);
       }
     }
   }
@@ -190,10 +199,15 @@ async function replay(
   ctx: EvalContext,
   recorder: Recorder,
   rows: Array<ResultRow>,
-): Promise<{ replays: Golden['replays']; skipped: Golden['skipped']; details: Array<ReplayDetail> }> {
+): Promise<{
+  replays: Golden['replays'];
+  skipped: Golden['skipped'];
+  details: Array<ReplayDetail>;
+}> {
   const cases = new Map<string, EvalCase>();
   for (const step of STEP_IDS) {
-    for (const c of await STEP_EVALS[step].cases(ctx)) cases.set(`${step}|${c.id}`, c);
+    for (const c of await STEP_EVALS[step].cases(ctx))
+      cases.set(`${step}|${c.id}`, c);
   }
   const byConfig = new Map<string, Array<ReplayDetail>>();
   const details: Array<ReplayDetail> = [];
@@ -211,7 +225,8 @@ async function replay(
     const evalDef = STEP_EVALS[row.step];
     recorder.chat = [];
     // The follow-up step may call twice; its two replies were saved joined.
-    recorder.replies = row.step === 'followup' ? row.raw.split('\n---\n') : [row.raw];
+    recorder.replies =
+      row.step === 'followup' ? row.raw.split('\n---\n') : [row.raw];
     recorder.doneReason = row.outcome === 'truncated' ? 'length' : 'stop';
     const run = await evalDef.run(c, row.settings, ctx);
     const graded = evalDef.grade(c, run.observed, ctx);
@@ -231,10 +246,12 @@ async function replay(
     byConfig.set(group, [...(byConfig.get(group) ?? []), detail]);
   }
   const replays = keyed(
-    [...byConfig].map(([group, list]): [string, { rows: number; digest: string }] => [
-      group,
-      { rows: list.length, digest: sha256(list) },
-    ]),
+    [...byConfig].map(
+      ([group, list]): [string, { rows: number; digest: string }] => [
+        group,
+        { rows: list.length, digest: sha256(list) },
+      ],
+    ),
   );
   return { replays, skipped, details };
 }
@@ -244,10 +261,17 @@ export async function buildGolden(
   rows: Array<ResultRow>,
   vectors: Map<string, Array<number>>,
   capture?: Parameters<typeof installRecorder>[1],
-): Promise<{ golden: Golden; details: Array<ReplayDetail>; missingVectors: Array<string> }> {
+): Promise<{
+  golden: Golden;
+  details: Array<ReplayDetail>;
+  missingVectors: Array<string>;
+}> {
   const recorder = installRecorder(vectors, capture);
   try {
-    const { requests, promptFingerprints } = await recordRequests(ctx, recorder);
+    const { requests, promptFingerprints } = await recordRequests(
+      ctx,
+      recorder,
+    );
     const { replays, skipped, details } = await replay(ctx, recorder, rows);
     const embedRequests = sha256([...recorder.embeds.keys()].sort());
     return {
@@ -260,12 +284,19 @@ export async function buildGolden(
   }
 }
 
-// Every place where two golden files disagree, as readable paths.
-export function goldenDifferences(expected: unknown, actual: unknown, path = ''): Array<string> {
+export function goldenDifferences(
+  expected: unknown,
+  actual: unknown,
+  path = '',
+): Array<string> {
   if (JSON.stringify(expected) === JSON.stringify(actual)) return [];
   const isRecord = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null && !Array.isArray(v);
   if (!isRecord(expected) || !isRecord(actual)) return [path || '(whole file)'];
-  const keys = [...new Set([...Object.keys(expected), ...Object.keys(actual)])].sort();
-  return keys.flatMap((k) => goldenDifferences(expected[k], actual[k], path ? `${path} > ${k}` : k));
+  const keys = [
+    ...new Set([...Object.keys(expected), ...Object.keys(actual)]),
+  ].sort();
+  return keys.flatMap((k) =>
+    goldenDifferences(expected[k], actual[k], path ? `${path} > ${k}` : k),
+  );
 }

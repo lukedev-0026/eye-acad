@@ -1,7 +1,3 @@
-// Makes a displayed value sayable. Keyed on the row's own unit, so nothing here
-// knows about any particular finding. Anything unrecognised is passed through
-// unchanged for the voice to read as best it can.
-
 const SPOKEN_UNIT: Record<string, string> = {
   mmHg: 'millimetres of mercury',
   mm: 'millimetres',
@@ -30,17 +26,20 @@ export function speakValue(display: string, unit: string | null): string {
   if (unit) {
     const spoken = SPOKEN_UNIT[unit] ?? unit;
     const u = escapeRegExp(unit);
-    // "168/94 mmHg" -> "168 over 94 millimetres of mercury"
     text = text.replace(
-      new RegExp(String.raw`(${NUMBER})\s*\/\s*(${NUMBER})\s*${u}(?![\w/])`, 'g'),
+      new RegExp(
+        String.raw`(${NUMBER})\s*\/\s*(${NUMBER})\s*${u}(?![\w/])`,
+        'g',
+      ),
       `$1 over $2 ${spoken}`,
     );
-    // "58 mmHg" -> "58 millimetres of mercury"; "5 mm" inside prose likewise.
-    text = text.replace(new RegExp(String.raw`(${NUMBER})\s*${u}(?![\w/])`, 'g'), `$1 ${spoken}`);
+    text = text.replace(
+      new RegExp(String.raw`(${NUMBER})\s*${u}(?![\w/])`, 'g'),
+      `$1 ${spoken}`,
+    );
   }
 
   if (unit === 'dioptres' || unit === 'D') {
-    // "+3.50 DS" -> "plus 3.50 dioptres sphere"
     text = text.replace(
       new RegExp(String.raw`([+\-−])\s*(${NUMBER})\s*D([SC])?\b`, 'g'),
       (_m, sign: string, n: string, kind?: string) =>
@@ -52,7 +51,7 @@ export function speakValue(display: string, unit: string | null): string {
   return text;
 }
 
-// A short all-capitals label is an abbreviation; say it letter by letter.
+/** A short all-capitals label is an abbreviation, said letter by letter. */
 export function speakLabel(label: string): string {
   return /^[A-Z]{2,5}$/.test(label) ? label.split('').join(' ') : label;
 }

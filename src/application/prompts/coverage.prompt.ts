@@ -34,5 +34,12 @@ export function coveragePrompt(
     `Items a full answer would include:\n${input.items.map((i) => `${i.id}: ${i.text}`).join('\n')}`,
     `The trainee's answer:\n${quoted(input.answer)}`,
   ].join('\n\n');
-  return { system: assemble(variant, { task: TASK, rules: RULES, examples: EXAMPLES }, jsonShape), user };
+  return {
+    system: assemble(
+      variant,
+      { task: TASK, rules: RULES, examples: EXAMPLES },
+      jsonShape,
+    ),
+    user,
+  };
 }

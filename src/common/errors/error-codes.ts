@@ -1,7 +1,4 @@
-// Every code an error can carry. A code is a stable, machine-readable name: the
-// browser switches on it, logs are searched by it, and it never changes with
-// the wording of a message. Always a string: Firestore retries a transaction
-// when it sees a numeric `code` on a thrown error.
+// Strings only: Firestore retries a transaction on a numeric `code`.
 export const ERROR_CODES = [
   'UNAUTHENTICATED',
   'INVALID_INPUT',
@@ -29,5 +26,8 @@ export const ERROR_CODES = [
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 export function isErrorCode(value: unknown): value is ErrorCode {
-  return typeof value === 'string' && (ERROR_CODES as ReadonlyArray<string>).includes(value);
+  return (
+    typeof value === 'string' &&
+    (ERROR_CODES as ReadonlyArray<string>).includes(value)
+  );
 }

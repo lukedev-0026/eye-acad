@@ -35,16 +35,21 @@ describe('starting an attempt', () => {
 
     const attemptId = await startAttempt({ attempts }, 'trainee-a');
 
-    await expect(attempts.read('trainee-b', attemptId)).rejects.toMatchObject({ code: 'ATTEMPT_NOT_FOUND' });
+    await expect(attempts.read('trainee-b', attemptId)).rejects.toMatchObject({
+      code: 'ATTEMPT_NOT_FOUND',
+    });
     expect(await attempts.count('trainee-b')).toBe(0);
   });
 
   it('refuses once the account has reached its limit', async () => {
     const attempts = new InMemoryAttemptRepository();
     const blank = newAttempt(await loadCase());
-    for (let i = 0; i < MAX_ATTEMPTS_PER_USER; i++) await attempts.create('trainee-a', blank);
+    for (let i = 0; i < MAX_ATTEMPTS_PER_USER; i++)
+      await attempts.create('trainee-a', blank);
 
-    await expect(startAttempt({ attempts }, 'trainee-a')).rejects.toBeInstanceOf(AttemptLimitReachedError);
+    await expect(
+      startAttempt({ attempts }, 'trainee-a'),
+    ).rejects.toBeInstanceOf(AttemptLimitReachedError);
     expect(await attempts.count('trainee-a')).toBe(MAX_ATTEMPTS_PER_USER);
   });
 });

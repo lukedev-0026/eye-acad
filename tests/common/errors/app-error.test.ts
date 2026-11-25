@@ -3,14 +3,21 @@ import { describe, expect, it } from 'vitest';
 import { AppError, serialiseError } from '@/common/errors/app.error';
 import { UnauthenticatedError } from '@/common/errors/auth.error';
 import { ERROR_CODES, isErrorCode } from '@/common/errors/error-codes';
-import { ExternalServiceError, ModelProviderError } from '@/common/errors/external-service.error';
+import {
+  ExternalServiceError,
+  ModelProviderError,
+} from '@/common/errors/external-service.error';
 import { InternalError } from '@/common/errors/internal.error';
 import { ValidationError } from '@/common/errors/validation.error';
 
 describe('AppError', () => {
   it('keeps what was caught as the cause, whole', () => {
     const network = new TypeError('fetch failed');
-    const error = new ModelProviderError('ollama', 'The model could not be reached.', { cause: network });
+    const error = new ModelProviderError(
+      'ollama',
+      'The model could not be reached.',
+      { cause: network },
+    );
 
     expect(error.cause).toBe(network);
     expect(error.rootCause).toBe(network);
@@ -18,7 +25,9 @@ describe('AppError', () => {
 
   it('finds the first failure under several wrappings', () => {
     const first = new Error('connection refused');
-    const second = new ModelProviderError('ollama', 'unreachable', { cause: first });
+    const second = new ModelProviderError('ollama', 'unreachable', {
+      cause: first,
+    });
     const third = new InternalError({ cause: second });
 
     expect(third.rootCause).toBe(first);
@@ -41,7 +50,9 @@ describe('AppError', () => {
   });
 
   it('names itself with a fixed name, not the class name the bundler may shorten', () => {
-    expect(new ModelProviderError('ollama', 'x').name).toBe('ModelProviderError');
+    expect(new ModelProviderError('ollama', 'x').name).toBe(
+      'ModelProviderError',
+    );
     expect(new UnauthenticatedError().name).toBe('UnauthenticatedError');
     expect(new InternalError().name).toBe('InternalError');
   });
@@ -50,17 +61,23 @@ describe('AppError', () => {
     const unauthenticated = new UnauthenticatedError();
     const internal = new InternalError({ cause: new Error('secret detail') });
 
-    expect([unauthenticated.code, unauthenticated.status, unauthenticated.expose]).toEqual([
-      'UNAUTHENTICATED',
-      401,
-      true,
+    expect([
+      unauthenticated.code,
+      unauthenticated.status,
+      unauthenticated.expose,
+    ]).toEqual(['UNAUTHENTICATED', 401, true]);
+    expect([internal.code, internal.status, internal.expose]).toEqual([
+      'INTERNAL',
+      500,
+      false,
     ]);
-    expect([internal.code, internal.status, internal.expose]).toEqual(['INTERNAL', 500, false]);
     expect(internal.message).not.toContain('secret detail');
   });
 
   it('records which service failed in its details', () => {
-    const error = new ModelProviderError('anthropic', 'HTTP 529', { details: { model: 'm' } });
+    const error = new ModelProviderError('anthropic', 'HTTP 529', {
+      details: { model: 'm' },
+    });
 
     expect(error.service).toBe('anthropic');
     expect(error.details).toEqual({ service: 'anthropic', model: 'm' });
@@ -68,7 +85,9 @@ describe('AppError', () => {
 
   it('turns into plain data with the whole chain of causes', () => {
     const error = new InternalError({
-      cause: new ModelProviderError('ollama', 'unreachable', { cause: new TypeError('fetch failed') }),
+      cause: new ModelProviderError('ollama', 'unreachable', {
+        cause: new TypeError('fetch failed'),
+      }),
     });
 
     expect(JSON.parse(JSON.stringify(error))).toEqual({
@@ -86,8 +105,14 @@ describe('AppError', () => {
   });
 
   it('serialises a thrown value that is not an error', () => {
-    expect(serialiseError('just a string')).toEqual({ name: 'NonError', message: 'just a string' });
-    expect(serialiseError({ reason: 1 })).toEqual({ name: 'NonError', message: '{"reason":1}' });
+    expect(serialiseError('just a string')).toEqual({
+      name: 'NonError',
+      message: 'just a string',
+    });
+    expect(serialiseError({ reason: 1 })).toEqual({
+      name: 'NonError',
+      message: '{"reason":1}',
+    });
   });
 
   it('stops following a chain of causes that loops', () => {

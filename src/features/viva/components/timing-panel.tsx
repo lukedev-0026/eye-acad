@@ -3,9 +3,11 @@ import type { JSX } from 'react';
 import { asTsv, summarise } from '@/features/viva/lib/latency';
 import type { TurnTiming } from '@/features/viva/lib/latency';
 
-// The response times of this session's turns, for the write-up. Nothing is
-// shown until there is a turn to show.
-export function TimingPanel({ timings }: { timings: Array<TurnTiming> }): JSX.Element | null {
+export function TimingPanel({
+  timings,
+}: {
+  timings: Array<TurnTiming>;
+}): JSX.Element | null {
   if (timings.length === 0) return null;
   const summary = summarise(timings);
   return (
@@ -17,7 +19,8 @@ export function TimingPanel({ timings }: { timings: Array<TurnTiming> }): JSX.El
           : ''}
       </summary>
       <p className="muted small">
-        The timer starts when the talk button is released and stops when the reply audio starts playing.
+        The timer starts when the talk button is released and stops when the
+        reply audio starts playing.
       </p>
       <pre className="timing-table">{asTsv(timings)}</pre>
     </details>

@@ -8,11 +8,14 @@ import { pageLabel } from '@/domain/note/note-text';
 import type { NoteIndex } from '@/domain/note/note.schema';
 import { Bm25, retrieve, stem, tokenize } from '@/domain/note/retrieve';
 
-const index = JSON.parse(readFileSync('data/note-index.json', 'utf8')) as NoteIndex;
-const pdfHash = createHash('sha256').update(readFileSync('data/reference-note.pdf')).digest('hex');
-// These expectations describe the PDF supplied with the task. If the PDF is
-// replaced they no longer apply, and are skipped with a clear reason.
-const SUPPLIED_PDF = 'aadeb55dce02f2e3131d9ab077e8dce271a2e295b69686de18e6121fbfa5ffaa';
+const index = JSON.parse(
+  readFileSync('data/note-index.json', 'utf8'),
+) as NoteIndex;
+const pdfHash = createHash('sha256')
+  .update(readFileSync('data/reference-note.pdf'))
+  .digest('hex');
+const SUPPLIED_PDF =
+  'aadeb55dce02f2e3131d9ab077e8dce271a2e295b69686de18e6121fbfa5ffaa';
 const supplied = pdfHash === SUPPLIED_PDF;
 
 const sentence = (phrase: string) => {
@@ -40,10 +43,11 @@ describe('the prepared note', () => {
     const all = JSON.stringify(index.chunks.map((c) => [c.headings, c.text]));
     expect(all).not.toContain('Take-home reference note');
     expect(all).not.toContain('Eye Academy reference note');
-    // The body text mentions Kanski once; the sources list cites the edition.
     expect(all).not.toMatch(/Clinical Ophthalmology, 10th ed/);
     expect(all).not.toMatch(/accessed November 2026/);
-    expect(index.chunks.some((c) => c.headings.includes('Sources'))).toBe(false);
+    expect(index.chunks.some((c) => c.headings.includes('Sources'))).toBe(
+      false,
+    );
   });
 });
 
@@ -60,24 +64,36 @@ describe.skipIf(!supplied)('the supplied PDF', () => {
       'Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it.',
     );
     expect(pageLabel(s.pages)).toBe('p. 6');
-    expect(chunk.sentences[0]?.text.startsWith('Acetazolamide 500 mg')).toBe(true);
+    expect(chunk.sentences[0]?.text.startsWith('Acetazolamide 500 mg')).toBe(
+      true,
+    );
     expect(pageLabel(chunk.sentences[0]?.pages ?? [])).toBe('pp. 5–6');
   });
   it('does not join the similar-looking break between pages 3 and 4', () => {
-    const { chunk } = sentence('Blurred vision and coloured haloes around lights');
+    const { chunk } = sentence(
+      'Blurred vision and coloured haloes around lights',
+    );
     expect(chunk.pages).toEqual([3]);
-    expect(sentence('Nausea, vomiting and sometimes abdominal pain').chunk.pages).toEqual([4]);
+    expect(
+      sentence('Nausea, vomiting and sometimes abdominal pain').chunk.pages,
+    ).toEqual([4]);
   });
   it('keeps table rows, with each cell quotable and its column named', () => {
-    const { chunk, sentence: s } = sentence('sulfonamide allergy, kidney disease, sickle cell disease');
+    const { chunk, sentence: s } = sentence(
+      'sulfonamide allergy, kidney disease, sickle cell disease',
+    );
     expect(chunk.kind).toBe('table_row');
     expect(chunk.leadIn).toBe('Systemic carbonic anhydrase inhibitors');
     expect(s.column).toBe('Key cautions');
     expect(chunk.headings).toEqual(['IOP-lowering medicines']);
   });
   it('treats a bold opening as a label only when it ends a sentence', () => {
-    expect(sentence('Pilocarpine 2% constricts the pupil').chunk.leadIn).toBe('Pilocarpine.');
-    const flowing = sentence('Hyperosmotic agents if the pressure stays high').chunk;
+    expect(sentence('Pilocarpine 2% constricts the pupil').chunk.leadIn).toBe(
+      'Pilocarpine.',
+    );
+    const flowing = sentence(
+      'Hyperosmotic agents if the pressure stays high',
+    ).chunk;
     expect(flowing.leadIn).toBeNull();
   });
 });
@@ -90,19 +106,31 @@ describe('search', () => {
     expect(stem('glaucomatous')).toBe('glaucomatous');
   });
   it('scores a document that shares rare words above one that does not', () => {
-    const bm25 = new Bm25([tokenize('acetazolamide and sulfonamide allergy'), tokenize('the pupil is fixed')]);
+    const bm25 = new Bm25([
+      tokenize('acetazolamide and sulfonamide allergy'),
+      tokenize('the pupil is fixed'),
+    ]);
     const scores = bm25.scores(tokenize('sulfonamide allergy'));
     expect(itemAt(scores, 0)).toBeGreaterThan(itemAt(scores, 1));
     expect(scores[1]).toBe(0);
   });
-  it.skipIf(!supplied)('finds the page 5-6 passage first for the allergy key point, by keywords alone', () => {
-    const run = retrieve(index, { target: 'Note the sulfonamide allergy before giving acetazolamide' });
-    expect(run.mode).toBe('keyword_only');
-    expect(run.results[0]?.chunk.leadIn).toBe('Systemic carbonic anhydrase inhibitor.');
-  });
+  it.skipIf(!supplied)(
+    'finds the page 5-6 passage first for the allergy key point, by keywords alone',
+    () => {
+      const run = retrieve(index, {
+        target: 'Note the sulfonamide allergy before giving acetazolamide',
+      });
+      expect(run.mode).toBe('keyword_only');
+      expect(run.results[0]?.chunk.leadIn).toBe(
+        'Systemic carbonic anhydrase inhibitor.',
+      );
+    },
+  );
   it('can leave a passage out, for the "no support" tests', () => {
     const first = itemAt(
-      retrieve(index, { target: 'Note the sulfonamide allergy before giving acetazolamide' }).results,
+      retrieve(index, {
+        target: 'Note the sulfonamide allergy before giving acetazolamide',
+      }).results,
       0,
     ).chunk.id;
     const without = retrieve(

@@ -9,9 +9,6 @@ import { CEILING_MS, sizeOf, startSettings } from '@/eval/sweep/grid';
 import type { SweepData } from '@/eval/sweep/sweep-data';
 import type { Preflight } from '@/eval/sweep/sweep-rows.schema';
 
-// The results table: one row per configuration, stage and split, built from
-// the saved calls alone.
-
 const COLUMNS = [
   'run_id',
   'date_utc',
@@ -71,9 +68,7 @@ type Column = (typeof COLUMNS)[number];
 export interface CsvMeta {
   readonly runId: string;
   readonly preflight: Preflight;
-  // A short hash of each step's case file, so a row says which cases it was scored on.
   readonly caseHashes: Partial<Record<StepId, string>>;
-  // step -> prompt wording -> a fingerprint of the prompts as the model receives them.
   readonly promptFingerprints: Record<string, Record<string, string>>;
 }
 
@@ -120,7 +115,8 @@ function csvRow(
     thinking: st.thinking ? 'on' : 'off',
     median_thinking_chars: upperMedian(rows.map((r) => r.thinkingChars)) ?? '',
     forced_format: st.forceFormat ? 'on' : 'off',
-    format_canary: meta.preflight.models?.[st.model]?.canaries?.[canaryKey]?.outcome ?? '',
+    format_canary:
+      meta.preflight.models?.[st.model]?.canaries?.[canaryKey]?.outcome ?? '',
     prompt: st.promptVariant,
     prompt_fingerprint: meta.promptFingerprints[step]?.[st.promptVariant] ?? '',
     num_ctx: st.numCtx ?? '',
@@ -151,21 +147,42 @@ function csvRow(
     power_mode: run?.env?.powerMode ?? '',
     case_file_hash: meta.caseHashes[step] ?? '',
     status: data.stopped.has(cfgId) ? 'stopped' : 'complete',
-    eligible: !data.stopped.has(cfgId) && !tooSlow && s.costly === 0 ? 'yes' : 'no',
+    eligible:
+      !data.stopped.has(cfgId) && !tooSlow && s.costly === 0 ? 'yes' : 'no',
     is_start: configId(step, startSettings(step)) === cfgId ? 'yes' : 'no',
     is_chosen: isChosen ? 'yes' : 'no',
   };
   return COLUMNS.map((column) => csvCell(row[column])).join(',');
 }
 
-export function resultsCsv(data: SweepData, chosen: Partial<Record<StepId, Ranked>>, meta: CsvMeta): Array<string> {
+export function resultsCsv(
+  data: SweepData,
+  chosen: Partial<Record<StepId, Ranked>>,
+  meta: CsvMeta,
+): Array<string> {
   const lines: Array<string> = [COLUMNS.join(',')];
-  const add = (cfgId: string, stage: string, split: string, rows: Array<ResultRow>): void => {
-    const line = csvRow(data, chosen, meta, cfgId, stage, split, rows, summarise(rows));
+  const add = (
+    cfgId: string,
+    stage: string,
+    split: string,
+    rows: Array<ResultRow>,
+  ): void => {
+    const line = csvRow(
+      data,
+      chosen,
+      meta,
+      cfgId,
+      stage,
+      split,
+      rows,
+      summarise(rows),
+    );
     if (line !== null) lines.push(line);
   };
   for (const cfg of data.configs.values()) {
-    const mine = data.results.filter((r) => r.configId === cfg.configId && r.step === cfg.step);
+    const mine = data.results.filter(
+      (r) => r.configId === cfg.configId && r.step === cfg.step,
+    );
     const pick = (stages: Array<string>, split: string): Array<ResultRow> =>
       mine.filter((r) => stages.includes(r.stage) && r.split === split);
     const screen = pick(['screen'], 'tune');

@@ -1,14 +1,11 @@
 import { AppError } from '@/common/errors/app.error';
 import type { AppErrorOptions } from '@/common/errors/app.error';
 
-// Something about an attempt stops a request from going ahead. These messages
-// were written for the trainee, so they may be shown.
 export abstract class AttemptError extends AppError {
   override readonly expose = true;
 }
 
-// It does not exist, or it belongs to someone else. The two are never told
-// apart: an attempt is looked up under the caller's own account.
+/** Missing or someone else's: deliberately not told apart. */
 export class AttemptNotFoundError extends AttemptError {
   override readonly name = 'AttemptNotFoundError';
   readonly code = 'ATTEMPT_NOT_FOUND';
@@ -19,8 +16,6 @@ export class AttemptNotFoundError extends AttemptError {
   }
 }
 
-// The attempt is not at the stage the request needs: a question after the
-// answer has been given, a second answer, a reply before the follow-up.
 export class AttemptPhaseError extends AttemptError {
   override readonly name = 'AttemptPhaseError';
   readonly code = 'ATTEMPT_WRONG_PHASE';

@@ -6,8 +6,6 @@ import type { PromptVariant } from '@/domain/llm/step-settings.schema';
 export interface SelectorPromptInput {
   openingPrompt: string;
   catalogue: Catalogue;
-  // The previous turn's choices, so "and the left?" can be resolved without
-  // replaying any earlier words from the trainee.
   previous: Array<SelectorRequest>;
   utterance: string;
 }
@@ -31,8 +29,7 @@ const RULES = `Rules:
 7. A question that mentions a diagnosis is still "request_items" if it asks for a finding. Use "wants_to_answer" only when the trainee states their own diagnosis or plan.
 8. For history items the eye is always "unspecified".`;
 
-// From an invented case with a different list, so nothing here can leak into,
-// or go stale against, the live case file.
+// Invented case on purpose: real examples could leak or go stale.
 const EXAMPLES = `Worked examples from a different, invented case. Its list was: findings "Colour vision", "Eye movements", "Eyelids", "Visual fields", "Tear film"; history "Occupation", "Smoking".
 - Trainee: "Can I have the colour vision in the right eye?"
   {"intent":"request_items","requests":[{"item":"Colour vision","eye":"right"}],"not_in_catalogue":false}
@@ -51,13 +48,20 @@ const EXAMPLES = `Worked examples from a different, invented case. Its list was:
 
 const quote = (text: string) => text.replaceAll('"""', '"').trim();
 
-export function selectorPrompt(variant: PromptVariant, input: SelectorPromptInput, jsonShape: string): Prompt {
-  const extra = variant === 'rules' ? RULES : variant === 'examples' ? EXAMPLES : '';
+export function selectorPrompt(
+  variant: PromptVariant,
+  input: SelectorPromptInput,
+  jsonShape: string,
+): Prompt {
+  const extra =
+    variant === 'rules' ? RULES : variant === 'examples' ? EXAMPLES : '';
   const system = [TASK, extra, jsonShape].filter(Boolean).join('\n\n');
 
   const findings = input.catalogue.items.filter((i) => i.kind === 'finding');
   const history = input.catalogue.items.filter((i) => i.kind === 'history');
-  const previous = input.previous.length ? input.previous.map((r) => `${r.item} (${r.eye})`).join('; ') : 'none';
+  const previous = input.previous.length
+    ? input.previous.map((r) => `${r.item} (${r.eye})`).join('; ')
+    : 'none';
 
   const user = [
     `Case introduction read to the trainee:\n"""${quote(input.openingPrompt)}"""`,

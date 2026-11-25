@@ -1,6 +1,4 @@
-// Compares the three ways of searching the note and writes
-// evals/retrieval-table.md. No language model is involved.
-//   pnpm retrieval-table
+// pnpm retrieval-table  compare note search methods, write evals/
 import { writeFile } from 'node:fs/promises';
 
 import { runCli } from '@/eval/cli';

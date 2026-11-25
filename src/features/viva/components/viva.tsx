@@ -15,12 +15,9 @@ import { hintFor } from '@/features/viva/lib/turn-machine';
 
 interface VivaProps {
   attemptId: string;
-  // The saved attempt, live: the screen is drawn from it and nothing else.
   attempt: PublicAttempt;
 }
 
-// One attempt at the viva: the conversation, what has been revealed, the
-// answer and follow-up, and the revision point at the end.
 export function Viva({ attemptId, attempt }: VivaProps): JSX.Element {
   const session = useVivaSession(attemptId, attempt);
   const { mode, turn } = session;
@@ -30,7 +27,9 @@ export function Viva({ attemptId, attempt }: VivaProps): JSX.Element {
       <div className="row between">
         <div>
           <h1>{attempt.caseTitle || 'Practice viva'}</h1>
-          <p className="muted small">Fictional case for practice. Not a real patient.</p>
+          <p className="muted small">
+            Fictional case for practice. Not a real patient.
+          </p>
         </div>
         <Link to="/attempts" className="button quiet">
           All attempts
@@ -39,9 +38,14 @@ export function Viva({ attemptId, attempt }: VivaProps): JSX.Element {
 
       {mode ? <TurnBanner state={turn} hint={hintFor(mode, turn)} /> : null}
 
-      {attempt.phase === 'complete' && attempt.revision ? <RevisionCardView card={attempt.revision} /> : null}
+      {attempt.phase === 'complete' && attempt.revision ? (
+        <RevisionCardView card={attempt.revision} />
+      ) : null}
       {attempt.phase === 'revising' ? (
-        <RevisionPending problem={session.revisionProblem} onRetry={() => void session.tryRevisionAgain()} />
+        <RevisionPending
+          problem={session.revisionProblem}
+          onRetry={() => void session.tryRevisionAgain()}
+        />
       ) : null}
 
       <div className="viva-grid">
@@ -56,7 +60,11 @@ export function Viva({ attemptId, attempt }: VivaProps): JSX.Element {
 
           {mode === 'asking' ? <RequestComposer session={session} /> : null}
           {mode === 'answering' || mode === 'follow_up' ? (
-            <AnswerComposer session={session} mode={mode} followUpReady={Boolean(attempt.followUp)} />
+            <AnswerComposer
+              session={session}
+              mode={mode}
+              followUpReady={Boolean(attempt.followUp)}
+            />
           ) : null}
         </section>
 

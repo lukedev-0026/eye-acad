@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-// Shape of the supplied case file. Unknown extra fields are allowed, so a
-// reviewer can add to the file without breaking the loader.
-
 const EyeSchema = z.enum(['right', 'left', 'both']).nullable();
 export type Eye = z.infer<typeof EyeSchema>;
 
@@ -10,7 +7,6 @@ const FindingSchema = z.looseObject({
   id: z.string().min(1),
   eye: EyeSchema.default(null),
   label: z.string().min(1),
-  // Pressures are JSON numbers; everything else is text.
   value: z.union([z.string(), z.number()]).nullable().default(null),
   unit: z.string().nullable().default(null),
   method: z.string().nullable().default(null),
@@ -19,7 +15,12 @@ const FindingSchema = z.looseObject({
 });
 export type Finding = z.infer<typeof FindingSchema>;
 
-const PatientValue = z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))]);
+const PatientValue = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.array(z.union([z.string(), z.number()])),
+]);
 export type PatientValue = z.infer<typeof PatientValue>;
 
 const ExaminerNotesSchema = z.looseObject({
@@ -37,22 +38,22 @@ export const CaseFileSchema = z
     patient: z.record(z.string(), PatientValue.nullable()),
     findings: z.array(FindingSchema).min(1),
     examiner_notes: ExaminerNotesSchema,
-    // The case author's own instruction on how to cite the reference note.
     reference_source: z.looseObject({ note: z.string().optional() }).optional(),
   })
-  .refine((c) => new Set(c.findings.map((f) => f.id)).size === c.findings.length, {
-    error: 'Two findings share the same id.',
-  });
+  .refine(
+    (c) => new Set(c.findings.map((f) => f.id)).size === c.findings.length,
+    {
+      error: 'Two findings share the same id.',
+    },
+  );
 
 export type CaseFile = z.infer<typeof CaseFileSchema>;
 
-// What the questioning phase is allowed to hold: everything except the notes.
 export interface PublicCase {
   caseId: string;
   title: string;
   openingPrompt: string;
   patient: Record<string, PatientValue | null>;
   findings: Array<Finding>;
-  // Changes whenever the file's bytes change. Stored with each attempt.
   fileHash: string;
 }

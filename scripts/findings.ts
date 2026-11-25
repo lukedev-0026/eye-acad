@@ -1,6 +1,4 @@
-// Prints every finding and history item exactly as the app will show and say
-// it, straight from the current case file. Compare against the case PDF.
-//   pnpm findings
+// pnpm findings  print every finding and history item as the app does
 import type { RenderedItem } from '@/domain/examiner/render';
 import { renderFinding, renderHistory } from '@/domain/examiner/render';
 import { runCli } from '@/eval/cli';
@@ -18,5 +16,6 @@ await runCli(async () => {
   console.log('FINDINGS');
   for (const row of c.findings) print(renderFinding(row));
   console.log('\nHISTORY');
-  for (const [key, value] of Object.entries(c.patient)) print(renderHistory(key, value));
+  for (const [key, value] of Object.entries(c.patient))
+    print(renderHistory(key, value));
 });

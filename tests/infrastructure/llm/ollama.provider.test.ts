@@ -27,7 +27,8 @@ const request = (settings: Partial<StepSettings> = {}): ProviderRequest => ({
   schema: Schema,
   jsonSchema: z.toJSONSchema(Schema),
 });
-const provider = () => new OllamaProvider(new OllamaClient('http://ollama.test:11434'), '30m');
+const provider = () =>
+  new OllamaProvider(new OllamaClient('http://ollama.test:11434'), '30m');
 const GOOD_REPLY = {
   model: 'qwen3.5:9b',
   message: { content: '{"verdict":"yes"}', thinking: 'hmm' },
@@ -94,16 +95,33 @@ describe('the Ollama provider', () => {
       text: '{"verdict":"yes"}',
       thinkingChars: 3,
       model: 'qwen3.5:9b',
-      server: { loadMs: 3, promptEvalMs: 40, evalMs: 311, promptTokens: 120, outputTokens: 9 },
+      server: {
+        loadMs: 3,
+        promptEvalMs: 40,
+        evalMs: 311,
+        promptTokens: 120,
+        outputTokens: 9,
+      },
     });
   });
 
   it('copes with a reply that leaves fields out or sends them as null', async () => {
-    fakeFetch(() => json({ message: { content: 'x', thinking: null }, done_reason: null, eval_duration: null }));
+    fakeFetch(() =>
+      json({
+        message: { content: 'x', thinking: null },
+        done_reason: null,
+        eval_duration: null,
+      }),
+    );
 
     const reply = await provider().call(request());
 
-    expect(reply).toMatchObject({ outcome: 'ok', text: 'x', thinkingChars: 0, model: 'qwen3.5:9b' });
+    expect(reply).toMatchObject({
+      outcome: 'ok',
+      text: 'x',
+      thinkingChars: 0,
+      model: 'qwen3.5:9b',
+    });
     expect(reply.server.evalMs).toBeUndefined();
   });
 
@@ -148,7 +166,10 @@ describe('the Ollama provider', () => {
   it('reports an error status with no message by its number', async () => {
     fakeFetch(() => json({}, 500));
 
-    expect(await provider().call(request())).toMatchObject({ outcome: 'infra_error', error: 'HTTP 500' });
+    expect(await provider().call(request())).toMatchObject({
+      outcome: 'infra_error',
+      error: 'HTTP 500',
+    });
   });
 
   it('reports a reply that is not JSON, or not shaped like a chat reply, as an infrastructure error', async () => {

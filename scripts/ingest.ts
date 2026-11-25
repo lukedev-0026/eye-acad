@@ -1,7 +1,4 @@
-// Prepares the reference note for search and writes data/note-index.json.
-//   pnpm ingest [path/to/note.pdf]
-// Needs poppler (`pdftohtml`). Re-running on an unchanged PDF with the same
-// embeddings model should leave the committed index byte-for-byte the same.
+// pnpm ingest [note.pdf]  index into data/note-index.json (needs pdftohtml)
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -19,7 +16,9 @@ await runCli(async () => {
   });
 
   if (!note.embedded) {
-    console.warn(`Could not reach the embeddings model (${config.embeddings.model}). Writing a keyword-only index.`);
+    console.warn(
+      `Could not reach the embeddings model (${config.embeddings.model}). Writing a keyword-only index.`,
+    );
   }
   await writeFile(config.files.noteIndex, note.text);
 

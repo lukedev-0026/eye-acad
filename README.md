@@ -114,7 +114,8 @@ down the same path as the held button:
 | **As shipped:** one clip per sentence, made ahead | **1.8 s** | 1.5 to 2.3 s | 10 |
 | First version: one clip per reply, made when needed | 5.8 s | 4.0 to 10.8 s | 10 |
 
-Now speech to text is 1.1 s and the model 0.5 s; text to speech is 0 s because the clips are made
+Now speech to text is 1.1 s and the model 0.5 s (before the second improvement, which adds about
+0.4 s when something is picked; not re-timed); text to speech is 0 s because the clips are made
 while the opening is read. The first turn after the model has been idle takes 3.6 s and is left
 out. Not measured: a real voice, a slow network, another machine. Raw rows:
 [`evals/voice-timing/`](evals/voice-timing/).
@@ -147,7 +148,10 @@ which names acetazolamide on p. 5. **A person's yes or no:** _to be filled in by
 
 ## What works, and what does not
 
-Runs passed of runs made, shipped settings, typed unless stated. Source: `CHECKS.md`.
+Runs passed of runs made, shipped settings, typed unless stated. Source: `CHECKS.md` (24 November).
+The required checks were run again on 25 November after the second improvement
+([`evals/near-miss/required-after.md`](evals/near-miss/required-after.md)): the same results, except
+as noted for "not in the case".
 
 **Works**
 
@@ -157,6 +161,8 @@ Runs passed of runs made, shipped settings, typed unless stated. Source: `CHECKS
 - **Findings.** The pressure 10 of 10 and gonioscopy 10 of 10 (also aloud). The pupil-defect
   test gives its stated reason and never the leftover text in its result field, 10 of 10. All 24
   values match the supplied case document.
+- **Something not in the case** ("What is the central corneal thickness?") gives "That isn't
+  recorded for this case", 10 of 10, since the second improvement (it was 3 of 10).
 - **One follow-up**, asked once, aloud and on screen. A second answer is refused; a refresh does
   not ask again.
 - **Whose turn it is.** One label with its own symbol and words for each state, readable in
@@ -173,8 +179,7 @@ Runs passed of runs made, shipped settings, typed unless stated. Source: `CHECKS
 
 | What | Observed |
 |---|---|
-| Something not in the case ("central corneal thickness?") | "That isn't recorded for this case." in **3 of 10**. Otherwise the cornea is read out: nothing false, but more than was asked. Blood glucose reveals urea and electrolytes |
-| "No support" with the supporting passage removed | **2 of 3** (1 cut off). In a later run, 1 of 3 end to end showed the page 8 sentence, about a different condition, as support. This is the fault the improvement went after |
+| "No support" with the supporting passage removed | **2 of 3** (1 cut off; 1 of 3 on 25 November). In a later run, 1 of 3 end to end showed the page 8 sentence, about a different condition, as support. This is the fault the improvement went after |
 | Three of the seven possible revision points | The diagnosis and two compound key points: no single sentence backs all of one, so the trainee is usually told "no support" for something the note covers |
 | The support check, which thinks first | Cut off in 2 of 24 end-to-end runs; the trainee is asked to try again |
 | "Tell me everything you've got" | Should ask for specific findings; on the held-back cases it ran out of room in 3 of 3 and said "Sorry, something went wrong" |
@@ -189,7 +194,7 @@ answers behind every count. CI on GitHub (it mirrors `pnpm verify`, which passes
 Calls that ran out of time while the laptop slept are not counted against the app. It is kept as
 [`evals/checks/improved-asleep.md`](evals/checks/improved-asleep.md).
 
-## What measuring improved, and the one improvement
+## What measuring improved, and the two improvements
 
 **Choosing the settings by measurement** ([`SWEEP.md`](SWEEP.md)) gave the clearest gain. The
 main change was turning thinking on for the support check:
@@ -202,7 +207,7 @@ main change was turning thinking on for the support check:
 
 **The first voice timings** led to one clip per sentence, made ahead: 5.8 s to 1.8 s.
 
-**The one improvement (the brief's "weakest area" fix) was built and measured, and did not help.**
+**The first improvement (the brief's "weakest area" fix) was built and measured, and did not help.**
 The weakest area was the revision step quoting a different condition's sentence and rewording the
 advice to fit. The fix is a second support check against the key point itself. On the held-back
 cases there was nothing left for it to catch, and it cost correct answers: 4 of 6 cases passing
@@ -210,6 +215,27 @@ every run without it, 3 of 6 with it; none fixed, one broken. It stays switched 
 decision was recorded before the held-back cases were opened and they report on a choice rather
 than make it. On this evidence it should come off: one line in `config/steps.json`.
 [`HANDOVER.md`](HANDOVER.md) has the detail.
+
+**The second improvement worked.** It went after the one acceptance criterion that was not met: asked
+for something not in the case, the menu-picker read out the nearest finding instead (corneal
+thickness gave the cornea). The fix is a second look: one more quick call, made only when
+something was picked, asking whether each pick is the thing asked for or only related to it. 26
+new cases were written and split first, and the choosing rule committed before any run
+([`evals/near-miss/`](evals/near-miss/RULE.md)). Twelve configurations (small and medium model,
+temperature 0 and 0.7, no fix, a stricter prompt, or the second look) ran in 17 minutes.
+
+| Menu-picker | Shipped | With the second look (medium, temperature 0) |
+|---|---|---|
+| Near misses answered "not recorded", tuning | 3 of 10 cases | **10 of 10** |
+| Close-but-present requests still answered, tuning | 5 of 5 | 5 of 5 |
+| Something revealed that was not asked for, tuning | 16 runs | **0** |
+| **Held-back cases** passing every run (opened once) | 24 of 27 | **25 of 27**: 1 fixed, none broken |
+| Required check: "central corneal thickness?" | 3 of 10 | **10 of 10** |
+
+The stricter prompt alone helped the medium model (8 of 10) and made the small one worse (1 of
+10). The cost of the second look is about 0.4 s more on a turn where something is picked; spoken
+turns have not been re-timed with it. The new held-back near misses were all already right on the
+shipped settings, so the held-back gain rests on one case: the corneal-thickness question itself.
 
 ## Time, and the four-hour point
 

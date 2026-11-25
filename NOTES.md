@@ -38,6 +38,17 @@ this (`docs/planning/04-investigation.md`).
 | 17:35–18:43 | Last run of every check on shipped settings (`17-35-09`), made with the laptop asleep: it slept three times, and calls ran two to three times slower. Seven timed-out calls put down to that. Not put down to it: one wrong quotation in 24 end to end (page 8, wording kept, so the improvement's check was not asked). Record for shipped settings: 1 in 48. Kept as `evals/checks/improved-asleep.md`; `CHECKS.md` stays on the 12:49 run. |
 | 18:57 | Write-ups updated. |
 
+## 25 November
+
+| When (UTC) | What |
+|---|---|
+| 13:28 | Second improvement: 26 new menu-picker cases, the second look (off by default) and `evals/near-miss/RULE.md` committed before any run (tag `near-miss-rule`). |
+| 13:29–13:46 | 12 configurations on the tuning cases. |
+| 13:48 | Choice committed (tag `near-miss-chosen`): medium, temperature 0, second look on. |
+| 13:48–13:49 | Held-back selector cases opened once: 24 → 25 of 27. |
+| 13:50–13:54 | Adopted in `config/steps.json`; required checks re-run: "not in the case" 10 of 10. Swap in use was 23 GB. |
+| 13:55 | Prettier config made identical to the reference service (80 columns); comments cut from 1,431 lines to 273. Syntax trees of all 228 files unchanged; `pnpm verify` passes. |
+
 ## Things seen before the sweep
 
 The choosing rule (07:00) was written after the first required-check run on the starting

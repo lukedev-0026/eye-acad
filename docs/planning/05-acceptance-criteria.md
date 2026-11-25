@@ -115,7 +115,7 @@ named in the tables above. The project's `README.md` and `CHECKS.md` hold the co
 |---|---|
 | 1 to 3 | Met. For 3, `pnpm leak-scan` searches the built browser files for every piece of text in the case file. |
 | 4 to 9 | Met: 10 of 10 typed runs for 4, 8 and 9; 4 and 8 also asked aloud once. For 6, all 24 values and methods match the text of the supplied case document; visual acuity also carries the case file's unit, "Snellen", which the document does not print. |
-| 10 | **Not met.** "What is the central corneal thickness?" got the right reply in 3 of 10 runs. In the others the cornea was read out instead. |
+| 10 | Met on 25 November, after the second improvement: 10 of 10 (`evals/near-miss/required-after.md`). Before it, 3 of 10, the cornea read out instead. |
 | 11 | Met. |
 | 12 | Met as far as code can check it: every question spoken passes the allowed-words test or is one of the case file's own. The read by a person has not been done; the sheet is `evals/sweep/followup-read.md`. |
 | 13 to 18 | Met. 13 and 14 were looked at in greyscale on a live attempt: each label has its own symbol and words, and the talk button is disabled while the examiner is thinking or speaking. 18 is held by a test: after the case file is edited, an earlier attempt still shows the words it was given. |

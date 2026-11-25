@@ -14,7 +14,9 @@ the final ones were picked, where the weaker ones fail, and how far it can be tr
   too slow. With thinking off, every support check accepted a quotation it should have refused.
   The small model cannot judge what an answer covered.
 - **On held-back cases one gain held:** no wrong quotation reached the trainee. The rest was within
-  a case or two, and the one improvement prevented nothing.
+  a case or two, and the first improvement prevented nothing.
+- A **second improvement**, measured on 25 November in a 17-minute grid of its own, fixed the
+  menu-picker's "not in the case" answers: [`evals/near-miss/`](evals/near-miss/DECISION.md).
 
 | Count of runs, through the app's own code | Starting | Chosen | Chosen + improvement |
 |---|---|---|---|

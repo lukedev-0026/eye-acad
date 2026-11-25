@@ -20,3 +20,21 @@ Applying [`RULE.md`](RULE.md):
 The cost: about 0.4 s more per turn when something is picked (middle 442 → 853 ms for the step).
 
 Next, once: the held-back selector cases, shipped settings then chosen, in one sitting.
+
+## The held-back cases, opened once (13:48 to 13:49)
+
+| 27 held-back cases, three runs each | Shipped | Chosen |
+|---|---|---|
+| Cases passing every run | 24 | **25** |
+| Near misses (7 new) | 7 | 7 |
+| Controls (4 new) | 4 | 4 |
+| Other cases (16) | 13 | 14 |
+| Runs revealing something not asked for | 2 | **0** |
+
+Fixed: `sel-absent-1`, "What is the central corneal thickness?" (1 of 3 runs right before).
+Broken: none. Failing both: `sel-broad-1` ("Tell me everything", out of room) and `sel-follow-3`.
+The new held-back near misses were already right on the shipped settings, so they show no gain.
+
+Adopted in `config/steps.json`. The required checks were then re-run
+([`required-after.md`](required-after.md)): "not in the case" 10 of 10, every other result as
+before, except "passages removed" 1 of 3 (2 of 3 on 24 November), which is the revision step.

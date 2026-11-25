@@ -116,11 +116,26 @@ after the viva has ended.
 told "no support" for three of the seven possible points (the diagnosis, lowering the pressure,
 laser to both eyes): each is a compound statement no single sentence backs.
 
+## The second improvement
+
+The menu-picker answered a request for something not in the case with the nearest finding (corneal
+thickness gave the cornea: criterion 10, 3 of 10). The fix, `check-requested-item` on the selector,
+is one more call made only when something was picked: for each pick, is it what was asked for, or
+only related? A related pick is dropped and the trainee hears "That isn't recorded for this case".
+If the check gives no usable reply, the first choice stands.
+
+Measured as the first was: 26 new cases written and split by hash, the rule committed (tag
+`near-miss-rule`), 12 configurations on the tuning cases, the choice committed (`near-miss-chosen`),
+then the held-back cases opened once. Near misses 3 → 10 of 10 on tuning; held-back 24 → 25 of 27,
+one fixed, none broken; the required check 3 → 10 of 10. Detail in
+[`evals/near-miss/DECISION.md`](evals/near-miss/DECISION.md).
+
 ## What I would do next
 
 1. Have a clinician read the expected answers (`evals/cases/REVIEW.md`). Until then every count
    measures agreement with one AI-assisted reading.
-2. Stop the menu-picker substituting the nearest finding for something not in the case.
+2. Re-time spoken turns with the menu-picker's second look (about 0.4 s more when something is
+   picked), and force its format again for "Tell me everything".
 3. Fix the revision panel: switch the second check off, split the three compound key points, show
    the support check the quotation's section heading, and try the medium model on the revision step.
 4. Repeat the one-run measurements three times, with more follow-up cases.

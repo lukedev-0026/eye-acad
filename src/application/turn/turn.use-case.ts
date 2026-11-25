@@ -74,7 +74,7 @@ export async function handleRequest(
     reply = fixedReply('wants_to_answer', LINES.pressTheButton);
   } else {
     const run = await runSelector(models, c, heard, attempt.lastRequests, config.steps.selector);
-    modelMs = run.call.ms;
+    modelMs = run.call.ms + (run.check?.ms ?? 0);
     // Refusal, truncation, an unusable reply or a provider error all end the
     // same way: a fixed line, nothing revealed, and the trainee's turn again.
     reply = run.decision ? replyFor(run.decision) : fixedReply('error', LINES.somethingWentWrong);

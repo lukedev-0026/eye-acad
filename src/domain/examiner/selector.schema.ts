@@ -61,3 +61,31 @@ export function normaliseSelectorOutput(catalogue: Catalogue): (value: unknown) 
     return { intent: lowerCased(value.intent), requests, not_in_catalogue: notInCatalogue };
   };
 }
+
+// The second look at a choice (the "check-requested-item" improvement): for
+// each item picked, is it what was asked for, or only related to it?
+export interface SelectorCheckOutput {
+  checks: Array<{ item: string; asked_for: boolean }>;
+}
+
+export function selectorCheckSchema(picked: ReadonlyArray<string>): z.ZodType<SelectorCheckOutput> {
+  const [first, ...rest] = picked;
+  const names = first === undefined ? z.string() : z.enum([first, ...rest]);
+  return z.object({ checks: z.array(z.object({ item: names, asked_for: z.boolean() })) });
+}
+
+// Matches the checked names to the picked ones without regard to capitals,
+// and drops any entry naming something that was not picked.
+export function normaliseSelectorCheck(picked: ReadonlyArray<string>): (value: unknown) => unknown {
+  const byLower = new Map(picked.map((n) => [n.toLowerCase(), n]));
+  return (value) => {
+    if (!isObject(value) || !Array.isArray(value.checks)) return value;
+    const checks: Array<unknown> = [];
+    for (const entry of value.checks as Array<unknown>) {
+      if (!isObject(entry) || typeof entry.item !== 'string') continue;
+      const name = byLower.get(entry.item.trim().toLowerCase());
+      if (name) checks.push({ item: name, asked_for: entry.asked_for });
+    }
+    return { checks };
+  };
+}

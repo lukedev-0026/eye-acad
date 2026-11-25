@@ -61,11 +61,23 @@ export const selectorEval: StepEval<Input, Expect, Observed> = {
   async run(c, settings, ctx) {
     const run = await runSelector(ctx.models, ctx.publicCase, c.input.utterance, c.input.previous ?? [], settings);
     const d = run.decision;
-    return asRun(run.call, {
+    const recorded = asRun(run.call, {
       kind: d ? d.kind : 'error',
       ids: d?.kind === 'reveal' ? d.items.map((i) => i.id) : [],
       alsoNotRecorded: d?.kind === 'reveal' ? d.alsoNotRecorded : false,
     });
+    if (!run.check) return recorded;
+    // The second look is part of the turn: its time counts, and its reply is
+    // kept beside the first.
+    return {
+      ...recorded,
+      calls: 2,
+      ms: recorded.ms + run.check.ms,
+      modelMs: recorded.modelMs + (run.check.server.evalMs ?? 0),
+      promptTokens: recorded.promptTokens + (run.check.server.promptTokens ?? 0),
+      outputTokens: recorded.outputTokens + (run.check.server.outputTokens ?? 0),
+      raw: `${recorded.raw}\n--- check ---\n${run.check.rawText}`,
+    };
   },
 
   grade(c, observed) {

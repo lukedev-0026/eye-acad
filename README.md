@@ -131,14 +131,17 @@ run**. No result here comes from it.
 
 ## The three required checks
 
-`pnpm check --only required`, through the app's own code, typed input, shipped settings. The run
-of 12:49 on 24 November 2026, written out in full in [`CHECKS.md`](CHECKS.md).
+`pnpm check --only required`, through the app's own code, typed input, on the settings the app
+ships with. The run of 13:50 on 25 November 2026
+([`evals/checks/required-2026-11-25.md`](evals/checks/required-2026-11-25.md)). The 24 November
+run, before the second improvement, gave the same counts and is written out with every other
+check in [`CHECKS.md`](CHECKS.md).
 
-| Check | Input | Observed | Runs passed | Model |
-|---|---|---|---|---|
-| **1. Available finding** | "What is the intraocular pressure in the right eye?" | Shown: "Right eye · Intraocular pressure: 58 mmHg (Goldmann applanation, 23:55)". Never "left", never 18 | **10 of 10** | `qwen3.5:9b` picks; code writes |
-| **2. Unavailable finding** | "Can I have gonioscopy of the right eye?" | "Right eye · Gonioscopy: Not available: No view: corneal oedema". Nothing from the left eye | **10 of 10** | the same |
-| **3. Citation supports the revision point** | An answer covering everything but the allergy (`evals/required.json`) | "Check for sulfonamide allergy before giving acetazolamide." Quoted from p. 6: "Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it." Support check: supported | **5 of 5** | `9b` judges the gap; `4b` picks and checks |
+| Check | Input | Expected | Observed | Runs passed | Model |
+|---|---|---|---|---|---|
+| **1. Available finding** | "What is the intraocular pressure in the right eye?" | Right eye, 58 mmHg, Goldmann applanation, 23:55, shown and said. Never "left eye", never 18 | Shown: "Right eye · Intraocular pressure: 58 mmHg (Goldmann applanation, 23:55)" | **10 of 10** | `qwen3.5:9b` picks; code writes |
+| **2. Unavailable finding** | "Can I have gonioscopy of the right eye?" | Says it is not available, with the case file's reason. Nothing from the left eye | "Right eye · Gonioscopy: Not available: No view: corneal oedema" | **10 of 10** | the same |
+| **3. Citation supports the revision point** | An answer covering everything but the allergy (`evals/required.json`) | Gap: the sulfonamide allergy. The pp. 5–6 passage retrieved. Quoted from p. 6: "Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it." Support check: supported | Revision point: "Check for sulfonamide allergy before giving acetazolamide." That sentence quoted from p. 6. Support check: supported | **5 of 5** | `9b` judges the gap; `4b` picks and checks |
 
 For check 3: **pages searched** 4, 5, 6, 8 and 9 (the right passage, running from p. 5 to p. 6,
 came first in both searches). **Passage quoted:** p. 6, "Systemic carbonic anhydrase inhibitor",
@@ -147,10 +150,10 @@ which names acetazolamide on p. 5. **A person's yes or no:** _to be filled in by
 
 ## What works, and what does not
 
-Runs passed of runs made, shipped settings, typed unless stated. Source: `CHECKS.md` (24 November).
-The required checks were run again on 25 November after the second improvement
-([`evals/near-miss/DECISION.md`](evals/near-miss/DECISION.md)): the same results, except
-as noted for "not in the case".
+Runs passed of runs made, typed unless stated. Source: `CHECKS.md` (24 November). The required
+checks were run again on 25 November on the current settings
+([`evals/checks/required-2026-11-25.md`](evals/checks/required-2026-11-25.md)): the same results,
+except as noted for "not in the case".
 
 **Works**
 

@@ -13,8 +13,6 @@ import {
   renderHistory,
 } from '@/domain/examiner/render';
 
-// Expectations are computed from the raw case file, not typed in here, so the
-// tests still mean something after a reviewer edits a value.
 const raw = JSON.parse(readFileSync('data/case-EA-VIVA-001.json', 'utf8')) as {
   findings: Array<Record<string, unknown>>;
 };
@@ -46,7 +44,13 @@ describe('every row of the supplied case', () => {
 
     it(`${f.id}: names the right eye, or none`, () => {
       const expected =
-        f.eye === 'right' ? 'Right eye' : f.eye === 'left' ? 'Left eye' : f.eye === 'both' ? 'Both eyes' : '';
+        f.eye === 'right'
+          ? 'Right eye'
+          : f.eye === 'left'
+            ? 'Left eye'
+            : f.eye === 'both'
+              ? 'Both eyes'
+              : '';
       expect(r.eyeLabel).toBe(expected);
       if (expected) {
         expect(r.display.startsWith(`${expected} · `)).toBe(true);
@@ -83,18 +87,30 @@ describe('every row of the supplied case', () => {
 describe('unit rule', () => {
   it('appends the unit to a number and to a bare ratio', () => {
     expect(formatValue(row({ value: 58, unit: 'mmHg' }))).toBe('58 mmHg');
-    expect(formatValue(row({ value: '168/94', unit: 'mmHg' }))).toBe('168/94 mmHg');
-    expect(formatValue(row({ value: '6/36', unit: 'Snellen' }))).toBe('6/36 Snellen');
+    expect(formatValue(row({ value: '168/94', unit: 'mmHg' }))).toBe(
+      '168/94 mmHg',
+    );
+    expect(formatValue(row({ value: '6/36', unit: 'Snellen' }))).toBe(
+      '6/36 Snellen',
+    );
   });
   it('keeps a unit it has never seen', () => {
     expect(formatValue(row({ value: 540, unit: 'µm' }))).toBe('540 µm');
     expect(formatValue(row({ value: 12, unit: 'zorbs' }))).toBe('12 zorbs');
   });
   it('does not double a unit already written in the value', () => {
-    expect(formatValue(row({ value: '3 mm, briskly reactive', unit: 'mm' }))).toBe('3 mm, briskly reactive');
+    expect(
+      formatValue(row({ value: '3 mm, briskly reactive', unit: 'mm' })),
+    ).toBe('3 mm, briskly reactive');
   });
   it('decides "unavailable" from the flag, even when a value is present', () => {
-    const r = renderFinding(row({ available: false, value: 'left-over text', unavailable_reason: 'Not done' }));
+    const r = renderFinding(
+      row({
+        available: false,
+        value: 'left-over text',
+        unavailable_reason: 'Not done',
+      }),
+    );
     expect(r.value).toBe('Not available: Not done');
     expect(r.display).not.toContain('left-over text');
   });
@@ -116,7 +132,10 @@ describe('history', () => {
 
 describe('speech cap', () => {
   it('never cuts an item in half', () => {
-    const parts = Array.from({ length: 12 }, (_, i) => `Item ${i}: ${'x'.repeat(90)}.`);
+    const parts = Array.from(
+      { length: 12 },
+      (_, i) => `Item ${i}: ${'x'.repeat(90)}.`,
+    );
     const out = composeSpeech(parts, 'The rest is on screen.');
     expect(out.endsWith('The rest is on screen.')).toBe(true);
     expect(out.length).toBeLessThanOrEqual(MAX_SPEECH_CHARS + 30);
@@ -127,7 +146,10 @@ describe('speech cap', () => {
     expect(composeSpeech(['One.', 'Two.'], 'x')).toBe('One. Two.');
   });
   it('keeps the sentences separate, so each can be spoken on its own, and says the same words', () => {
-    const parts = Array.from({ length: 12 }, (_, i) => `Item ${i}: ${'x'.repeat(90)}.`);
+    const parts = Array.from(
+      { length: 12 },
+      (_, i) => `Item ${i}: ${'x'.repeat(90)}.`,
+    );
     const kept = composeSpeechParts(parts, 'The rest is on screen.');
     expect(kept.at(-1)).toBe('The rest is on screen.');
     expect(kept.slice(0, -1)).toEqual(parts.slice(0, kept.length - 1));

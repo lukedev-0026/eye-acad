@@ -4,15 +4,20 @@ import { sha1Hex } from '@/common/hash.server';
 import type { CallOutcome } from '@/domain/llm/call-result';
 import type { StepSettings } from '@/domain/llm/step-settings.schema';
 import { TooManyInfraErrorsError } from '@/eval/eval.error';
-import type { AnyStepEval, EvalCase, EvalContext, Graded } from '@/eval/eval.types';
+import type {
+  AnyStepEval,
+  EvalCase,
+  EvalContext,
+  Graded,
+} from '@/eval/eval.types';
 
 import { configId } from './config-id';
 import { rowKey } from './result-row';
 import type { ResultRow } from './result-row';
 import { appendRow } from './results.store';
 
-// A small seeded shuffle, so the order is the same on a re-run but the same
-// prompt never follows itself (Ollama skips work on a repeated prompt).
+// Seeded so a re-run keeps the order, but a prompt never follows itself
+// (Ollama skips work on a repeated prompt).
 function shuffled<T>(items: Array<T>, seed: string): Array<T> {
   let state = Number.parseInt(sha1Hex(seed).slice(0, 8), 16);
   const next = () => {
@@ -34,21 +39,18 @@ export interface RunOptions {
   cases: Array<EvalCase>;
   settings: StepSettings;
   trials: number;
-  // Seeds are 1, 2, 3... by trial, and recorded.
   firstTrial?: number;
   ctx: EvalContext;
   runId: string;
   stage: string;
-  // Rows already on disk from an interrupted run.
   done?: Set<string>;
-  // Return true to stop this configuration early (for example, far too slow).
   shouldStop?: (rows: Array<ResultRow>) => boolean;
   onRow?: (row: ResultRow) => void;
 }
 
-// Runs one configuration over a set of cases, one call at a time, writing a
-// row per call as it goes.
-export async function runCases(o: RunOptions): Promise<{ rows: Array<ResultRow>; stopped: boolean }> {
+export async function runCases(
+  o: RunOptions,
+): Promise<{ rows: Array<ResultRow>; stopped: boolean }> {
   const cfg = configId(o.evalDef.step, o.settings);
   const rows: Array<ResultRow> = [];
   let infraStreak = 0;
@@ -66,12 +68,21 @@ export async function runCases(o: RunOptions): Promise<{ rows: Array<ResultRow>;
         run = await o.evalDef.run(c, settings, o.ctx);
         outcome = run.outcome;
         graded = o.evalDef.grade(c, run.observed, o.ctx);
-        // Truncation, a refusal or an unusable reply is a failed run, whatever
-        // the fallback observation happened to look like.
-        if (outcome !== 'ok') graded = { ...graded, pass: false, detail: `${outcome}; ${graded.detail}` };
+        // Truncation, refusal or an unusable reply fails, despite any fallback.
+        if (outcome !== 'ok')
+          graded = {
+            ...graded,
+            pass: false,
+            detail: `${outcome}; ${graded.detail}`,
+          };
       } catch (e) {
         outcome = 'infra_error';
-        graded = { pass: false, costly: false, fallback: false, detail: `exception: ${describeError(e)}` };
+        graded = {
+          pass: false,
+          costly: false,
+          fallback: false,
+          detail: `exception: ${describeError(e)}`,
+        };
       }
       infraStreak = outcome === 'infra_error' ? infraStreak + 1 : 0;
       const row: ResultRow = {

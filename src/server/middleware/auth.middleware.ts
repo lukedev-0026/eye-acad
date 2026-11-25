@@ -8,14 +8,13 @@ import { getFirebaseAdmin } from '@/infrastructure/firestore/firebase-admin';
 
 const BEARER = 'Bearer ';
 
-// Every server function that touches the case or an attempt uses this.
-// Browser half: attach the signed-in user's Firebase ID token.
-// Server half: verify it and pass the uid on. The uid is never taken from the
-// request body, so one trainee cannot act as another.
+/** The uid comes from the verified ID token, never the body. */
 export const requireUser = createMiddleware({ type: 'function' })
   .client(async ({ next }) => {
     const token = await getIdToken();
-    return next({ headers: token ? { Authorization: `${BEARER}${token}` } : {} });
+    return next({
+      headers: token ? { Authorization: `${BEARER}${token}` } : {},
+    });
   })
   .server(async ({ next }) => {
     const header = getRequestHeader('authorization') ?? '';
@@ -25,7 +24,6 @@ export const requireUser = createMiddleware({ type: 'function' })
     try {
       uid = (await getFirebaseAdmin().auth.verifyIdToken(token)).uid;
     } catch (error) {
-      // An expired, forged or foreign token. The reason is kept for the log.
       throw new UnauthenticatedError({ cause: error });
     }
     annotateRequestContext({ uid });

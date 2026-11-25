@@ -4,17 +4,19 @@ import { produceRevision } from '@/application/revision/produce-revision';
 import { RevisionUnavailableError } from '@/application/revision/revision.error';
 import type { CallOutcome } from '@/domain/llm/call-result';
 import type { StepsConfig } from '@/domain/llm/step-settings.schema';
-import { findSentence, readCases, resolveTarget, sentenceIds } from '@/eval/eval-context';
+import {
+  findSentence,
+  readCases,
+  resolveTarget,
+  sentenceIds,
+} from '@/eval/eval-context';
 import { InvalidEvalCaseError } from '@/eval/eval.error';
 import type { EvalCase, EvalContext, Graded } from '@/eval/eval.types';
 import type { ChainRow } from '@/eval/run/result-row';
-import { RevisionExpectSchema, RevisionInputSchema } from '@/eval/steps/revision.eval';
-
-// The revision step and the support check, run together as the app runs them:
-// search, pick a sentence, word the advice, check the support, and build the
-// card the trainee would see. The per-step sets test each of those alone on
-// fixed inputs; this is where one step's mistake can be caught, or missed, by
-// the next. It uses the same 14 points to revise as the revision set.
+import {
+  RevisionExpectSchema,
+  RevisionInputSchema,
+} from '@/eval/steps/revision.eval';
 
 type Input = z.infer<typeof RevisionInputSchema>;
 type Expect = z.infer<typeof RevisionExpectSchema>;
@@ -28,26 +30,32 @@ interface Observed {
   selectionOutcome: string | null;
   supportCheck: 'supported' | 'not_supported' | 'not_reached';
   keyPointCheck: 'supported' | 'not_supported' | 'not_run';
-  // When a step could not finish: which one, and how its model call ended.
+  /** null when every step finished. */
   stoppedAt: { step: string; outcome: CallOutcome } | null;
 }
 
 const chainCases = (): Promise<Array<EvalCase<Input, Expect>>> =>
   readCases('revision.jsonl', RevisionInputSchema, RevisionExpectSchema);
 
-function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Graded {
+function grade(
+  c: EvalCase<Input, Expect>,
+  o: Observed,
+  ctx: EvalContext,
+): Graded {
   if (o.outcome === 'unavailable') {
-    // The trainee is told the revision point could not be prepared, and can
-    // try again. Nothing wrong is shown, but nothing is shown either.
     const what = o.stoppedAt
       ? `the ${o.stoppedAt.step} step did not finish (${o.stoppedAt.outcome})`
       : 'a step could not run';
-    return { pass: false, costly: false, fallback: false, detail: `${what}: the trainee is asked to try again` };
+    return {
+      pass: false,
+      costly: false,
+      fallback: false,
+      detail: `${what}: the trainee is asked to try again`,
+    };
   }
   if (!c.expect.support) {
     return {
       pass: o.outcome === 'no_support',
-      // The trainee is shown a quotation for a point the note does not back.
       costly: o.outcome === 'supported',
       fallback: false,
       detail:
@@ -57,7 +65,10 @@ function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Grade
     };
   }
   const t = ctx.targets.find((x) => x.id === c.expect.targetId);
-  if (!t) throw new InvalidEvalCaseError(`${c.id}: no entry for ${c.expect.targetId} in retrieval.json`);
+  if (!t)
+    throw new InvalidEvalCaseError(
+      `${c.id}: no entry for ${c.expect.targetId} in retrieval.json`,
+    );
   const good = sentenceIds(ctx.index, [...t.gold, ...t.alsoSupports]);
   const wrong = sentenceIds(ctx.index, t.distractor);
   const citedGood = o.cited.length > 0 && o.cited.every((id) => good.has(id));
@@ -65,7 +76,8 @@ function grade(c: EvalCase<Input, Expect>, o: Observed, ctx: EvalContext): Grade
   return {
     pass: o.outcome === 'supported' && citedGood,
     costly: o.outcome === 'supported' && citedWrong,
-    fallback: o.outcome === 'supported' && citedGood && o.pointSource === 'supplied',
+    fallback:
+      o.outcome === 'supported' && citedGood && o.pointSource === 'supplied',
     detail:
       o.outcome === 'no_support'
         ? `told no support for a point the note does back (${o.selectionOutcome === 'no_support' ? 'revision step said so' : o.supportCheck === 'not_supported' ? 'support check rejected it' : o.keyPointCheck === 'not_supported' ? 'check against the key point rejected it' : 'search'})`
@@ -82,7 +94,6 @@ export async function runChain(
     split: 'tune' | 'holdout';
     trials: number;
     label: string;
-    // Called with each row as it is made, for saving it and showing progress.
     onRow: (row: ChainRow) => Promise<void>;
   },
 ): Promise<Array<ChainRow>> {
@@ -96,7 +107,9 @@ export async function runChain(
         c.input.exclude === 'all_support' && t
           ? [
               ...new Set(
-                [...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map((p) => findSentence(ctx.index, p).chunk.id),
+                [...t.gold, ...t.alsoSupports, ...(t.offSection ?? [])].map(
+                  (p) => findSentence(ctx.index, p).chunk.id,
+                ),
               ),
             ]
           : [];
@@ -109,20 +122,29 @@ export async function runChain(
       try {
         const { card, trace } = await produceRevision(
           ctx.models,
-          { notes: ctx.notes, answer: '', followUpQuestion: null, guidance: ctx.guidance },
+          {
+            notes: ctx.notes,
+            answer: '',
+            followUpQuestion: null,
+            guidance: ctx.guidance,
+          },
           seeded,
           ctx.index,
           {
             exclude,
             pinnedTarget: {
               id: c.expect.targetId ?? 'invented',
-              kind: c.expect.targetId === 'diagnosis' ? 'diagnosis' : 'key_point',
+              kind:
+                c.expect.targetId === 'diagnosis' ? 'diagnosis' : 'key_point',
               text: target,
             },
           },
         );
         model = trace.revision?.call.model ?? model;
-        calls = (trace.revision ? 1 : 0) + (trace.verifier ? 1 : 0) + (trace.keyPointCheck ? 1 : 0);
+        calls =
+          (trace.revision ? 1 : 0) +
+          (trace.verifier ? 1 : 0) +
+          (trace.keyPointCheck ? 1 : 0);
         observed = {
           outcome: card.outcome,
           cited: trace.revision?.citation?.sentences.map((s) => s.id) ?? [],
@@ -131,7 +153,11 @@ export async function runChain(
           point: trace.revision?.point ?? null,
           pointSource: trace.revision?.pointSource ?? null,
           selectionOutcome: trace.revision?.outcome ?? null,
-          supportCheck: trace.verifier ? (trace.verifier.supported ? 'supported' : 'not_supported') : 'not_reached',
+          supportCheck: trace.verifier
+            ? trace.verifier.supported
+              ? 'supported'
+              : 'not_supported'
+            : 'not_reached',
           keyPointCheck: trace.keyPointCheck
             ? trace.keyPointCheck.supported
               ? 'supported'
@@ -140,11 +166,12 @@ export async function runChain(
           stoppedAt: null,
         };
       } catch (error) {
-        // A model call that was cut off or came back unusable is the
-        // configuration's own doing, and is counted. Anything else is the
-        // machine, and is left out of the counts.
+        // Only a truncated or unusable model call counts against the config;
+        // any other failure is the machine's and is left out.
         const stoppedAt =
-          error instanceof RevisionUnavailableError ? { step: error.step, outcome: error.outcome } : null;
+          error instanceof RevisionUnavailableError
+            ? { step: error.step, outcome: error.outcome }
+            : null;
         if (stoppedAt) calls = 1;
         observed = {
           outcome: 'unavailable',
@@ -173,7 +200,10 @@ export async function runChain(
         caseType: c.type,
         trial,
         seed: trial,
-        outcome: observed.outcome === 'unavailable' ? (observed.stoppedAt?.outcome ?? 'infra_error') : 'ok',
+        outcome:
+          observed.outcome === 'unavailable'
+            ? (observed.stoppedAt?.outcome ?? 'infra_error')
+            : 'ok',
         pass: g.pass,
         costly: g.costly,
         fallback: g.fallback,

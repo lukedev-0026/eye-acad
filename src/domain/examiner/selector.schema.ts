@@ -2,9 +2,6 @@ import { z } from 'zod';
 
 import type { Catalogue } from './catalogue';
 
-// What the selector is allowed to say: choices from closed lists and one
-// yes/no. It cannot return a value, a sentence or anything of its own.
-
 const INTENTS = ['request_items', 'wants_to_answer', 'other'] as const;
 export type Intent = (typeof INTENTS)[number];
 
@@ -14,7 +11,6 @@ export type RequestEye = (typeof REQUEST_EYES)[number];
 const MAX_REQUESTS = 12;
 
 export interface SelectorRequest {
-  // A name from the catalogue, exactly as listed there.
   item: string;
   eye: RequestEye;
 }
@@ -22,61 +18,81 @@ export interface SelectorRequest {
 export interface SelectorOutput {
   intent: Intent;
   requests: Array<SelectorRequest>;
-  // True when the trainee asked for something that is not on the menu.
   not_in_catalogue: boolean;
 }
 
-export function selectorSchema(catalogue: Catalogue): z.ZodType<SelectorOutput> {
+export function selectorSchema(
+  catalogue: Catalogue,
+): z.ZodType<SelectorOutput> {
   return z.object({
     intent: z.enum(INTENTS),
-    requests: z.array(z.object({ item: z.enum(catalogue.names), eye: z.enum(REQUEST_EYES) })).max(MAX_REQUESTS),
+    requests: z
+      .array(
+        z.object({ item: z.enum(catalogue.names), eye: z.enum(REQUEST_EYES) }),
+      )
+      .max(MAX_REQUESTS),
     not_in_catalogue: z.boolean(),
   });
 }
 
-// Anything keyed, a list included: the reply has not been checked yet.
-const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
-const lowerCased = (value: unknown): unknown => (typeof value === 'string' ? value.trim().toLowerCase() : value);
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+const lowerCased = (value: unknown): unknown =>
+  typeof value === 'string' ? value.trim().toLowerCase() : value;
 
-// Tidies a reply before it is checked: matches names and enum values without
-// regard to capitals, and turns a name that is not on the list into "not in
-// the catalogue". An unknown name can therefore never reveal anything.
-export function normaliseSelectorOutput(catalogue: Catalogue): (value: unknown) => unknown {
+/** Case-insensitive; an unknown name becomes "not in the catalogue". */
+export function normaliseSelectorOutput(
+  catalogue: Catalogue,
+): (value: unknown) => unknown {
   const byLower = new Map(catalogue.names.map((n) => [n.toLowerCase(), n]));
 
   return (value) => {
     if (!isObject(value)) return value;
     let notInCatalogue = value.not_in_catalogue;
     const requests: Array<unknown> = [];
-    const asked: Array<unknown> = Array.isArray(value.requests) ? value.requests : [];
+    const asked: Array<unknown> = Array.isArray(value.requests)
+      ? value.requests
+      : [];
     for (const request of asked) {
       if (!isObject(request)) continue;
-      const name = typeof request.item === 'string' ? byLower.get(request.item.trim().toLowerCase()) : undefined;
+      const name =
+        typeof request.item === 'string'
+          ? byLower.get(request.item.trim().toLowerCase())
+          : undefined;
       if (!name) {
         notInCatalogue = true;
         continue;
       }
-      requests.push({ item: name, eye: lowerCased(request.eye ?? 'unspecified') });
+      requests.push({
+        item: name,
+        eye: lowerCased(request.eye ?? 'unspecified'),
+      });
     }
-    return { intent: lowerCased(value.intent), requests, not_in_catalogue: notInCatalogue };
+    return {
+      intent: lowerCased(value.intent),
+      requests,
+      not_in_catalogue: notInCatalogue,
+    };
   };
 }
 
-// The second look at a choice (the "check-requested-item" improvement): for
-// each item picked, is it what was asked for, or only related to it?
 export interface SelectorCheckOutput {
   checks: Array<{ item: string; asked_for: boolean }>;
 }
 
-export function selectorCheckSchema(picked: ReadonlyArray<string>): z.ZodType<SelectorCheckOutput> {
+export function selectorCheckSchema(
+  picked: ReadonlyArray<string>,
+): z.ZodType<SelectorCheckOutput> {
   const [first, ...rest] = picked;
   const names = first === undefined ? z.string() : z.enum([first, ...rest]);
-  return z.object({ checks: z.array(z.object({ item: names, asked_for: z.boolean() })) });
+  return z.object({
+    checks: z.array(z.object({ item: names, asked_for: z.boolean() })),
+  });
 }
 
-// Matches the checked names to the picked ones without regard to capitals,
-// and drops any entry naming something that was not picked.
-export function normaliseSelectorCheck(picked: ReadonlyArray<string>): (value: unknown) => unknown {
+export function normaliseSelectorCheck(
+  picked: ReadonlyArray<string>,
+): (value: unknown) => unknown {
   const byLower = new Map(picked.map((n) => [n.toLowerCase(), n]));
   return (value) => {
     if (!isObject(value) || !Array.isArray(value.checks)) return value;

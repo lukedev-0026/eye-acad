@@ -7,12 +7,13 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { newAttempt, pushTurn } from '@/domain/attempt/attempt';
-import { AttemptNotFoundError, AttemptPhaseError } from '@/domain/attempt/attempt.error';
+import {
+  AttemptNotFoundError,
+  AttemptPhaseError,
+} from '@/domain/attempt/attempt.error';
 import { loadCase } from '@/infrastructure/files/case-file.loader';
 import { FirestoreAttemptRepository } from '@/infrastructure/firestore/firestore-attempt.repository';
 
-// Needs the Firestore emulator (pnpm emulators). Uses its own project id, so
-// it never touches attempts made in the app.
 const PROJECT = 'demo-viva-repository-test';
 
 let app: App;
@@ -33,7 +34,6 @@ afterAll(async () => {
   vi.unstubAllEnvs();
 });
 
-// A fresh owner for each test: the emulator keeps its data between runs.
 const freshUid = () => `trainee-${randomUUID()}`;
 const blank = async () => newAttempt(await loadCase());
 
@@ -46,23 +46,29 @@ describe('the Firestore attempt store', () => {
 
     expect(await repository.read(uid, attemptId)).toEqual(attempt);
     expect(await repository.count(uid)).toBe(1);
-    expect((await db.doc(`users/${uid}/attempts/${attemptId}`).get()).exists).toBe(true);
+    expect(
+      (await db.doc(`users/${uid}/attempts/${attemptId}`).get()).exists,
+    ).toBe(true);
   });
 
   it('does not find an attempt through anyone but its owner', async () => {
     const attemptId = await repository.create(freshUid(), await blank());
 
-    await expect(repository.read(freshUid(), attemptId)).rejects.toBeInstanceOf(AttemptNotFoundError);
-    await expect(repository.update(freshUid(), attemptId, () => undefined)).rejects.toBeInstanceOf(
+    await expect(repository.read(freshUid(), attemptId)).rejects.toBeInstanceOf(
       AttemptNotFoundError,
     );
+    await expect(
+      repository.update(freshUid(), attemptId, () => undefined),
+    ).rejects.toBeInstanceOf(AttemptNotFoundError);
   });
 
   it('applies a change and returns what the change returns', async () => {
     const uid = freshUid();
     const attemptId = await repository.create(uid, await blank());
 
-    const turn = await repository.update(uid, attemptId, (a) => pushTurn(a, { speaker: 'trainee', text: 'Hello' }));
+    const turn = await repository.update(uid, attemptId, (a) =>
+      pushTurn(a, { speaker: 'trainee', text: 'Hello' }),
+    );
     const saved = await repository.read(uid, attemptId);
 
     expect(turn).toMatchObject({ n: 1, text: 'Hello' });
@@ -73,7 +79,9 @@ describe('the Firestore attempt store', () => {
   it('saves nothing when the change throws, and passes the error on as it is', async () => {
     const uid = freshUid();
     const attemptId = await repository.create(uid, await blank());
-    const refusal = new AttemptPhaseError('An answer has already been given for this attempt.');
+    const refusal = new AttemptPhaseError(
+      'An answer has already been given for this attempt.',
+    );
 
     const update = repository.update(uid, attemptId, (a) => {
       a.phase = 'complete';
@@ -94,7 +102,8 @@ describe('the Firestore attempt store', () => {
     await repository.update(uid, attemptId, (a) => {
       Object.assign(a, { examinerNotes: 'hidden too' });
     });
-    const stored = (await db.doc(`users/${uid}/attempts/${attemptId}`).get()).data() ?? {};
+    const stored =
+      (await db.doc(`users/${uid}/attempts/${attemptId}`).get()).data() ?? {};
 
     expect(stored).not.toHaveProperty('diagnosis');
     expect(stored).not.toHaveProperty('examinerNotes');
@@ -104,18 +113,34 @@ describe('the Firestore attempt store', () => {
     const uid = freshUid();
     const attemptId = await repository.create(uid, await blank());
 
-    await repository.appendWorkingNote(uid, attemptId, { step: 'selector', picked: { requests: [['nested']] } });
-    await repository.appendWorkingNote(uid, attemptId, { step: 'followup', path: 'written' });
-    const stored = (await db.doc(`users/${uid}/attempts/${attemptId}/private/trace`).get()).data() as {
+    await repository.appendWorkingNote(uid, attemptId, {
+      step: 'selector',
+      picked: { requests: [['nested']] },
+    });
+    await repository.appendWorkingNote(uid, attemptId, {
+      step: 'followup',
+      path: 'written',
+    });
+    const stored = (
+      await db.doc(`users/${uid}/attempts/${attemptId}/private/trace`).get()
+    ).data() as {
       entries: Array<string>;
     };
-    const entries = stored.entries.map((entry) => JSON.parse(entry) as Record<string, unknown>);
+    const entries = stored.entries.map(
+      (entry) => JSON.parse(entry) as Record<string, unknown>,
+    );
 
-    expect(stored.entries.every((entry) => typeof entry === 'string')).toBe(true);
-    expect(entries.map((entry) => entry.step)).toEqual(['selector', 'followup']);
+    expect(stored.entries.every((entry) => typeof entry === 'string')).toBe(
+      true,
+    );
+    expect(entries.map((entry) => entry.step)).toEqual([
+      'selector',
+      'followup',
+    ]);
     expect(entries[0]).toMatchObject({ picked: { requests: [['nested']] } });
     expect(typeof entries[0]?.atMs).toBe('number');
-    // The attempt itself is untouched: the notes are a separate document.
-    expect(JSON.stringify(await repository.read(uid, attemptId))).not.toContain('nested');
+    expect(JSON.stringify(await repository.read(uid, attemptId))).not.toContain(
+      'nested',
+    );
   });
 });

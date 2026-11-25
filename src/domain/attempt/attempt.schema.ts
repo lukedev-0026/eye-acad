@@ -2,11 +2,7 @@ import { z } from 'zod';
 
 import { REQUEST_EYES } from '@/domain/examiner/selector.schema';
 
-// The saved attempt, exactly as the trainee's browser may read it. The server
-// passes every write through this schema, and zod drops any field not listed
-// here, so nothing can reach the browser by being added to an object by
-// mistake. Hidden working (what was judged missing, search details, raw model
-// output) lives in a separate server-only record.
+// zod drops unlisted fields on write, so nothing leaks to the browser.
 
 const PHASES = ['asking', 'follow_up', 'revising', 'complete'] as const;
 export type Phase = (typeof PHASES)[number];
@@ -20,8 +16,6 @@ const RevealedItemSchema = z.object({
   method: z.string().nullable(),
   available: z.boolean(),
   display: z.string(),
-  // When it was first revealed. The wording is a snapshot: a later edit to the
-  // case file does not rewrite an old attempt.
   atMs: z.number(),
 });
 export type RevealedItem = z.infer<typeof RevealedItemSchema>;
@@ -41,7 +35,6 @@ const RequestSchema = z.object({ item: z.string(), eye: z.enum(REQUEST_EYES) });
 
 const FollowUpSchema = z.object({
   question: z.string(),
-  // The trainee's own words the question responds to, when there are any.
   respondingTo: z.string().nullable(),
   path: z.enum(['written', 'supplied', 'fixed']),
   atMs: z.number(),
@@ -49,7 +42,7 @@ const FollowUpSchema = z.object({
 
 const RevisionCardSchema = z.object({
   outcome: z.enum(['supported', 'no_support']),
-  // In the trainee's terms: what the answer left out, or that nothing was.
+  // What the answer left out, in the trainee's terms; null if nothing.
   missed: z.string().nullable(),
   point: z.string().nullable(),
   pointSource: z.enum(['written', 'supplied']).nullable(),
@@ -59,7 +52,6 @@ const RevisionCardSchema = z.object({
   retrievedPages: z.array(z.number()),
   retrievalMode: z.enum(['hybrid', 'keyword_only']),
   message: z.string().nullable(),
-  // The reference note's own statement of what it is.
   noteLine: z.string().nullable().default(null),
   atMs: z.number(),
 });

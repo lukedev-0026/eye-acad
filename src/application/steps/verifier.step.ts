@@ -16,11 +16,9 @@ export type VerifierOutput = z.infer<typeof VerifierSchema>;
 
 export interface VerifierResult {
   call: CallResult<VerifierOutput>;
-  // Anything other than a clear "supported" counts as not supported.
   supported: boolean;
 }
 
-// The passage as the verifier sees it, with the quoted sentences marked.
 function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
   return chunk.sentences
     .map((s) => {
@@ -30,8 +28,7 @@ function markedPassage(chunk: NoteChunk, sentenceIds: Array<string>): string {
     .join(' ');
 }
 
-// A separate, fresh call that has seen none of the conversation. A quotation
-// can be word-for-word accurate and still not back the claim attached to it.
+/** A fresh call, no conversation: an exact quote can still fail its claim. */
 export async function runVerifier(
   models: LanguageModelGateway,
   statement: string,
@@ -45,7 +42,8 @@ export async function runVerifier(
       settings.promptVariant,
       {
         statement,
-        heading: headingPath(chunk) + (chunk.kind === 'table_row' ? ' (table)' : ''),
+        heading:
+          headingPath(chunk) + (chunk.kind === 'table_row' ? ' (table)' : ''),
         leadIn: chunk.leadIn,
         marked: markedPassage(chunk, sentenceIds),
       },
@@ -54,5 +52,8 @@ export async function runVerifier(
     VerifierSchema,
     { step: 'verifier' },
   );
-  return { call, supported: call.outcome === 'ok' && call.value.verdict === 'supported' };
+  return {
+    call,
+    supported: call.outcome === 'ok' && call.value.verdict === 'supported',
+  };
 }

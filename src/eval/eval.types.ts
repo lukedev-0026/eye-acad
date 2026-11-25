@@ -9,15 +9,10 @@ import type { NoteIndex } from '@/domain/note/note.schema';
 
 import type { RetrievalTargetSchema } from './eval-case.schema';
 
-// The checks call the app's own step functions. Nothing here re-implements a
-// prompt or a model call: a copy would measure a different system.
-
 export type Split = 'tune' | 'holdout';
 
 export interface EvalCase<I = unknown, E = unknown> {
   id: string;
-  // tune: used to choose settings and the improvement.
-  // holdout: only ever used to report.
   split: Split;
   type: string;
   input: I;
@@ -28,7 +23,6 @@ export interface EvalCase<I = unknown, E = unknown> {
 export type RetrievalTarget = z.infer<typeof RetrievalTargetSchema>;
 
 export interface EvalContext {
-  // The model gateway the steps are called with: the app's own.
   models: LanguageModelGateway;
   publicCase: PublicCase;
   catalogue: Catalogue;
@@ -36,18 +30,14 @@ export interface EvalContext {
   guidance: string | null;
   index: NoteIndex;
   targets: Array<RetrievalTarget>;
-  // Query embeddings, kept so that every configuration searches identically.
   vectors: Map<string, Array<number> | null>;
 }
 
 export interface Graded {
   pass: boolean;
-  // The expensive kind of mistake for this step, counted separately.
   costly: boolean;
-  // A safe pre-written fallback was used in place of the model's own text.
   fallback: boolean;
   detail: string;
-  // A second, finer count where a step has one (item agreement for coverage).
   secondary?: { k: number; n: number; leftOut: number };
 }
 
@@ -55,7 +45,6 @@ export interface StepRun<O> {
   outcome: CallOutcome;
   observed: O;
   calls: number;
-  // Wall-clock for the whole step, retries included.
   ms: number;
   modelMs: number;
   promptTokens: number;
@@ -68,13 +57,17 @@ export interface StepRun<O> {
 export interface StepEval<I, E, O> {
   step: StepId;
   cases: (ctx: EvalContext) => Promise<Array<EvalCase<I, E>>>;
-  run: (c: EvalCase<I, E>, settings: StepSettings, ctx: EvalContext) => Promise<StepRun<O>>;
+  run: (
+    c: EvalCase<I, E>,
+    settings: StepSettings,
+    ctx: EvalContext,
+  ) => Promise<StepRun<O>>;
   grade: (c: EvalCase<I, E>, observed: O, ctx: EvalContext) => Graded;
-  // A perfect observation for the case. Fed through `grade` before any model
-  // runs, to prove the grader agrees with its own expected answers.
   ideal: (c: EvalCase<I, E>, ctx: EvalContext) => O;
-  // What a step that ignores its input would produce: the floor.
-  constant: { name: string; observe: (c: EvalCase<I, E>, ctx: EvalContext) => O };
+  constant: {
+    name: string;
+    observe: (c: EvalCase<I, E>, ctx: EvalContext) => O;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

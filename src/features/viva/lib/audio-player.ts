@@ -3,10 +3,8 @@ export interface ReplyAudio {
   mimeType: string;
 }
 
-// Plays the clips of one reply back to back. They all arrived inside the same
-// server reply. Resolves `started` with the time the first clip began playing
-// and `ended` when the last one finishes. A failure to play is never an error
-// for the caller: the words are on screen anyway.
+/** `started` resolves when the first clip begins, `ended` after the last.
+ * Never rejects on a playback failure: the words are on screen anyway. */
 export function playReply(clips: Array<ReplyAudio>): {
   started: Promise<number | null>;
   ended: Promise<void>;
@@ -16,7 +14,6 @@ export function playReply(clips: Array<ReplyAudio>): {
     const bytes = Uint8Array.from(atob(clip.base64), (ch) => ch.charCodeAt(0));
     return URL.createObjectURL(new Blob([bytes], { type: clip.mimeType }));
   });
-  // Created up front so each clip is decoded and ready when its turn comes.
   const elements = urls.map((url) => {
     const element = new Audio(url);
     element.preload = 'auto';
@@ -34,9 +31,6 @@ export function playReply(clips: Array<ReplyAudio>): {
   const playOne = (element: HTMLAudioElement, first: boolean) =>
     new Promise<void>((done) => {
       current = element;
-      // `playing` fires when the browser has audio ready and has begun to
-      // output it. It marks "playback ready", not the instant sound reaches
-      // the ear.
       if (first)
         element.addEventListener(
           'playing',

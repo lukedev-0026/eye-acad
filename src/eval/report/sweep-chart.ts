@@ -8,12 +8,6 @@ import { selfTest } from '@/eval/run/self-test';
 import { STEP_EVALS } from '@/eval/steps/registry';
 import { CEILING_MS } from '@/eval/sweep/grid';
 
-// The chart: accuracy against model call time, one dot per configuration, one
-// panel per AI step. It is drawn from the rows of the results table and
-// nothing else, as SVG text with no chart library.
-
-// The columns of the results table the chart reads. Every value in a CSV file
-// is text.
 export const ChartRowSchema = z.object({
   provider: z.string(),
   stage: z.string(),
@@ -44,25 +38,27 @@ export const ChartRowSchema = z.object({
 });
 type CsvRow = z.infer<typeof ChartRowSchema>;
 
-// What a step that ignores its input scores on the tuning cases.
 export interface Floor {
   readonly k: number;
   readonly name: string;
 }
 
 interface ChartFrame {
-  // One screening row per configuration.
   readonly rows: Array<CsvRow>;
   readonly floors: Record<StepId, Floor>;
-  // The time axis, in seconds, shared by every panel.
+  /** Seconds, shared by every panel. */
   readonly xMin: number;
   readonly xMax: number;
   readonly xTicks: Array<number>;
 }
 
-export async function chartFloors(ctx: EvalContext): Promise<Record<StepId, Floor>> {
+export async function chartFloors(
+  ctx: EvalContext,
+): Promise<Record<StepId, Floor>> {
   const floorFor = async (step: StepId): Promise<Floor> => {
-    const cases = (await STEP_EVALS[step].cases(ctx)).filter((c) => c.split === 'tune');
+    const cases = (await STEP_EVALS[step].cases(ctx)).filter(
+      (c) => c.split === 'tune',
+    );
     const st = selfTest(STEP_EVALS[step], cases, ctx);
     return { k: st.constantPass, name: st.constantName };
   };
@@ -75,16 +71,27 @@ export async function chartFloors(ctx: EvalContext): Promise<Record<StepId, Floo
   };
 }
 
-// ---------- look ----------
-// Colours are the first three slots of the reference palette, which pass the
-// colour-blind checks against every other pair (validated with the dataviz
-// skill's validate_palette.js, light and dark). Size is also carried by
-// shape, so colour is never the only cue.
+// Colour-blind-checked palette slots; size is also shown by shape.
 
 const SIZE = {
-  small: { label: 'small (4b)', shape: 'circle', light: '#2a78d6', dark: '#3987e5' },
-  medium: { label: 'medium (9b)', shape: 'square', light: '#eb6834', dark: '#d95926' },
-  large: { label: 'large (27b)', shape: 'triangle', light: '#1baf7a', dark: '#199e70' },
+  small: {
+    label: 'small (4b)',
+    shape: 'circle',
+    light: '#2a78d6',
+    dark: '#3987e5',
+  },
+  medium: {
+    label: 'medium (9b)',
+    shape: 'square',
+    light: '#eb6834',
+    dark: '#d95926',
+  },
+  large: {
+    label: 'large (27b)',
+    shape: 'triangle',
+    light: '#1baf7a',
+    dark: '#199e70',
+  },
 } as const;
 type SizeKey = keyof typeof SIZE;
 const isSizeKey = (value: string): value is SizeKey => value in SIZE;
@@ -108,19 +115,27 @@ const PLOT = { left: 44, right: 14, top: 30, bottom: 62 };
 const H = TOP + 2 * PANEL_H + GAP_Y + 64;
 
 const esc = (s: string) =>
-  s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+  s
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 const num = (v: string) => (v === '' ? null : Number(v));
 
-function marker(shape: string, cx: number, cy: number, r: number, cls: string): string {
-  if (shape === 'circle') return `<circle class="${cls}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}"/>`;
+function marker(
+  shape: string,
+  cx: number,
+  cy: number,
+  r: number,
+  cls: string,
+): string {
+  if (shape === 'circle')
+    return `<circle class="${cls}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}"/>`;
   if (shape === 'square')
     return `<rect class="${cls}" x="${(cx - r).toFixed(1)}" y="${(cy - r).toFixed(1)}" width="${2 * r}" height="${2 * r}" rx="1.5"/>`;
   const h = r * 1.25;
   return `<path class="${cls}" d="M${cx.toFixed(1)} ${(cy - h).toFixed(1)} L${(cx + h).toFixed(1)} ${(cy + h * 0.8).toFixed(1)} L${(cx - h).toFixed(1)} ${(cy + h * 0.8).toFixed(1)} Z"/>`;
 }
-
-// Placing labels. A label is tried in a few usual places and takes the first
-// that is clear of the dots and of the labels already down.
 
 interface Box {
   x0: number;
@@ -139,23 +154,28 @@ interface Dot {
 interface Label {
   svg: string;
   box: Box;
-  // A thin line back to the dot, when the label is not beside it.
   leader?: string;
 }
 
-const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+const overlaps = (a: Box, b: Box): boolean =>
+  a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 
-// Roughly where a line of text will sit. `baseline` is the y it is drawn at;
-// the width is an estimate from the number of characters.
-function textBox(xAt: number, baseline: number, text: string, anchor: 'start' | 'end', charWidth: number): Box {
+function textBox(
+  xAt: number,
+  baseline: number,
+  text: string,
+  anchor: 'start' | 'end',
+  charWidth: number,
+): Box {
   const width = text.length * charWidth;
   const x0 = anchor === 'start' ? xAt : xAt - width;
   return { x0, x1: x0 + width, y0: baseline - 10, y1: baseline + 3 };
 }
 
-// The first candidate that overlaps nothing, or failing that the one that
-// overlaps least.
-function clearest(candidates: ReadonlyArray<Label>, taken: ReadonlyArray<Box>): Label {
+function clearest(
+  candidates: ReadonlyArray<Label>,
+  taken: ReadonlyArray<Box>,
+): Label {
   let best = itemAt(candidates, 0);
   let fewest = Number.POSITIVE_INFINITY;
   for (const candidate of candidates) {
@@ -172,15 +192,18 @@ function clearest(candidates: ReadonlyArray<Label>, taken: ReadonlyArray<Box>): 
 const REF_CHAR_WIDTH = 5.4;
 const DIRECT_CHAR_WIDTH = 6.2;
 
-function refLabel(xAt: number, baseline: number, text: string, anchor: 'start' | 'end'): Label {
+function refLabel(
+  xAt: number,
+  baseline: number,
+  text: string,
+  anchor: 'start' | 'end',
+): Label {
   return {
     svg: `<text class="ref-label" x="${xAt.toFixed(1)}" y="${baseline.toFixed(1)}" text-anchor="${anchor}">${esc(text)}</text>`,
     box: textBox(xAt, baseline, text, anchor, REF_CHAR_WIDTH),
   };
 }
 
-// Where a dot's label may go, as a step across and a step down from the dot,
-// nearest first: beside it, then just above or below, then further out.
 const LABEL_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [18, 0],
   [-18, 0],
@@ -216,25 +239,37 @@ function directLabel(dot: Dot, dx: number, dy: number, text: string): Label {
   };
 }
 
-function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): string {
+function panel(
+  frame: ChartFrame,
+  step: StepId,
+  col: number,
+  rowIndex: number,
+): string {
   const { xMin, xMax, xTicks } = frame;
   const rows = frame.rows.filter((r) => r.step === step);
   const ox = LEFT + col * (PANEL_W + GAP_X);
   const oy = TOP + rowIndex * (PANEL_H + GAP_Y);
   const pw = PANEL_W - PLOT.left - PLOT.right;
   const ph = PANEL_H - PLOT.top - PLOT.bottom;
-  const n = Math.max(1, ...rows.filter((r) => r.status !== 'stopped').map((r) => Number(r.cases_n)));
-  const x = (s: number) => ox + PLOT.left + ((Math.log(s) - Math.log(xMin)) / (Math.log(xMax) - Math.log(xMin))) * pw;
+  const n = Math.max(
+    1,
+    ...rows.filter((r) => r.status !== 'stopped').map((r) => Number(r.cases_n)),
+  );
+  const x = (s: number) =>
+    ox +
+    PLOT.left +
+    ((Math.log(s) - Math.log(xMin)) / (Math.log(xMax) - Math.log(xMin))) * pw;
   const y = (k: number) => oy + PLOT.top + ph - (k / n) * ph;
   const stoppedY = oy + PLOT.top + ph + 44;
   const out: Array<string> = [];
 
-  out.push(`<text class="panel-title" x="${ox}" y="${oy + 12}">${STEP_TITLE[step]}</text>`);
+  out.push(
+    `<text class="panel-title" x="${ox}" y="${oy + 12}">${STEP_TITLE[step]}</text>`,
+  );
   out.push(
     `<text class="muted" x="${ox + PANEL_W - PLOT.right}" y="${oy + 12}" text-anchor="end">${rows.length} configurations · ${n} cases</text>`,
   );
 
-  // Grid and axes: hairlines, recessive.
   const step5 = n <= 8 ? 2 : n <= 16 ? 4 : n <= 30 ? 5 : 10;
   for (let k = 0; k <= n; k += step5) {
     out.push(
@@ -257,24 +292,30 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
       `<text class="tick" x="${x(t).toFixed(1)}" y="${oy + PLOT.top + ph + 15}" text-anchor="middle">${t}</text>`,
     );
   }
-  out.push(`<line class="axis" x1="${ox + PLOT.left}" x2="${ox + PLOT.left + pw}" y1="${y(0)}" y2="${y(0)}"/>`);
+  out.push(
+    `<line class="axis" x1="${ox + PLOT.left}" x2="${ox + PLOT.left + pw}" y1="${y(0)}" y2="${y(0)}"/>`,
+  );
 
-  // Where each dot goes. Those that would land on top of each other are
-  // nudged apart. Worked out first, so that the labels can keep clear of them.
   const dots: Array<Dot> = [];
-  const sorted = [...rows].sort((a, b) => Number(a.is_chosen === 'yes') - Number(b.is_chosen === 'yes'));
+  const sorted = [...rows].sort(
+    (a, b) => Number(a.is_chosen === 'yes') - Number(b.is_chosen === 'yes'),
+  );
   for (const row of sorted) {
     const med = num(row.median_ms);
     if (med === null || med <= 0) continue;
     const stopped = row.status === 'stopped';
     const px = x(med / 1000);
     let py = stopped ? stoppedY : y(Number(row.cases_all_pass_k));
-    for (let tries = 0; tries < 8 && dots.some((d) => Math.abs(d.px - px) < 9 && Math.abs(d.py - py) < 9); tries++) {
+    for (
+      let tries = 0;
+      tries < 8 &&
+      dots.some((d) => Math.abs(d.px - px) < 9 && Math.abs(d.py - py) < 9);
+      tries++
+    ) {
       py += tries % 2 === 0 ? -(5 + tries * 2) : 5 + tries * 2;
     }
     dots.push({ row, px, py, stopped });
   }
-  // What a label must not sit on: every dot, with its cross if it has one.
   const taken: Array<Box> = dots.map((d) => ({
     x0: d.px - 9,
     x1: d.px + (Number(d.row.costly_errors) > 0 ? 13 : 9),
@@ -282,18 +323,20 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
     y1: d.py + 9,
   }));
   const inPanel = (box: Box): boolean =>
-    box.x0 >= ox + PLOT.left && box.x1 <= ox + PANEL_W && box.y0 >= oy + 16 && box.y1 <= stoppedY + 12;
+    box.x0 >= ox + PLOT.left &&
+    box.x1 <= ox + PANEL_W &&
+    box.y0 >= oy + 16 &&
+    box.y1 <= stoppedY + 12;
 
-  // Reference lines: the speed ceiling and the floor. Each label takes the
-  // first of its usual places that is clear.
   const f = frame.floors[step];
   const floorText = `floor ${f.k}: ${f.name}`;
   const floorLabel = clearest(
     [
       refLabel(ox + PLOT.left + pw, y(f.k) - 4, floorText, 'end'),
       refLabel(ox + PLOT.left + 4, y(f.k) - 4, floorText, 'start'),
-      // Under the line, unless the line is the bottom of the plot.
-      ...(f.k > 0 ? [refLabel(ox + PLOT.left + pw, y(f.k) + 12, floorText, 'end')] : []),
+      ...(f.k > 0
+        ? [refLabel(ox + PLOT.left + pw, y(f.k) + 12, floorText, 'end')]
+        : []),
     ],
     taken,
   );
@@ -323,7 +366,6 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
     taken.push(ceilingLabel.box);
   }
 
-  // The band under the plot for configurations stopped as far too slow.
   if (rows.some((r) => r.status === 'stopped')) {
     out.push(
       `<text class="ref-label" x="${ox + PLOT.left - 6}" y="${stoppedY + 3.5}" text-anchor="end">stopped</text>`,
@@ -333,19 +375,24 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
     );
   }
 
-  // Only two dots per panel are named: where the build started, and the
-  // choice. The choice is placed first. A label that cannot sit beside its
-  // dot is moved to clear space and joined to it by a thin line.
   const leaders: Array<string> = [];
   const labels: Array<string> = [];
   for (const d of [...dots].reverse()) {
-    const tags = [d.row.is_start === 'yes' ? 'start' : '', d.row.is_chosen === 'yes' ? 'chosen' : '']
+    const tags = [
+      d.row.is_start === 'yes' ? 'start' : '',
+      d.row.is_chosen === 'yes' ? 'chosen' : '',
+    ]
       .filter(Boolean)
       .join(' = ');
     if (!tags) continue;
     const text = `${tags}: ${d.stopped ? 'stopped' : `${d.row.cases_all_pass_k} of ${d.row.cases_n}`}`;
-    const candidates = LABEL_OFFSETS.map(([dx, dy]) => directLabel(d, dx, dy, text)).filter((c) => inPanel(c.box));
-    const label = clearest(candidates.length ? candidates : [directLabel(d, 18, 0, text)], taken);
+    const candidates = LABEL_OFFSETS.map(([dx, dy]) =>
+      directLabel(d, dx, dy, text),
+    ).filter((c) => inPanel(c.box));
+    const label = clearest(
+      candidates.length ? candidates : [directLabel(d, 18, 0, text)],
+      taken,
+    );
     if (label.leader) leaders.push(label.leader);
     labels.push(label.svg);
     taken.push(label.box);
@@ -365,19 +412,33 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
       );
     }
     if (r.is_chosen === 'yes')
-      parts.push(`<circle class="chosen-ring" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="11"/>`);
-    parts.push(marker(size.shape, px, py, 5, `${hollow ? 'hollow' : 'solid'} s-${r.size}`));
+      parts.push(
+        `<circle class="chosen-ring" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="11"/>`,
+      );
+    parts.push(
+      marker(
+        size.shape,
+        px,
+        py,
+        5,
+        `${hollow ? 'hollow' : 'solid'} s-${r.size}`,
+      ),
+    );
     if (r.forced_format === 'off') {
       parts.push(
         `<line class="slash" x1="${(px - 6).toFixed(1)}" y1="${(py + 6).toFixed(1)}" x2="${(px + 6).toFixed(1)}" y2="${(py - 6).toFixed(1)}"/>`,
       );
     }
     if (Number(r.costly_errors) > 0) {
-      parts.push(`<path class="cross" d="M${(px + 5).toFixed(1)} ${(py - 12).toFixed(1)} l6 6 m0 -6 l-6 6"/>`);
+      parts.push(
+        `<path class="cross" d="M${(px + 5).toFixed(1)} ${(py - 12).toFixed(1)} l6 6 m0 -6 l-6 6"/>`,
+      );
     }
     const tip =
       `${STEP_TITLE[step]} — ${size.label}, thinking ${r.thinking}, forced format ${r.forced_format}, temperature ${r.temperature}, ${r.prompt} prompt` +
-      (/"presence_penalty":0[,}]/.test(r.sampling) ? ', no repetition penalty' : '') +
+      (/"presence_penalty":0[,}]/.test(r.sampling)
+        ? ', no repetition penalty'
+        : '') +
       `\n${stopped ? `stopped after ${r.timed_calls} calls: far over the speed ceiling` : `${r.cases_all_pass_k} of ${r.cases_n} cases passed`}` +
       `\ncostly errors ${r.costly_errors}, fallbacks ${r.fallbacks}, unusable replies ${Number(r.truncated) + Number(r.schema_invalid)}` +
       `\nmedian ${r.median_ms} ms (range ${r.min_ms}–${r.max_ms}), ${r.timed_calls} calls`;
@@ -393,25 +454,38 @@ function panel(frame: ChartFrame, step: StepId, col: number, rowIndex: number): 
   return out.join('\n');
 }
 
-// The legend, in the sixth cell.
 function legend(): string {
   const ox = LEFT + 2 * (PANEL_W + GAP_X) + 12;
   const oy = TOP + PANEL_H + GAP_Y + 6;
-  const out: Array<string> = [`<text class="panel-title" x="${ox}" y="${oy + 6}">How to read it</text>`];
+  const out: Array<string> = [
+    `<text class="panel-title" x="${ox}" y="${oy + 6}">How to read it</text>`,
+  ];
   let yy = oy + 32;
   const line = (draw: string, text: string) => {
-    out.push(draw, `<text class="legend" x="${ox + 30}" y="${yy + 4}">${esc(text)}</text>`);
+    out.push(
+      draw,
+      `<text class="legend" x="${ox + 30}" y="${yy + 4}">${esc(text)}</text>`,
+    );
     yy += 23;
   };
   for (const key of keysOf(SIZE)) {
-    line(marker(SIZE[key].shape, ox + 10, yy, 5, `solid s-${key}`), `${SIZE[key].label} model`);
+    line(
+      marker(SIZE[key].shape, ox + 10, yy, 5, `solid s-${key}`),
+      `${SIZE[key].label} model`,
+    );
   }
-  line(marker('circle', ox + 10, yy, 5, 'hollow s-small'), 'hollow: thinking on (filled: off)');
+  line(
+    marker('circle', ox + 10, yy, 5, 'hollow s-small'),
+    'hollow: thinking on (filled: off)',
+  );
   line(
     `${marker('circle', ox + 10, yy, 5, 'solid s-small')}<line class="slash" x1="${ox + 4}" y1="${yy + 6}" x2="${ox + 16}" y2="${yy - 6}"/>`,
     'slash: output format not forced',
   );
-  line(`<path class="cross" d="M${ox + 7} ${yy - 3} l6 6 m0 -6 l-6 6"/>`, 'cross: made a costly error');
+  line(
+    `<path class="cross" d="M${ox + 7} ${yy - 3} l6 6 m0 -6 l-6 6"/>`,
+    'cross: made a costly error',
+  );
   line(
     `<circle class="chosen-ring" cx="${ox + 10}" cy="${yy}" r="9"/>${marker('square', ox + 10, yy, 4, 'solid s-medium')}`,
     'ring: the configuration chosen',
@@ -424,13 +498,19 @@ function legend(): string {
     `<line class="ref" x1="${ox}" x2="${ox + 20}" y1="${yy}" y2="${yy}"/>`,
     'grey lines: speed ceiling, and the floor',
   );
-  out.push(`<text class="muted" x="${ox}" y="${yy + 10}">Up is more accurate. Left is faster.</text>`);
-  out.push(`<text class="muted" x="${ox}" y="${yy + 26}">Temperature and prompt wording are in</text>`);
-  out.push(`<text class="muted" x="${ox}" y="${yy + 41}">results.csv, not on the chart.</text>`);
+  out.push(
+    `<text class="muted" x="${ox}" y="${yy + 10}">Up is more accurate. Left is faster.</text>`,
+  );
+  out.push(
+    `<text class="muted" x="${ox}" y="${yy + 26}">Temperature and prompt wording are in</text>`,
+  );
+  out.push(
+    `<text class="muted" x="${ox}" y="${yy + 41}">results.csv, not on the chart.</text>`,
+  );
   return out.join('\n');
 }
 
-// Where each step's panel sits: column, then row.
+// [step, column, row]
 const PANELS: Array<[StepId, number, number]> = [
   ['selector', 0, 0],
   ['followup', 1, 0],
@@ -468,16 +548,19 @@ const CSS = `
   .hit { fill: transparent; }
 `;
 
-// `rows` are the screening rows of the results table for one provider: every
-// dot is the single screening run on the tuning cases, so all are measured the
-// same way.
-export function sweepChartSvg(rows: Array<CsvRow>, floors: Record<StepId, Floor>): string {
+/** `rows` are one provider's screening rows, so every dot is comparable. */
+export function sweepChartSvg(
+  rows: Array<CsvRow>,
+  floors: Record<StepId, Floor>,
+): string {
   const seconds = rows
     .flatMap((r) => [num(r.median_ms), num(r.min_ms), num(r.max_ms)])
     .filter((v): v is number => v !== null && v > 0);
   const xMin = Math.min(0.2, Math.min(...seconds) / 1000 / 1.3);
   const xMax = Math.max(30, (Math.max(...seconds) / 1000) * 1.3);
-  const xTicks = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 60, 120, 300].filter((t) => t >= xMin && t <= xMax);
+  const xTicks = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 60, 120, 300].filter(
+    (t) => t >= xMin && t <= xMax,
+  );
   const frame: ChartFrame = { rows, floors, xMin, xMax, xTicks };
   const sample = rows[0];
 

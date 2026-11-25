@@ -1,6 +1,4 @@
-// Writes evals/cases/REVIEW.md: every hand-written case with its expected
-// answer, laid out for a person to read and correct.
-//   pnpm tsx scripts/cases-review.ts
+// pnpm cases:review  write evals/cases/REVIEW.md with expected answers
 import { writeFile } from 'node:fs/promises';
 
 import { runCli } from '@/eval/cli';

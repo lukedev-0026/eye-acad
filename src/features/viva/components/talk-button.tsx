@@ -1,8 +1,6 @@
 import { useRef } from 'react';
 import type { JSX } from 'react';
 
-// Hold to talk, with the mouse, a finger, or the space bar. Holding makes it
-// unmistakable when the trainee may speak and when they have finished.
 interface TalkButtonProps {
   label: string;
   disabled: boolean;

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// One run of one of the brief's three required checks, as it is saved.
 export const RequiredRowSchema = z.object({
   type: z.literal('required'),
   runId: z.string(),
@@ -14,7 +13,6 @@ export const RequiredRowSchema = z.object({
   pass: z.boolean(),
   ms: z.number(),
   model: z.string(),
-  // For the citation check: what was retrieved and what was quoted.
   retrieved: z
     .array(
       z.object({
@@ -27,7 +25,11 @@ export const RequiredRowSchema = z.object({
     )
     .optional(),
   cited: z
-    .object({ page: z.string().nullable(), excerpt: z.string().nullable(), heading: z.string().nullable() })
+    .object({
+      page: z.string().nullable(),
+      excerpt: z.string().nullable(),
+      heading: z.string().nullable(),
+    })
     .optional(),
 });
 export type RequiredRow = z.infer<typeof RequiredRowSchema>;

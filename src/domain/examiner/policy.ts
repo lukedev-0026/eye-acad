@@ -6,9 +6,6 @@ import { composeSpeechParts, renderFinding, renderHistory } from './render';
 import type { RenderedItem } from './render';
 import type { SelectorOutput } from './selector.schema';
 
-// Turns the selector's choices into what the examiner does. Pure code: the
-// same choices always produce the same reply.
-
 const MAX_ITEMS_PER_TURN = 6;
 
 export type TurnDecision =
@@ -18,8 +15,11 @@ export type TurnDecision =
   | { kind: 'wants_to_answer' }
   | { kind: 'other' };
 
-export function decide(c: PublicCase, catalogue: Catalogue, selected: SelectorOutput): TurnDecision {
-  // Starting an answer never changes phase by itself; only the button does.
+export function decide(
+  c: PublicCase,
+  catalogue: Catalogue,
+  selected: SelectorOutput,
+): TurnDecision {
   if (selected.intent === 'wants_to_answer') return { kind: 'wants_to_answer' };
 
   const findingIds = new Set<string>();
@@ -37,12 +37,12 @@ export function decide(c: PublicCase, catalogue: Catalogue, selected: SelectorOu
       continue;
     }
     const rows = c.findings.filter((f) => f.label === item.label);
-    // No eye named means every row with that label; an eye is never guessed.
-    // A row recorded for both eyes, or for no eye, answers a request for
-    // either eye.
+    // No eye named means every row with that label: never guess an eye.
     const wanted =
       request.eye === 'right' || request.eye === 'left'
-        ? rows.filter((f) => f.eye === request.eye || f.eye === 'both' || f.eye === null)
+        ? rows.filter(
+            (f) => f.eye === request.eye || f.eye === 'both' || f.eye === null,
+          )
         : rows;
     if (wanted.length === 0) missed = true;
     for (const f of wanted) findingIds.add(f.id);
@@ -50,11 +50,12 @@ export function decide(c: PublicCase, catalogue: Catalogue, selected: SelectorOu
 
   const count = findingIds.size + historyKeys.size;
   if (count === 0) {
-    return missed || selected.intent === 'request_items' ? { kind: 'not_recorded' } : { kind: 'other' };
+    return missed || selected.intent === 'request_items'
+      ? { kind: 'not_recorded' }
+      : { kind: 'other' };
   }
   if (count > MAX_ITEMS_PER_TURN) return { kind: 'too_many' };
 
-  // Case-file order, findings first, whatever order they were asked in.
   const items = [
     ...c.findings.filter((f) => findingIds.has(f.id)).map(renderFinding),
     ...Object.entries(c.patient)
@@ -66,12 +67,8 @@ export function decide(c: PublicCase, catalogue: Catalogue, selected: SelectorOu
 
 export interface ExaminerReply {
   kind: TurnDecision['kind'] | 'did_not_catch' | 'error';
-  // What is shown, one entry per line.
   lines: Array<string>;
-  // What is said. Built from the same items, so it cannot differ in substance.
   speech: string;
-  // The same words, one sentence group per item. Each is synthesised (and
-  // kept) on its own, so a reply about two eyes does not wait twice as long.
   speechParts: Array<string>;
   items: Array<RenderedItem>;
 }
@@ -106,6 +103,9 @@ export function replyFor(decision: TurnDecision): ExaminerReply {
   }
 }
 
-export function fixedReply(kind: ExaminerReply['kind'], line: string): ExaminerReply {
+export function fixedReply(
+  kind: ExaminerReply['kind'],
+  line: string,
+): ExaminerReply {
   return { kind, lines: [line], speech: line, speechParts: [line], items: [] };
 }

@@ -1,13 +1,18 @@
 import { useNavigate } from '@tanstack/react-router';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
 
 import { useAuthUser } from '@/features/auth/hooks/use-auth';
-import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from '@/features/auth/lib/firebase';
+import {
+  DEMO_ACCOUNTS,
+  DEMO_PASSWORD,
+  auth,
+} from '@/features/auth/lib/firebase';
 
-// Signing in as one of the two demo trainees. Nothing about the case is on
-// this page.
 export function SignInPage(): JSX.Element {
   const user = useAuthUser();
   const navigate = useNavigate();
@@ -28,7 +33,9 @@ export function SignInPage(): JSX.Element {
       try {
         await createUserWithEmailAndPassword(auth, email, DEMO_PASSWORD);
       } catch {
-        setError('Could not sign in. Are the Firebase emulators running? (pnpm emulators)');
+        setError(
+          'Could not sign in. Are the Firebase emulators running? (pnpm emulators)',
+        );
       }
     } finally {
       setBusy(false);
@@ -39,7 +46,8 @@ export function SignInPage(): JSX.Element {
     <main className="page narrow">
       <h1>Practice viva</h1>
       <p className="lede">
-        A spoken practice exam on one fictional eye casualty case. Sign in to start or to reopen an earlier attempt.
+        A spoken practice exam on one fictional eye casualty case. Sign in to
+        start or to reopen an earlier attempt.
       </p>
       <div className="stack">
         {DEMO_ACCOUNTS.map((account) => (
@@ -59,7 +67,8 @@ export function SignInPage(): JSX.Element {
         </p>
       ) : null}
       <p className="muted small">
-        Demo accounts in a local Firebase emulator. Each trainee can see only their own attempts.
+        Demo accounts in a local Firebase emulator. Each trainee can see only
+        their own attempts.
       </p>
     </main>
   );

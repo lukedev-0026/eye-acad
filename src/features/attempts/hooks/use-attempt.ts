@@ -1,4 +1,10 @@
-import { collection, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import { PublicAttemptSchema } from '@/domain/attempt/attempt.schema';
@@ -6,11 +12,10 @@ import type { PublicAttempt } from '@/domain/attempt/attempt.schema';
 import { db } from '@/features/auth/lib/firebase';
 
 export type AttemptState =
-  { status: 'loading' } | { status: 'ready'; attempt: PublicAttempt } | { status: 'unavailable' };
+  | { status: 'loading' }
+  | { status: 'ready'; attempt: PublicAttempt }
+  | { status: 'unavailable' };
 
-// Live view of one saved attempt, read straight from Firestore under the
-// owner-only rules. This is why a page refresh brings everything back: the
-// screen is drawn from the saved record, not from memory.
 export function useAttempt(uid: string, attemptId: string): AttemptState {
   const [state, setState] = useState<AttemptState>({ status: 'loading' });
   useEffect(() => {
@@ -20,7 +25,9 @@ export function useAttempt(uid: string, attemptId: string): AttemptState {
       (snap) => {
         const parsed = PublicAttemptSchema.safeParse(snap.data());
         setState(
-          snap.exists() && parsed.success ? { status: 'ready', attempt: parsed.data } : { status: 'unavailable' },
+          snap.exists() && parsed.success
+            ? { status: 'ready', attempt: parsed.data }
+            : { status: 'unavailable' },
         );
       },
       // Not found and "not yours" look the same to the trainee, on purpose.
@@ -40,7 +47,10 @@ export interface AttemptSummary {
 export function useAttemptList(uid: string): Array<AttemptSummary> | null {
   const [list, setList] = useState<Array<AttemptSummary> | null>(null);
   useEffect(() => {
-    const q = query(collection(db, 'users', uid, 'attempts'), orderBy('createdAtMs', 'desc'));
+    const q = query(
+      collection(db, 'users', uid, 'attempts'),
+      orderBy('createdAtMs', 'desc'),
+    );
     return onSnapshot(
       q,
       (snap) => {

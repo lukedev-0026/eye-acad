@@ -1,11 +1,7 @@
-// Checks that the app still sends the model exactly what it sent before, and
-// still makes exactly the same of every reply a model has given it. Runs
-// offline: the network is replaced by a recorder.
-//
-//   pnpm golden                    compare with tests/golden/golden.json
-//   pnpm golden --update           rewrite that file (only for a change that is meant)
-//   pnpm golden --capture-vectors  also ask Ollama for any query vector not yet pinned
-//   pnpm golden --dump out.json    write every replayed outcome, for comparing two versions
+// pnpm golden                    compare with tests/golden/golden.json
+// pnpm golden --update           rewrite that file (intended changes only)
+// pnpm golden --capture-vectors  also fetch unpinned query vectors from Ollama
+// pnpm golden --dump out.json    write every replayed outcome, to diff versions
 import { parseArgs } from 'node:util';
 
 import { runCli } from '@/eval/cli';

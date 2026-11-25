@@ -3,28 +3,52 @@ import { describe, expect, it } from 'vitest';
 import { asTsv, summarise } from '@/features/viva/lib/latency';
 import type { TurnTiming } from '@/features/viva/lib/latency';
 
-const turn = (n: number, via: TurnTiming['via'], toPlaybackMs: number | null): TurnTiming => ({
+const turn = (
+  n: number,
+  via: TurnTiming['via'],
+  toPlaybackMs: number | null,
+): TurnTiming => ({
   n,
   via,
   toResponseMs: 900,
   toPlaybackMs,
-  server: { speechToTextMs: via === 'voice' ? 300 : null, modelMs: 450, textToSpeechMs: 200, serverTotalMs: 980 },
+  server: {
+    speechToTextMs: via === 'voice' ? 300 : null,
+    modelMs: 450,
+    textToSpeechMs: 200,
+    serverTotalMs: 980,
+  },
 });
 
 describe('response times for the write-up', () => {
   it('summarises spoken turns whose reply was played, and nothing else', () => {
-    const timings = [turn(1, 'voice', 2000), turn(2, 'typed', 1500), turn(3, 'voice', null), turn(4, 'voice', 3000)];
+    const timings = [
+      turn(1, 'voice', 2000),
+      turn(2, 'typed', 1500),
+      turn(3, 'voice', null),
+      turn(4, 'voice', 3000),
+    ];
 
-    expect(summarise(timings)).toEqual({ n: 2, medianMs: 2500, minMs: 2000, maxMs: 3000 });
+    expect(summarise(timings)).toEqual({
+      n: 2,
+      medianMs: 2500,
+      minMs: 2000,
+      maxMs: 3000,
+    });
   });
 
   it('has nothing to say until a spoken reply has been played', () => {
     expect(summarise([])).toBeNull();
-    expect(summarise([turn(1, 'typed', 1200), turn(2, 'voice', null)])).toBeNull();
+    expect(
+      summarise([turn(1, 'typed', 1200), turn(2, 'voice', null)]),
+    ).toBeNull();
   });
 
   it('writes one line per turn, leaving a gap where a step did not happen', () => {
-    const [head, spoken, typed] = asTsv([turn(1, 'voice', 2000), turn(2, 'typed', null)]).split('\n');
+    const [head, spoken, typed] = asTsv([
+      turn(1, 'voice', 2000),
+      turn(2, 'typed', null),
+    ]).split('\n');
 
     expect(head?.split('\t')).toEqual([
       'turn',

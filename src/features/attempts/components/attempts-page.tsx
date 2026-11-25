@@ -15,9 +15,7 @@ const PHASE_LABEL: Record<Phase, string> = {
   complete: 'Finished',
 };
 
-// The trainee's own attempts, newest first, and the button that starts one.
 export function AttemptsPage(): JSX.Element {
-  // The layout above only renders this once a user is signed in.
   const uid = auth.currentUser?.uid ?? '';
   const list = useAttemptList(uid);
   const navigate = useNavigate();
@@ -31,7 +29,9 @@ export function AttemptsPage(): JSX.Element {
       const { attemptId } = await startAttempt();
       await navigate({ to: '/attempts/$attemptId', params: { attemptId } });
     } catch (thrown) {
-      setError(messageFor(thrown, 'Could not start an attempt. Please try again.'));
+      setError(
+        messageFor(thrown, 'Could not start an attempt. Please try again.'),
+      );
       setBusy(false);
     }
   }
@@ -40,7 +40,11 @@ export function AttemptsPage(): JSX.Element {
     <main className="page">
       <div className="row between">
         <h1>Your attempts</h1>
-        <button className="button primary" disabled={busy} onClick={() => void begin()}>
+        <button
+          className="button primary"
+          disabled={busy}
+          onClick={() => void begin()}
+        >
           Start a new attempt
         </button>
       </div>
@@ -57,7 +61,11 @@ export function AttemptsPage(): JSX.Element {
         <ul className="attempt-list">
           {list.map(({ id, attempt }) => (
             <li key={id}>
-              <Link to="/attempts/$attemptId" params={{ attemptId: id }} className="attempt-link">
+              <Link
+                to="/attempts/$attemptId"
+                params={{ attemptId: id }}
+                className="attempt-link"
+              >
                 <span className="attempt-title">
                   {new Date(attempt.createdAtMs).toLocaleString('en-GB', {
                     dateStyle: 'medium',
@@ -65,7 +73,8 @@ export function AttemptsPage(): JSX.Element {
                   })}
                 </span>
                 <span className="muted small">
-                  {PHASE_LABEL[attempt.phase]} · {attempt.revealed.length} revealed · {attempt.turns.length} turns
+                  {PHASE_LABEL[attempt.phase]} · {attempt.revealed.length}{' '}
+                  revealed · {attempt.turns.length} turns
                 </span>
               </Link>
             </li>

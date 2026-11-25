@@ -12,21 +12,15 @@ import { extractPdfXml } from '@/infrastructure/files/pdf-text.extractor';
 
 export interface IngestedNote {
   readonly index: NoteIndex;
-  // The index exactly as it should be written to disk.
   readonly text: string;
   readonly passages: number;
   readonly sentences: number;
   readonly pages: number;
-  // Passages that run across a page break.
   readonly crossingPages: Array<string>;
-  // False when the embeddings model could not be reached: the index then
-  // supports keyword search only.
   readonly embedded: boolean;
 }
 
-// Prepares the reference note for search: reads the PDF, splits it into
-// passages and sentences that each know their page, and adds an embedding to
-// every passage. Nothing is written here.
+/** Splits the PDF into page-tagged passages and embeds them. Writes nothing. */
 export async function ingestNote(
   models: Pick<LanguageModelGateway, 'embed'>,
   options: { pdf: string; embeddingModel: string },
@@ -44,7 +38,10 @@ export async function ingestNote(
       pages: note.pages.length,
     },
     disclaimer: note.disclaimer,
-    embedding: vectors && dimensions !== undefined ? { model: options.embeddingModel, dimensions } : null,
+    embedding:
+      vectors && dimensions !== undefined
+        ? { model: options.embeddingModel, dimensions }
+        : null,
     chunks: note.chunks.map((chunk, i) => {
       const vector = vectors?.[i];
       return vector ? { ...chunk, vector } : chunk;
@@ -57,7 +54,9 @@ export async function ingestNote(
     passages: index.chunks.length,
     sentences: index.chunks.reduce((n, c) => n + c.sentences.length, 0),
     pages: note.pages.length,
-    crossingPages: index.chunks.filter((c) => c.pages.length > 1).map((c) => c.id),
+    crossingPages: index.chunks
+      .filter((c) => c.pages.length > 1)
+      .map((c) => c.id),
     embedded: index.embedding !== null,
   };
 }

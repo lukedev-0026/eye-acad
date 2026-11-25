@@ -1,12 +1,21 @@
 import { readFileSync } from 'node:fs';
 
-import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
+import {
+  assertFails,
+  assertSucceeds,
+  initializeTestEnvironment,
+} from '@firebase/rules-unit-testing';
 import type { RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 
-// Needs the Firestore emulator (pnpm emulators). Uses its own project id so it
-// never touches attempts made in the app.
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
@@ -19,11 +28,12 @@ beforeAll(async () => {
     },
   });
   await env.clearFirestore();
-  // Written the way the server writes: with the rules bypassed.
   await env.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
     await setDoc(doc(db, 'users/alice/attempts/a1'), { phase: 'asking' });
-    await setDoc(doc(db, 'users/alice/attempts/a1/private/trace'), { entries: [] });
+    await setDoc(doc(db, 'users/alice/attempts/a1/private/trace'), {
+      entries: [],
+    });
   });
 });
 
@@ -48,14 +58,24 @@ describe('attempts are private to their owner', () => {
   });
   it('no browser can write an attempt, not even its owner', async () => {
     const alice = env.authenticatedContext('alice').firestore();
-    await assertFails(updateDoc(doc(alice, 'users/alice/attempts/a1'), { phase: 'complete' }));
-    await assertFails(setDoc(doc(alice, 'users/alice/attempts/new'), { phase: 'asking' }));
+    await assertFails(
+      updateDoc(doc(alice, 'users/alice/attempts/a1'), { phase: 'complete' }),
+    );
+    await assertFails(
+      setDoc(doc(alice, 'users/alice/attempts/new'), { phase: 'asking' }),
+    );
     const bob = env.authenticatedContext('bob').firestore();
-    await assertFails(setDoc(doc(bob, 'users/alice/attempts/a1'), { phase: 'complete' }));
+    await assertFails(
+      setDoc(doc(bob, 'users/alice/attempts/a1'), { phase: 'complete' }),
+    );
   });
   it('the server-only working notes are closed to everyone, owner included', async () => {
     const alice = env.authenticatedContext('alice').firestore();
-    await assertFails(getDoc(doc(alice, 'users/alice/attempts/a1/private/trace')));
-    await assertFails(getDocs(collection(alice, 'users/alice/attempts/a1/private')));
+    await assertFails(
+      getDoc(doc(alice, 'users/alice/attempts/a1/private/trace')),
+    );
+    await assertFails(
+      getDocs(collection(alice, 'users/alice/attempts/a1/private')),
+    );
   });
 });

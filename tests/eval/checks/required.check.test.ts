@@ -9,41 +9,49 @@ import { loadStepsConfig } from '@/infrastructure/files/steps-config.loader';
 import { scriptModel } from '@tests/fakes/scripted-model';
 import type { ScriptedModel } from '@tests/fakes/scripted-model';
 
-// The brief's three required checks, run with a model that behaves in a known
-// way, to check the checks: do they pass what is right and fail what is wrong?
-
-const userText = (request: ChatBody): string => request.messages.find((m) => m.role === 'user')?.content ?? '';
-const systemText = (request: ChatBody): string => request.messages.find((m) => m.role === 'system')?.content ?? '';
-const isSelector = (request: ChatBody): boolean => systemText(request).includes('routing step');
-const isCoverage = (request: ChatBody): boolean => systemText(request).includes('item_0');
-const isRevision = (request: ChatBody): boolean => userText(request).includes('Sentences from the reference note');
+const userText = (request: ChatBody): string =>
+  request.messages.find((m) => m.role === 'user')?.content ?? '';
+const systemText = (request: ChatBody): string =>
+  request.messages.find((m) => m.role === 'system')?.content ?? '';
+const isSelector = (request: ChatBody): boolean =>
+  systemText(request).includes('routing step');
+const isCoverage = (request: ChatBody): boolean =>
+  systemText(request).includes('item_0');
+const isRevision = (request: ChatBody): boolean =>
+  userText(request).includes('Sentences from the reference note');
 
 const pick = (item: string, eye: string) => ({
   intent: 'request_items',
   requests: [{ item, eye }],
   not_in_catalogue: false,
 });
-const NOT_ON_MENU = { intent: 'request_items', requests: [], not_in_catalogue: true };
+const NOT_ON_MENU = {
+  intent: 'request_items',
+  requests: [],
+  not_in_catalogue: true,
+};
 
-// What a model that does its job says to each menu-picker question in the spec.
 function goodSelection(request: ChatBody): object {
   const said = userText(request);
-  if (said.includes('intraocular pressure in the right eye')) return pick('Intraocular pressure', 'right');
-  if (said.includes('gonioscopy of the right eye')) return pick('Gonioscopy', 'right');
+  if (said.includes('intraocular pressure in the right eye'))
+    return pick('Intraocular pressure', 'right');
+  if (said.includes('gonioscopy of the right eye'))
+    return pick('Gonioscopy', 'right');
   if (said.includes('relative afferent pupillary defect'))
     return pick('Relative afferent pupillary defect', 'unspecified');
   return NOT_ON_MENU;
 }
 
-// Everything covered except the second key point, which is named as the gap.
 const ALLERGY_GAP = {
   items: Object.fromEntries(
-    Array.from({ length: 7 }, (_, i) => [`item_${i}`, { quote: '', status: i === 2 ? 'not_covered' : 'not_covered' }]),
+    Array.from({ length: 7 }, (_, i) => [
+      `item_${i}`,
+      { quote: '', status: i === 2 ? 'not_covered' : 'not_covered' },
+    ]),
   ),
   priority: 'item_2',
 };
 
-// The number the prompt gave to the sentence containing `phrase`.
 function refOf(request: ChatBody, phrase: string): string | null {
   const line = userText(request)
     .split('\n')
@@ -79,7 +87,9 @@ afterAll(() => {
 
 async function run(only: Array<string>): Promise<Array<RequiredRow>> {
   const config = await loadStepsConfig('config/steps.start.json');
-  return runRequiredChecks(ctx, config, 'test-run', only, () => Promise.resolve());
+  return runRequiredChecks(ctx, config, 'test-run', only, () =>
+    Promise.resolve(),
+  );
 }
 const passed = (rows: Array<RequiredRow>, name: string): string => {
   const mine = rows.filter((r) => r.name === name);
@@ -88,20 +98,24 @@ const passed = (rows: Array<RequiredRow>, name: string): string => {
 
 describe('checks 1 and 2: asking for a finding', () => {
   it('pass a model that picks what was asked for, every time', async () => {
-    model.willAnswer((request) => (isSelector(request) ? goodSelection(request) : {}));
+    model.willAnswer((request) =>
+      isSelector(request) ? goodSelection(request) : {},
+    );
 
     const rows = await run(['1', '2']);
 
     expect(passed(rows, 'available finding')).toBe('10 of 10');
     expect(passed(rows, 'unavailable finding')).toBe('10 of 10');
-    expect(passed(rows, 'unavailable, with left-over text in its value field')).toBe('10 of 10');
+    expect(
+      passed(rows, 'unavailable, with left-over text in its value field'),
+    ).toBe('10 of 10');
     expect(passed(rows, 'not in the case at all')).toBe('10 of 10');
     expect(rows.find((r) => r.name === 'available finding')?.observed).toBe(
       'Shown: Right eye · Intraocular pressure: 58 mmHg (Goldmann applanation, 23:55) | Said: Right eye. Intraocular pressure: 58 millimetres of mercury. Method: Goldmann applanation, 23:55.',
     );
-    expect(rows.find((r) => r.name === 'unavailable finding')?.observed).toContain(
-      'Not available: No view: corneal oedema',
-    );
+    expect(
+      rows.find((r) => r.name === 'unavailable finding')?.observed,
+    ).toContain('Not available: No view: corneal oedema');
   });
 
   it('take what should be said from the case file itself, not from the app', async () => {
@@ -129,7 +143,9 @@ describe('checks 1 and 2: asking for a finding', () => {
 
   it('fail a model that offers the nearest thing when asked for something not in the case', async () => {
     model.willAnswer((request) =>
-      userText(request).includes('central corneal thickness') ? pick('Cornea', 'unspecified') : goodSelection(request),
+      userText(request).includes('central corneal thickness')
+        ? pick('Cornea', 'unspecified')
+        : goodSelection(request),
     );
 
     const rows = await run(['2']);
@@ -140,8 +156,13 @@ describe('checks 1 and 2: asking for a finding', () => {
 });
 
 describe('check 3: the citation, and saying when there is no support', () => {
-  const answer = (cite: (request: ChatBody) => object) => (request: ChatBody) =>
-    isCoverage(request) ? ALLERGY_GAP : isRevision(request) ? cite(request) : SUPPORTED;
+  const answer =
+    (cite: (request: ChatBody) => object) => (request: ChatBody) =>
+      isCoverage(request)
+        ? ALLERGY_GAP
+        : isRevision(request)
+          ? cite(request)
+          : SUPPORTED;
 
   it('passes when the gap is the allergy and the page 6 sentence is quoted', async () => {
     model.willAnswer(answer(citing('Check for sulfonamide allergy')));
@@ -152,7 +173,9 @@ describe('check 3: the citation, and saying when there is no support', () => {
     expect(citation).toHaveLength(5);
     expect(citation.every((r) => r.pass)).toBe(true);
     expect(citation[0]?.cited?.page).toBe('p. 6');
-    expect(citation[0]?.cited?.excerpt).toContain('Check for sulfonamide allergy');
+    expect(citation[0]?.cited?.excerpt).toContain(
+      'Check for sulfonamide allergy',
+    );
     expect(citation[0]?.retrieved?.length).toBeGreaterThan(0);
   });
 
@@ -166,14 +189,23 @@ describe('check 3: the citation, and saying when there is no support', () => {
   });
 
   it('expects "no support" with no page and no quotation when the supporting passages are removed', async () => {
-    // With the page 5-6 passage gone, a model that still finds something to quote fails the check.
     model.willAnswer(answer(citing('Avoid acetazolamide')));
-    const quoting = (await run(['3'])).filter((r) => r.name === 'no support: the supporting passages removed');
+    const quoting = (await run(['3'])).filter(
+      (r) => r.name === 'no support: the supporting passages removed',
+    );
     expect(quoting).toHaveLength(3);
     expect(quoting.some((r) => r.pass)).toBe(false);
 
-    model.willAnswer(answer(() => ({ outcome: 'no_support', sentence_refs: [], revision_point: '' })));
-    const declining = (await run(['3'])).filter((r) => r.name.startsWith('no support:'));
+    model.willAnswer(
+      answer(() => ({
+        outcome: 'no_support',
+        sentence_refs: [],
+        revision_point: '',
+      })),
+    );
+    const declining = (await run(['3'])).filter((r) =>
+      r.name.startsWith('no support:'),
+    );
     expect(declining).toHaveLength(6);
     expect(declining.every((r) => r.pass)).toBe(true);
     expect(declining[0]?.observed).toContain('No page, no quotation.');
@@ -183,21 +215,31 @@ describe('check 3: the citation, and saying when there is no support', () => {
     model.willAnswer(() => 'not json');
 
     const rows = await run(['3']);
-    const needsTheModel = rows.filter((r) => r.name !== 'no support: a key point the note does not cover');
+    const needsTheModel = rows.filter(
+      (r) => r.name !== 'no support: a key point the note does not cover',
+    );
 
     expect(needsTheModel).toHaveLength(8);
     expect(needsTheModel.every((r) => !r.pass)).toBe(true);
-    expect(needsTheModel[0]?.observed).toMatch(/^Could not run: RevisionUnavailableError: coverage: schema_invalid/);
-    expect(needsTheModel[7]?.observed).toMatch(/^Could not run: RevisionUnavailableError: revision: schema_invalid/);
+    expect(needsTheModel[0]?.observed).toMatch(
+      /^Could not run: RevisionUnavailableError: coverage: schema_invalid/,
+    );
+    expect(needsTheModel[7]?.observed).toMatch(
+      /^Could not run: RevisionUnavailableError: revision: schema_invalid/,
+    );
   });
 
   it('needs no model to refuse a point that shares nothing with the note, when searching by keyword alone', async () => {
     model.willAnswer(() => 'not json');
 
-    const invented = (await run(['3'])).filter((r) => r.name === 'no support: a key point the note does not cover');
+    const invented = (await run(['3'])).filter(
+      (r) => r.name === 'no support: a key point the note does not cover',
+    );
 
     expect(invented).toHaveLength(3);
     expect(invented.every((r) => r.pass)).toBe(true);
-    expect(model.requests().some((request) => userText(request).includes('MRI'))).toBe(false);
+    expect(
+      model.requests().some((request) => userText(request).includes('MRI')),
+    ).toBe(false);
   });
 });

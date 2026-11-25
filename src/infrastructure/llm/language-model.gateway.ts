@@ -22,16 +22,23 @@ type ProviderName = StepSettings['provider'];
 const log = () => getLogger('language-model');
 
 interface Embedder {
-  embed(texts: ReadonlyArray<string>, kind: EmbeddingKind): Promise<Array<Array<number>> | null>;
+  embed(
+    texts: ReadonlyArray<string>,
+    kind: EmbeddingKind,
+  ): Promise<Array<Array<number>> | null>;
 }
 
-// Sends each call to the provider its settings name, then checks the reply
-// here, the same way for every provider.
+/** Routes each call to its provider and checks every reply the same way. */
 export class ProviderLanguageModelGateway implements LanguageModelGateway {
-  private readonly providers: Readonly<Record<ProviderName, LanguageModelProvider>>;
+  private readonly providers: Readonly<
+    Record<ProviderName, LanguageModelProvider>
+  >;
   private readonly embedder: Embedder;
 
-  constructor(providers: Readonly<Record<ProviderName, LanguageModelProvider>>, embedder: Embedder) {
+  constructor(
+    providers: Readonly<Record<ProviderName, LanguageModelProvider>>,
+    embedder: Embedder,
+  ) {
     this.providers = providers;
     this.embedder = embedder;
   }
@@ -69,35 +76,50 @@ export class ProviderLanguageModelGateway implements LanguageModelGateway {
       thinkingChars: reply.thinkingChars,
     };
     if (reply.outcome !== 'ok') {
-      // An expected outcome, not an exception: the caller has a fallback for it.
       log().info(
-        { ...logged, actionResult: 'FAILED', outcome: reply.outcome, reason: reply.error },
+        {
+          ...logged,
+          actionResult: 'FAILED',
+          outcome: reply.outcome,
+          reason: reply.error,
+        },
         'callStep.unusable',
       );
       return { ...facts, outcome: reply.outcome, error: reply.error };
     }
 
-    // The same check whether or not the provider was asked to enforce the
-    // format. This, not the provider, is what keeps an out-of-list answer out.
+    // This check, not provider enforcement, keeps an out-of-list answer out.
     const json = extractJson(reply.text);
     const candidate = options.normalise ? options.normalise(json) : json;
     const parsed = schema.safeParse(candidate);
     if (!parsed.success) {
       const reason = z.prettifyError(parsed.error);
-      log().info({ ...logged, actionResult: 'FAILED', outcome: 'schema_invalid', reason }, 'callStep.unusable');
+      log().info(
+        {
+          ...logged,
+          actionResult: 'FAILED',
+          outcome: 'schema_invalid',
+          reason,
+        },
+        'callStep.unusable',
+      );
       return { ...facts, outcome: 'schema_invalid', error: reason };
     }
-    log().debug({ ...logged, actionResult: 'SUCCESS', outcome: 'ok' }, 'callStep.completed');
+    log().debug(
+      { ...logged, actionResult: 'SUCCESS', outcome: 'ok' },
+      'callStep.completed',
+    );
     return { ...facts, outcome: 'ok', value: parsed.data };
   }
 
-  embed(texts: ReadonlyArray<string>, kind: EmbeddingKind): Promise<Array<Array<number>> | null> {
+  embed(
+    texts: ReadonlyArray<string>,
+    kind: EmbeddingKind,
+  ): Promise<Array<Array<number>> | null> {
     return this.embedder.embed(texts, kind);
   }
 }
 
-// The real gateway: local models through Ollama, Claude through Anthropic's
-// API, embeddings from the local embeddings model.
 export function createLanguageModelGateway(
   config: Pick<AppConfig, 'ollama' | 'embeddings' | 'anthropic'>,
 ): LanguageModelGateway {

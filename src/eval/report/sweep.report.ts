@@ -10,10 +10,11 @@ import type { Ranked } from '@/eval/sweep/choosing-rule';
 import { CEILING_MS, describe, sizeOf, startSettings } from '@/eval/sweep/grid';
 import type { SweepData } from '@/eval/sweep/sweep-data';
 
-const cell = (text: string): string => text.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
-const clip = (text: string, n: number): string => (text.length > n ? `${text.slice(0, n - 1)}…` : text);
+const cell = (text: string): string =>
+  text.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
+const clip = (text: string, n: number): string =>
+  text.length > n ? `${text.slice(0, n - 1)}…` : text;
 
-// The question a follow-up run produced, read from what was saved of it.
 const AskedSchema = z.looseObject({ question: z.string().nullish() });
 const askedQuestion = (observed: unknown): string => {
   const asked = AskedSchema.safeParse(observed);
@@ -21,16 +22,19 @@ const askedQuestion = (observed: unknown): string => {
 };
 
 export interface PairedDifference {
-  // Cases only the first configuration passed, and only the second.
   onlyA: number;
   onlyB: number;
   real: boolean;
 }
 
-// Cases one configuration passed (on every run) and another did not, and the
-// reverse. A difference is only called real when at least six cases differ
-// and all of them differ the same way.
-export function paired(a: Array<ResultRow>, b: Array<ResultRow>): PairedDifference {
+/**
+ * Cases one configuration passed on every run and another did not. A
+ * difference is only real when at least six cases differ, all the same way.
+ */
+export function paired(
+  a: Array<ResultRow>,
+  b: Array<ResultRow>,
+): PairedDifference {
   const allPass = (rows: Array<ResultRow>): Map<string, boolean> => {
     const m = new Map<string, boolean>();
     for (const r of rows) m.set(r.caseId, (m.get(r.caseId) ?? true) && r.pass);
@@ -57,7 +61,7 @@ const TITLE: Record<StepId, string> = {
   verifier: 'Support check (`verifier`)',
 };
 
-// The full tables behind SWEEP.md, built from the recorded calls only.
+/** The full tables behind SWEEP.md, built from the recorded calls only. */
 export function sweepMarkdown(
   data: SweepData,
   ranked: Partial<Record<StepId, Array<Ranked>>>,
@@ -107,22 +111,29 @@ export function sweepMarkdown(
       );
     }
 
-    // Every configuration, on the single screening run so all are comparable,
-    // with the confirmation result alongside where there is one.
     out.push(
       '| | Size | Thinking | Format | Temp | Prompt | Screened: cases | Costly | Fallbacks | Unusable | Median ms (range) | Confirmed: cases (flipped) | Costly | Eligible |',
       '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     );
     const order = new Map(list.map((c, i) => [c.configId, i]));
     const configs = [...data.configs.values()].filter((c) => c.step === step);
-    configs.sort((a, b) => (order.get(a.configId) ?? 999) - (order.get(b.configId) ?? 999));
+    configs.sort(
+      (a, b) => (order.get(a.configId) ?? 999) - (order.get(b.configId) ?? 999),
+    );
     for (const cfg of configs) {
-      const mine = data.results.filter((r) => r.configId === cfg.configId && r.step === step && r.split === 'tune');
+      const mine = data.results.filter(
+        (r) =>
+          r.configId === cfg.configId && r.step === step && r.split === 'tune',
+      );
       const screen = mine.filter((r) => r.stage === 'screen');
       if (!screen.length) continue;
       const s = summarise(screen);
       const hasConfirm = mine.some((r) => r.stage === 'confirm');
-      const c3 = hasConfirm ? summarise(mine.filter((r) => r.stage === 'screen' || r.stage === 'confirm')) : null;
+      const c3 = hasConfirm
+        ? summarise(
+            mine.filter((r) => r.stage === 'screen' || r.stage === 'confirm'),
+          )
+        : null;
       const stopped = data.stopped.has(cfg.configId);
       const tags = [
         cfg.configId === startId ? 'start' : '',
@@ -134,17 +145,18 @@ export function sweepMarkdown(
       const rankedRow = list.find((c) => c.configId === cfg.configId);
       out.push(
         `| ${tags} | ${sizeOf(cfg.settings.model)} | ${cfg.settings.thinking ? 'on' : 'off'} | ${cfg.settings.forceFormat ? 'forced' : 'not forced'} | ${cfg.settings.temperature} | ${cfg.settings.promptVariant} | ` +
-          (stopped ? `stopped after ${s.timedCalls} calls` : `${s.casesAllPass} of ${s.cases}`) +
+          (stopped
+            ? `stopped after ${s.timedCalls} calls`
+            : `${s.casesAllPass} of ${s.cases}`) +
           ` | ${s.costly} | ${s.fallbacks} | ${s.truncated + s.schemaInvalid + s.refusals} | ${s.medianMs} (${s.minMs}–${s.maxMs}) | ` +
-          (c3 ? `${c3.casesAllPass} of ${c3.cases} (${c3.casesFlipped})` : '–') +
+          (c3
+            ? `${c3.casesAllPass} of ${c3.cases} (${c3.casesFlipped})`
+            : '–') +
           ` | ${c3 ? c3.costly : '–'} | ${stopped ? 'no: too slow' : rankedRow ? (rankedRow.eligible ? 'yes' : `no: ${rankedRow.why}`) : '–'} |`,
       );
     }
     out.push('');
 
-    // An accepted follow-up question may simply repeat one of the case file's
-    // own questions word for word. That is allowed, but it is not the same as
-    // a question in the model's own words, so it is counted.
     if (step === 'followup') {
       const squash = (t: string) =>
         t
@@ -158,16 +170,23 @@ export function sweepMarkdown(
       );
       for (const cfg of configs) {
         const accepted = data.results.filter(
-          (r) => r.configId === cfg.configId && r.step === step && r.split === 'tune' && r.pass,
+          (r) =>
+            r.configId === cfg.configId &&
+            r.step === step &&
+            r.split === 'tune' &&
+            r.pass,
         );
         if (!accepted.length) continue;
-        const echoes = accepted.filter((r) => supplied.has(squash(askedQuestion(r.observed))));
-        out.push(`| ${describe(cfg.settings)} | ${accepted.length} | ${echoes.length} |`);
+        const echoes = accepted.filter((r) =>
+          supplied.has(squash(askedQuestion(r.observed))),
+        );
+        out.push(
+          `| ${describe(cfg.settings)} | ${accepted.length} | ${echoes.length} |`,
+        );
       }
       out.push('');
     }
 
-    // Is the chosen configuration really better than the others, or only tied?
     if (pick) {
       const rowsOf = (id: string) =>
         data.results.filter(
@@ -177,7 +196,9 @@ export function sweepMarkdown(
             r.split === 'tune' &&
             (r.stage === 'screen' || r.stage === 'confirm'),
         );
-      const others = list.filter((c) => c.configId !== pick.configId && !c.stopped).slice(0, 8);
+      const others = list
+        .filter((c) => c.configId !== pick.configId && !c.stopped)
+        .slice(0, 8);
       if (others.length) {
         out.push(
           '**Chosen against the others, case by case** (a difference counts as real only when at least six cases differ, all the same way):',
@@ -197,8 +218,10 @@ export function sweepMarkdown(
       }
     }
 
-    // Where the weaker settings fail: real outputs.
-    out.push('<details><summary>Failing runs, by configuration (real outputs)</summary>', '');
+    out.push(
+      '<details><summary>Failing runs, by configuration (real outputs)</summary>',
+      '',
+    );
     for (const cfg of configs) {
       const bad = data.results.filter(
         (r) =>
@@ -215,7 +238,10 @@ export function sweepMarkdown(
         `**${describe(cfg.settings)}** — ${byCase.size} case${byCase.size === 1 ? '' : 's'} failed at least once`,
         '',
       );
-      out.push('| Case | Type | Costly | What happened | Raw reply |', '|---|---|---|---|---|');
+      out.push(
+        '| Case | Type | Costly | What happened | Raw reply |',
+        '|---|---|---|---|---|',
+      );
       for (const r of [...byCase.values()].slice(0, 12)) {
         out.push(
           `| ${r.caseId} | ${r.caseType} | ${r.costly ? 'yes' : ''} | ${cell(clip(r.detail, 220))} | \`${cell(clip(r.raw, 160)).replaceAll('`', "'")}\` |`,

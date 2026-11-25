@@ -1,18 +1,9 @@
 import { median } from '@/common/stats';
 
-// The timing of one voice turn, as the trainee experiences it.
-//
-// The timer STARTS when the trainee releases the talk button (the moment they
-// have finished speaking) and STOPS when the browser reports the reply audio
-// is playing. It therefore includes: upload, speech-to-text, the model call,
-// building the sentence, text-to-speech, download and decode. It excludes the
-// time the trainee spent speaking, and the playing time of the reply itself.
 export interface TurnTiming {
   n: number;
   via: 'voice' | 'typed';
-  // Release -> the server's reply arrived in the browser.
   toResponseMs: number;
-  // Release -> reply audio playing. Null if no audio was played.
   toPlaybackMs: number | null;
   server: {
     speechToTextMs: number | null;
@@ -29,11 +20,20 @@ export interface TimingSummary {
   maxMs: number;
 }
 
-// Spoken turns whose reply was played. Null when there are none yet.
-export function summarise(timings: ReadonlyArray<TurnTiming>): TimingSummary | null {
-  const played = timings.flatMap((t) => (t.via === 'voice' && t.toPlaybackMs !== null ? [t.toPlaybackMs] : []));
+/** Spoken turns whose reply was played; null when there are none yet. */
+export function summarise(
+  timings: ReadonlyArray<TurnTiming>,
+): TimingSummary | null {
+  const played = timings.flatMap((t) =>
+    t.via === 'voice' && t.toPlaybackMs !== null ? [t.toPlaybackMs] : [],
+  );
   return played.length
-    ? { n: played.length, medianMs: median(played), minMs: Math.min(...played), maxMs: Math.max(...played) }
+    ? {
+        n: played.length,
+        medianMs: median(played),
+        minMs: Math.min(...played),
+        maxMs: Math.max(...played),
+      }
     : null;
 }
 

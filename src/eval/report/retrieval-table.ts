@@ -1,12 +1,17 @@
 import { pageLabel } from '@/domain/note/note-text';
 import type { NoteChunk } from '@/domain/note/note.schema';
-import { COSINE_FLOOR, MIN_SHARED_WORDS, TOP_K, retrieve } from '@/domain/note/retrieve';
-import { findSentence, loadRetrievalSpec, resolveTarget } from '@/eval/eval-context';
+import {
+  COSINE_FLOOR,
+  MIN_SHARED_WORDS,
+  TOP_K,
+  retrieve,
+} from '@/domain/note/retrieve';
+import {
+  findSentence,
+  loadRetrievalSpec,
+  resolveTarget,
+} from '@/eval/eval-context';
 import type { EvalContext } from '@/eval/eval.types';
-
-// Compares the three ways of searching the note (words, meaning, both) on the
-// diagnosis, the six key points and the three follow-up topics. No language
-// model is involved, so the table is exactly repeatable.
 
 type RankKey = 'keywordRank' | 'meaningRank' | 'fusedRank';
 
@@ -14,9 +19,12 @@ const bestOf = (ranks: Array<number | null>): number | null => {
   const real = ranks.filter((r): r is number => r !== null);
   return real.length ? Math.min(...real) : null;
 };
-const show = (rank: number | null): string => (rank === null ? '–' : String(rank));
+const show = (rank: number | null): string =>
+  rank === null ? '–' : String(rank);
 
-export async function retrievalTableMarkdown(ctx: EvalContext): Promise<string> {
+export async function retrievalTableMarkdown(
+  ctx: EvalContext,
+): Promise<string> {
   const { index } = ctx;
   const spec = await loadRetrievalSpec();
   const chunksContaining = (phrases: ReadonlyArray<string>): Array<NoteChunk> =>
@@ -25,22 +33,42 @@ export async function retrievalTableMarkdown(ctx: EvalContext): Promise<string> 
     (await ctx.models.embed([text], 'query'))?.[0] ?? null;
 
   const rows: Array<string> = [];
-  const summary = { goldInTop: 0, total: 0, distractorAboveGold: 0, fusedBeatsBoth: 0 };
+  const summary = {
+    goldInTop: 0,
+    total: 0,
+    distractorAboveGold: 0,
+    fusedBeatsBoth: 0,
+  };
   const withoutQuote = new Map<string, number | null>();
   const quoteEffect = { better: 0, worse: 0, same: 0 };
-  const floorData: Array<{ what: string; shared: number; cosine: number | null; noSupport: boolean }> = [];
+  const floorData: Array<{
+    what: string;
+    shared: number;
+    cosine: number | null;
+    noSupport: boolean;
+  }> = [];
 
   for (const withQuote of [false, true]) {
     for (const t of spec.targets) {
       const target = resolveTarget(ctx, t.source);
       const extra = withQuote ? spec.quotes[t.id] : undefined;
-      const run = retrieve(index, { target, extra, vector: await embed(`${target} ${extra ?? ''}`.trim()) });
+      const run = retrieve(index, {
+        target,
+        extra,
+        vector: await embed(`${target} ${extra ?? ''}`.trim()),
+      });
       const rank = (chunks: Array<NoteChunk>, key: RankKey): number | null =>
-        bestOf(chunks.map((c) => run.ranking.find((r) => r.chunk.id === c.id)?.[key] ?? null));
+        bestOf(
+          chunks.map(
+            (c) => run.ranking.find((r) => r.chunk.id === c.id)?.[key] ?? null,
+          ),
+        );
       const gold = chunksContaining(t.gold);
       const distractors = chunksContaining(t.distractor);
       const goldFused = rank(gold, 'fusedRank');
-      const distractorFused = distractors.length ? rank(distractors, 'fusedRank') : null;
+      const distractorFused = distractors.length
+        ? rank(distractors, 'fusedRank')
+        : null;
       if (withQuote) {
         const before = withoutQuote.get(t.id) ?? null;
         if (before !== null && goldFused !== null) {
@@ -52,12 +80,27 @@ export async function retrievalTableMarkdown(ctx: EvalContext): Promise<string> 
         withoutQuote.set(t.id, goldFused);
         const k = rank(gold, 'keywordRank');
         const m = rank(gold, 'meaningRank');
-        if (goldFused !== null && k !== null && m !== null && goldFused < Math.min(k, m)) summary.fusedBeatsBoth++;
+        if (
+          goldFused !== null &&
+          k !== null &&
+          m !== null &&
+          goldFused < Math.min(k, m)
+        )
+          summary.fusedBeatsBoth++;
         summary.total++;
         if (goldFused !== null && goldFused <= TOP_K) summary.goldInTop++;
-        if (distractorFused !== null && goldFused !== null && distractorFused < goldFused)
+        if (
+          distractorFused !== null &&
+          goldFused !== null &&
+          distractorFused < goldFused
+        )
           summary.distractorAboveGold++;
-        floorData.push({ what: t.id, shared: run.best.sharedWords, cosine: run.best.cosine, noSupport: run.noSupport });
+        floorData.push({
+          what: t.id,
+          shared: run.best.sharedWords,
+          cosine: run.best.cosine,
+          noSupport: run.noSupport,
+        });
       }
       rows.push(
         `| ${t.id} | ${withQuote ? 'yes' : 'no'} | ${show(rank(gold, 'keywordRank'))} | ${show(rank(gold, 'meaningRank'))} | **${show(goldFused)}** | ${
@@ -79,7 +122,9 @@ export async function retrievalTableMarkdown(ctx: EvalContext): Promise<string> 
     });
   }
 
-  const mode = index.embedding ? `keyword + ${index.embedding.model}` : 'keyword only (no embeddings in the index)';
+  const mode = index.embedding
+    ? `keyword + ${index.embedding.model}`
+    : 'keyword only (no embeddings in the index)';
   return `# Retrieval comparison
 
 Generated by \`pnpm retrieval-table\` on ${new Date().toISOString().slice(0, 10)} from the committed index

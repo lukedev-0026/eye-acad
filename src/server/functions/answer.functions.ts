@@ -13,31 +13,49 @@ import { requireUser } from '@/server/middleware/auth.middleware';
 import { AttemptInput, TextInput, validated } from './function-input.schema';
 import { toReplyAudio } from './reply-audio';
 
-// From "Give my answer" to the revision point.
-
 async function withSpeech(followUp: FollowUpReplyOut) {
-  return { ...followUp, audio: toReplyAudio(await getContainer().speech.speak([followUp.speech])) };
+  return {
+    ...followUp,
+    audio: toReplyAudio(await getContainer().speech.speak([followUp.speech])),
+  };
 }
 
-// The only function that ends the questioning. It is called by the
-// "Give my answer" button, never inferred from what the trainee says.
+/** The only way questioning ends: never inferred from what the trainee says. */
 export const giveAnswer = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(validated(TextInput))
   .handler(async ({ context, data }) =>
-    withSpeech(await handleAnswer(getContainer(), context.uid, data.attemptId, data.text, data.via)),
+    withSpeech(
+      await handleAnswer(
+        getContainer(),
+        context.uid,
+        data.attemptId,
+        data.text,
+        data.via,
+      ),
+    ),
   );
 
 export const retryFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(validated(AttemptInput))
-  .handler(async ({ context, data }) => withSpeech(await ensureFollowUp(getContainer(), context.uid, data.attemptId)));
+  .handler(async ({ context, data }) =>
+    withSpeech(
+      await ensureFollowUp(getContainer(), context.uid, data.attemptId),
+    ),
+  );
 
 export const replyToFollowUp = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(validated(TextInput))
   .handler(async ({ context, data }) => {
-    const card = await handleFollowUpReply(getContainer(), context.uid, data.attemptId, data.text, data.via);
+    const card = await handleFollowUpReply(
+      getContainer(),
+      context.uid,
+      data.attemptId,
+      data.text,
+      data.via,
+    );
     return { outcome: card.outcome };
   });
 
@@ -45,6 +63,10 @@ export const retryRevision = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(validated(AttemptInput))
   .handler(async ({ context, data }) => {
-    const card = await prepareRevision(getContainer(), context.uid, data.attemptId);
+    const card = await prepareRevision(
+      getContainer(),
+      context.uid,
+      data.attemptId,
+    );
     return { outcome: card.outcome };
   });

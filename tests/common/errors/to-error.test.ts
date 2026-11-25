@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { InternalError } from '@/common/errors/internal.error';
-import { describeError, errorMessage, toAppError, toError } from '@/common/errors/to-error';
+import {
+  describeError,
+  errorMessage,
+  toAppError,
+  toError,
+} from '@/common/errors/to-error';
 import { ValidationError } from '@/common/errors/validation.error';
 
 describe('toError', () => {

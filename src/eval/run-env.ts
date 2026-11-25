@@ -5,12 +5,12 @@ import { z } from 'zod';
 import { getConfig } from '@/config/env.server';
 import { OllamaClient } from '@/infrastructure/llm/ollama-http';
 
-// What the machine was doing when a result was recorded. Timings mean little
-// without it: this Mac was found in Low Power Mode with swap in use.
-
 function sh(command: string, args: Array<string>): string {
   try {
-    return execFileSync(command, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return execFileSync(command, args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
   } catch {
     return '';
   }
@@ -29,8 +29,11 @@ export const RunEnvSchema = z.object({
 });
 export type RunEnv = z.infer<typeof RunEnvSchema>;
 
-// As macOS numbers them.
-const POWER_MODES: Record<string, string> = { '0': 'automatic', '1': 'low power', '2': 'high power' };
+const POWER_MODES: Record<string, string> = {
+  '0': 'automatic',
+  '1': 'low power',
+  '2': 'high power',
+};
 
 function powerMode(): string {
   const digit = /powermode\s+(\d)/.exec(sh('pmset', ['-g']))?.[1];
@@ -44,19 +47,25 @@ export function swapUsedMb(): number | null {
 
 async function ollamaVersion(): Promise<string> {
   try {
-    return (await new OllamaClient(getConfig().ollama.host).version()) ?? 'unknown';
+    return (
+      (await new OllamaClient(getConfig().ollama.host).version()) ?? 'unknown'
+    );
   } catch {
     return 'not running';
   }
 }
 
-// The battery, as macOS reports it. A long run can draw more power than a
-// small charger supplies, so the sweep watches this and stops cleanly.
-export function batteryState(): { percent: number | null; onMains: boolean | null } {
+export function batteryState(): {
+  percent: number | null;
+  onMains: boolean | null;
+} {
   const report = sh('pmset', ['-g', 'batt']);
   if (!report) return { percent: null, onMains: null };
   const percent = /(\d+)%/.exec(report)?.[1];
-  return { percent: percent === undefined ? null : Number(percent), onMains: report.includes('AC Power') };
+  return {
+    percent: percent === undefined ? null : Number(percent),
+    onMains: report.includes('AC Power'),
+  };
 }
 
 export async function captureEnv(): Promise<RunEnv> {
@@ -84,13 +93,20 @@ export interface ModelInfo {
 
 export async function modelInfo(name: string): Promise<ModelInfo | null> {
   try {
-    const models = await new OllamaClient(getConfig().ollama.host).installedModels();
-    const m = models.find((x) => x.name === name || x.name === `${name}:latest`);
+    const models = await new OllamaClient(
+      getConfig().ollama.host,
+    ).installedModels();
+    const m = models.find(
+      (x) => x.name === name || x.name === `${name}:latest`,
+    );
     if (!m) return null;
     return {
       name: m.name,
       digest: (m.digest ?? '').slice(0, 12),
-      engine: m.details?.format === 'safetensors' ? 'mlx' : (m.details?.format ?? 'unknown'),
+      engine:
+        m.details?.format === 'safetensors'
+          ? 'mlx'
+          : (m.details?.format ?? 'unknown'),
       quantisation: m.details?.quantization_level ?? 'unknown',
       sizeGb: Math.round(((m.size ?? 0) / 1e9) * 10) / 10,
     };

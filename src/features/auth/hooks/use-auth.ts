@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { auth } from '@/features/auth/lib/firebase';
 
-// undefined: not known yet. null: signed out.
+/** `undefined` while not yet known, `null` when signed out. */
 export function useAuthUser(): User | null | undefined {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   useEffect(() => onAuthStateChanged(auth, setUser), []);

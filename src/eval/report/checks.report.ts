@@ -3,11 +3,18 @@ import type { RequiredRow } from '@/eval/checks/required-row.schema';
 import type { ChainRow, ResultRow } from '@/eval/run/result-row';
 import { summarise } from '@/eval/run/summarise';
 
-const cell = (text: string): string => text.replaceAll('|', '\\|').replaceAll('\n', ' ');
-const clip = (text: string, n: number): string => (text.length > n ? `${text.slice(0, n - 1)}…` : text);
+const cell = (text: string): string =>
+  text.replaceAll('|', '\\|').replaceAll('\n', ' ');
+const clip = (text: string, n: number): string =>
+  text.length > n ? `${text.slice(0, n - 1)}…` : text;
 
-// Builds CHECKS.md from the rows of one `pnpm check` run and nothing else.
-export function checksMarkdown({ header, required, results, selfTests }: CheckRun): string {
+/** Builds CHECKS.md from the rows of one `pnpm check` run. */
+export function checksMarkdown({
+  header,
+  required,
+  results,
+  selfTests,
+}: CheckRun): string {
   const date = header?.at.slice(0, 10) ?? 'unknown date';
   const out: Array<string> = [];
 
@@ -38,7 +45,11 @@ export function checksMarkdown({ header, required, results, selfTests }: CheckRu
 
   out.push('## The three required checks', '');
   const groups = new Map<string, Array<RequiredRow>>();
-  for (const r of required) groups.set(`${r.check}|${r.name}`, [...(groups.get(`${r.check}|${r.name}`) ?? []), r]);
+  for (const r of required)
+    groups.set(`${r.check}|${r.name}`, [
+      ...(groups.get(`${r.check}|${r.name}`) ?? []),
+      r,
+    ]);
   if (groups.size === 0) out.push('_Not run in this pass._', '');
   for (const [key, rows] of groups) {
     const [check, name] = key.split('|');
@@ -48,15 +59,20 @@ export function checksMarkdown({ header, required, results, selfTests }: CheckRu
     out.push(`### Check ${check}: ${name}`, '');
     out.push(`- **Input:** ${clip(example.input, 400)}`);
     out.push(`- **Expected:** ${example.expected}`);
-    out.push(`- **Observed${rows.some((r) => !r.pass) ? ' (a failing run)' : ''}:** ${example.observed}`);
-    out.push(`- **Result:** ${passed} of ${rows.length} runs passed. Model \`${example.model}\`, ${date}.`);
+    out.push(
+      `- **Observed${rows.some((r) => !r.pass) ? ' (a failing run)' : ''}:** ${example.observed}`,
+    );
+    out.push(
+      `- **Result:** ${passed} of ${rows.length} runs passed. Model \`${example.model}\`, ${date}.`,
+    );
     if (example.retrieved) {
       out.push(
         '',
         '| Passage retrieved | Pages | Rank by words | Rank by meaning | Closeness |',
         '|---|---|---|---|---|',
         ...example.retrieved.map(
-          (r) => `| ${r.passage} | ${r.pages} | ${r.keywordRank} | ${r.meaningRank ?? '–'} | ${r.cosine ?? '–'} |`,
+          (r) =>
+            `| ${r.passage} | ${r.pages} | ${r.keywordRank} | ${r.meaningRank ?? '–'} | ${r.cosine ?? '–'} |`,
         ),
       );
     }
@@ -107,8 +123,8 @@ export function checksMarkdown({ header, required, results, selfTests }: CheckRu
   let any = false;
   for (const step of steps) {
     const byCase = new Map<string, Array<ResultRow | ChainRow>>();
-    for (const r of results.filter((x) => x.step === step)) byCase.set(r.caseId, [...(byCase.get(r.caseId) ?? []), r]);
-    // Each case that failed at least once, with one of its failing runs.
+    for (const r of results.filter((x) => x.step === step))
+      byCase.set(r.caseId, [...(byCase.get(r.caseId) ?? []), r]);
     const failing = [...byCase.entries()].flatMap(([id, rows]) => {
       const bad = rows.find((r) => !r.pass);
       return bad ? [{ id, rows, bad }] : [];

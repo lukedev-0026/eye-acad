@@ -5,7 +5,6 @@ import { EvalRefusedError } from '@/eval/eval.error';
 import { PATHS } from '@/eval/paths';
 import type { DeepgramSpeechService } from '@/infrastructure/speech/deepgram-speech.service';
 
-// A different voice from the examiner's, so the two are not confused.
 export const TRAINEE_VOICE = 'aura-2-pandora-en';
 
 const QUESTIONS = [
@@ -23,17 +22,24 @@ const QUESTIONS = [
   'What does the left optic disc look like?',
 ];
 
-// Makes short recorded questions for trying the spoken path without a
-// microphone. They are synthetic speech, and anything measured with them is
-// labelled as such.
-export async function makeVoiceClips(voice: DeepgramSpeechService, print: Print): Promise<void> {
+/** Synthesises spoken questions to test the voice path without a microphone. */
+export async function makeVoiceClips(
+  voice: DeepgramSpeechService,
+  print: Print,
+): Promise<void> {
   await mkdir(PATHS.voiceClipsDir, { recursive: true });
   const clips: Array<{ file: string; says: string }> = [];
   for (const [i, says] of QUESTIONS.entries()) {
     const speech = await voice.synthesise(says);
-    if (!speech) throw new EvalRefusedError(`Could not synthesise: ${says} (${voice.lastError})`);
+    if (!speech)
+      throw new EvalRefusedError(
+        `Could not synthesise: ${says} (${voice.lastError})`,
+      );
     const file = `q${String(i + 1).padStart(2, '0')}.mp3`;
-    await writeFile(`${PATHS.voiceClipsDir}/${file}`, Buffer.from(speech.audioBase64, 'base64'));
+    await writeFile(
+      `${PATHS.voiceClipsDir}/${file}`,
+      Buffer.from(speech.audioBase64, 'base64'),
+    );
     clips.push({ file, says });
     print(`${file} ${says}`);
   }
@@ -42,5 +48,8 @@ export async function makeVoiceClips(voice: DeepgramSpeechService, print: Print)
     note: 'Synthetic speech, generated for testing the spoken path without a microphone.',
     clips,
   };
-  await writeFile(`${PATHS.voiceClipsDir}/index.json`, `${JSON.stringify(index, null, 2)}\n`);
+  await writeFile(
+    `${PATHS.voiceClipsDir}/index.json`,
+    `${JSON.stringify(index, null, 2)}\n`,
+  );
 }

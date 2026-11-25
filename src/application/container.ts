@@ -8,8 +8,7 @@ import type { VivaDeps } from './deps';
 
 let cached: VivaDeps | undefined;
 
-// The real things, wired together once and on first use. The server functions
-// and the command-line tools both start here.
+/** The real dependencies, wired once on first use. */
 export function getContainer(): VivaDeps {
   cached ??= {
     attempts: new FirestoreAttemptRepository(getFirebaseAdmin().db),

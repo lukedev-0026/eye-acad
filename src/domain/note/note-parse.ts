@@ -2,10 +2,6 @@ import { itemAt } from '@/common/arrays';
 
 import type { NoteChunk, NoteSentence } from './note.schema';
 
-// Turns the layout XML that poppler's `pdftohtml -xml` produces into passages.
-// Everything is decided from position and font size, never from font ids or
-// from the wording, so a re-exported or lightly edited PDF still parses.
-
 interface Font {
   size: number;
   color: string;
@@ -34,7 +30,10 @@ const ENTITIES: Record<string, string> = {
 function decode(raw: string): string {
   return raw
     .replace(/<[^>]+>/g, '')
-    .replace(/&(?:amp|lt|gt|quot|apos|#\d+);/g, (m) => ENTITIES[m] ?? String.fromCodePoint(Number(m.slice(2, -1))));
+    .replace(
+      /&(?:amp|lt|gt|quot|apos|#\d+);/g,
+      (m) => ENTITIES[m] ?? String.fromCodePoint(Number(m.slice(2, -1))),
+    );
 }
 
 export interface ParsedPage {
@@ -42,7 +41,10 @@ export interface ParsedPage {
   footerNumber: number | null;
 }
 
-function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> } {
+function readItems(xml: string): {
+  items: Array<Item>;
+  pages: Array<ParsedPage>;
+} {
   const fonts = new Map<string, Font>();
   for (const [, id = '', size = '', color = ''] of xml.matchAll(
     /<fontspec id="(\d+)" size="(\d+)"[^>]*color="(#[0-9a-fA-F]+)"/g,
@@ -58,12 +60,17 @@ function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> 
     const page = Number(pageNumber);
     const height = Number(pageHeight);
     let footerNumber: number | null = null;
-    for (const [, topText = '', leftText = '', fontId = '', inner = ''] of pageXml.matchAll(
+    for (const [
+      ,
+      topText = '',
+      leftText = '',
+      fontId = '',
+      inner = '',
+    ] of pageXml.matchAll(
       /<text top="(\d+)" left="(\d+)" width="\d+" height="\d+" font="(\d+)">([\s\S]*?)<\/text>/g,
     )) {
       const top = Number(topText);
       const text = decode(inner);
-      // Running header and footer, by position.
       if (top < height * 0.05) continue;
       if (top > height * 0.95) {
         if (/^\s*\d+\s*$/.test(text)) footerNumber = Number(text);
@@ -85,7 +92,8 @@ function readItems(xml: string): { items: Array<Item>; pages: Array<ParsedPage> 
   return { items, pages };
 }
 
-type Role = 'title' | 'h2' | 'h3' | 'body' | 'table_head' | 'table_cell' | 'small';
+type Role =
+  'title' | 'h2' | 'h3' | 'body' | 'table_head' | 'table_cell' | 'small';
 
 function roleOf(item: Item): Role {
   if (item.white) return 'table_head';
@@ -97,7 +105,6 @@ function roleOf(item: Item): Role {
   return 'small';
 }
 
-// A run of body text: the words, and which page each stretch of them is on.
 interface Span {
   start: number;
   end: number;
@@ -116,8 +123,7 @@ interface Block {
 function appendLine(block: Block, line: string, page: number) {
   const piece = line.replace(/\s+/g, ' ').trim();
   if (!piece) return;
-  // A word hyphenated across a line break ("open-" / "angle") is rejoined
-  // without a space. The hyphen is kept: these are compound words.
+  // Rejoin a line-break hyphen keeping the hyphen: these are compound words.
   const glue = block.text === '' || /[A-Za-z]-$/.test(block.text) ? '' : ' ';
   const start = block.text.length + glue.length;
   block.text += glue + piece;
@@ -177,14 +183,17 @@ export function parseNoteXml(xml: string): ParsedNote {
     open = null;
   };
 
-  // Body items that share a line (a bold label followed by ordinary text).
   interface Line {
     page: number;
     top: number;
     left: number;
     parts: Array<Item>;
   }
-  const lines: Array<Line | { table: Array<Item>; page: number } | { heading: Item; role: 'h2' | 'h3' | 'title' }> = [];
+  const lines: Array<
+    | Line
+    | { table: Array<Item>; page: number }
+    | { heading: Item; role: 'h2' | 'h3' | 'title' }
+  > = [];
   let tableRun: Array<Item> = [];
   const flushTable = () => {
     const first = tableRun[0];
@@ -203,10 +212,20 @@ export function parseNoteXml(xml: string): ParsedNote {
     flushTable();
     if (role === 'body') {
       const prev = lines.at(-1);
-      if (prev && 'parts' in prev && prev.page === item.page && Math.abs(prev.top - item.top) <= 3) {
+      if (
+        prev &&
+        'parts' in prev &&
+        prev.page === item.page &&
+        Math.abs(prev.top - item.top) <= 3
+      ) {
         prev.parts.push(item);
       } else {
-        lines.push({ page: item.page, top: item.top, left: item.left, parts: [item] });
+        lines.push({
+          page: item.page,
+          top: item.top,
+          left: item.left,
+          parts: [item],
+        });
       }
     } else {
       lines.push({ heading: item, role });
@@ -238,29 +257,39 @@ export function parseNoteXml(xml: string): ParsedNote {
 
     const text = line.parts.map((p) => p.text).join('');
     if (hidden) {
-      if (/^about this note$/i.test(h2)) disclaimer = `${disclaimer} ${text}`.trim();
+      if (/^about this note$/i.test(h2))
+        disclaimer = `${disclaimer} ${text}`.trim();
       continue;
     }
 
     const kind = line.left >= 95 ? 'bullet' : 'paragraph';
-    // A new passage starts after a visibly larger gap than a wrapped line, or
-    // when the indentation changes. Across a page break the two are joined
-    // only when the first clearly stops mid-sentence and the second clearly
-    // continues it.
+    // Join across a page only when the first clearly stops mid-sentence.
     let continues = false;
     if (open && lastBody) {
       if (lastBody.page === line.page) {
-        continues = line.top - lastBody.top <= 27 && Math.abs(line.left - lastBody.left) <= 10 && open.kind === kind;
+        continues =
+          line.top - lastBody.top <= 27 &&
+          Math.abs(line.left - lastBody.left) <= 10 &&
+          open.kind === kind;
       } else {
         continues =
-          open.kind === kind && !ENDS_SENTENCE.test(open.text) && /^[a-z0-9]/.test(text.trim()) && !line.parts[0]?.bold;
+          open.kind === kind &&
+          !ENDS_SENTENCE.test(open.text) &&
+          /^[a-z0-9]/.test(text.trim()) &&
+          !line.parts[0]?.bold;
       }
     }
     if (!continues) {
       close();
-      open = { kind, headings, leadIn: null, text: '', spans: [], firstPage: line.page, lastPage: line.page };
-      // A bold opening that ends in a full stop or colon is a label for the
-      // passage. Bold text that runs straight into the sentence is part of it.
+      open = {
+        kind,
+        headings,
+        leadIn: null,
+        text: '',
+        spans: [],
+        firstPage: line.page,
+        lastPage: line.page,
+      };
       const first = line.parts[0];
       if (first?.bold && line.parts.length > 1 && /[.:]\s*$/.test(first.text)) {
         open.leadIn = first.text.trim();
@@ -282,19 +311,25 @@ export function parseNoteXml(xml: string): ParsedNote {
   }
   close();
 
-  function parseTable(cells: Array<Item>, headings: Array<string>): Array<TableRow> {
+  function parseTable(
+    cells: Array<Item>,
+    headings: Array<string>,
+  ): Array<TableRow> {
     const head = cells.filter((c) => c.white).sort((a, b) => a.left - b.left);
     if (head.length < 2) return [];
-    const body = cells.filter((c) => !c.white).sort((a, b) => a.top - b.top || a.left - b.left);
+    const body = cells
+      .filter((c) => !c.white)
+      .sort((a, b) => a.top - b.top || a.left - b.left);
     const columnOf = (c: Item) => {
       let best = 0;
       for (const [i, h] of head.entries()) {
-        if (Math.abs(c.left - h.left) < Math.abs(c.left - itemAt(head, best).left)) best = i;
+        if (
+          Math.abs(c.left - h.left) < Math.abs(c.left - itemAt(head, best).left)
+        )
+          best = i;
       }
       return best;
     };
-    // A row starts at each first-column line that is not a wrapped
-    // continuation of the label above it.
     const starts: Array<number> = [];
     let prevLabelTop = -Infinity;
     for (const c of body) {
@@ -311,14 +346,16 @@ export function parseNoteXml(xml: string): ParsedNote {
           .map((c) => c.text.trim())
           .join(' ')
           .replace(/\s+/g, ' ');
-      // A bare number as a row name ("1") reads better with its column
-      // header in front ("Grade 1").
       const name = join(0);
       return {
         kind: 'table_row' as const,
         headings,
-        label: /^\d+$/.test(name) ? `${itemAt(head, 0).text.trim()} ${name}` : name,
-        cells: head.slice(1).map((h, k) => ({ column: h.text.trim(), text: join(k + 1) })),
+        label: /^\d+$/.test(name)
+          ? `${itemAt(head, 0).text.trim()} ${name}`
+          : name,
+        cells: head
+          .slice(1)
+          .map((h, k) => ({ column: h.text.trim(), text: join(k + 1) })),
         page: mine[0]?.page ?? itemAt(cells, 0).page,
       };
     });
@@ -349,7 +386,13 @@ export function parseNoteXml(xml: string): ParsedNote {
     const sentences: Array<NoteSentence> = splitSentences(b.text).map((s) => ({
       id: nextSentenceId(),
       text: b.text.slice(s.start, s.end),
-      pages: [...new Set(b.spans.filter((sp) => sp.start < s.end && sp.end > s.start).map((sp) => sp.page))],
+      pages: [
+        ...new Set(
+          b.spans
+            .filter((sp) => sp.start < s.end && sp.end > s.start)
+            .map((sp) => sp.page),
+        ),
+      ],
     }));
     return {
       id,

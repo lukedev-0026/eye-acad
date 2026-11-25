@@ -5,7 +5,6 @@ import { readCases } from '@/eval/eval-context';
 import type { StepEval } from '@/eval/eval.types';
 
 export const FollowUpInputSchema = z.object({ answer: z.string() });
-// The automatic pass needs no expected answer: see `grade` below.
 export const FollowUpExpectSchema = z.object({});
 type Input = z.infer<typeof FollowUpInputSchema>;
 type Expect = z.infer<typeof FollowUpExpectSchema>;
@@ -19,23 +18,34 @@ interface Observed {
 
 export const followupEval: StepEval<Input, Expect, Observed> = {
   step: 'followup',
-  cases: () => readCases('followup.jsonl', FollowUpInputSchema, FollowUpExpectSchema),
+  cases: () =>
+    readCases('followup.jsonl', FollowUpInputSchema, FollowUpExpectSchema),
 
   async run(c, settings, ctx) {
-    const result = await runFollowUp(ctx.models, ctx.notes, c.input.answer, settings);
+    const result = await runFollowUp(
+      ctx.models,
+      ctx.notes,
+      c.input.answer,
+      settings,
+    );
     const calls = result.attempts.map((a) => a.call);
     const last = calls.at(-1);
     const first = result.attempts[0];
     return {
-      // A step that fell back to a supplied question still completed.
-      outcome: calls.some((x) => x.outcome === 'ok') ? 'ok' : (last?.outcome ?? 'ok'),
+      outcome: calls.some((x) => x.outcome === 'ok')
+        ? 'ok'
+        : (last?.outcome ?? 'ok'),
       observed: {
         path: result.path,
         question: result.question,
         respondingTo: result.respondingTo,
-        firstAttemptOk: Boolean(first?.questionCheck?.ok && first.anchorCheck?.ok),
+        firstAttemptOk: Boolean(
+          first?.questionCheck?.ok && first.anchorCheck?.ok,
+        ),
         reasons: result.attempts.flatMap((a) => [
-          ...(a.questionCheck && !a.questionCheck.ok ? [`question ${a.questionCheck.reason}`] : []),
+          ...(a.questionCheck && !a.questionCheck.ok
+            ? [`question ${a.questionCheck.reason}`]
+            : []),
           ...(a.anchorCheck && !a.anchorCheck.ok ? [a.anchorCheck.reason] : []),
         ]),
       },
@@ -50,9 +60,6 @@ export const followupEval: StepEval<Input, Expect, Observed> = {
     };
   },
 
-  // The automatic pass means a model-written question survived every check
-  // within the app's two attempts. Whether it is a GOOD question is read by a
-  // person, for the finalist settings only.
   grade(_c, observed) {
     const written = observed.path === 'written';
     return {
@@ -65,9 +72,21 @@ export const followupEval: StepEval<Input, Expect, Observed> = {
     };
   },
 
-  ideal: () => ({ path: 'written', question: '', respondingTo: null, firstAttemptOk: true, reasons: [] }),
+  ideal: () => ({
+    path: 'written',
+    question: '',
+    respondingTo: null,
+    firstAttemptOk: true,
+    reasons: [],
+  }),
   constant: {
     name: 'always use a supplied question',
-    observe: () => ({ path: 'supplied', question: '', respondingTo: null, firstAttemptOk: false, reasons: [] }),
+    observe: () => ({
+      path: 'supplied',
+      question: '',
+      respondingTo: null,
+      firstAttemptOk: false,
+      reasons: [],
+    }),
   },
 };

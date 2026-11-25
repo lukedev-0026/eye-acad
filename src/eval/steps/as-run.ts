@@ -1,8 +1,6 @@
 import type { CallResult } from '@/domain/llm/call-result';
 import type { StepRun } from '@/eval/eval.types';
 
-// One model call, with what the check made of it, in the shape every step's
-// run is recorded in.
 export function asRun<O>(call: CallResult<unknown>, observed: O): StepRun<O> {
   return {
     outcome: call.outcome,

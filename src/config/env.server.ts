@@ -8,19 +8,15 @@ import { EnvSchema } from './env.schema';
 import type { LogFormat, LogLevel, SpeechMode } from './env.schema';
 import type { Secret } from './secret';
 
-// The one place the server's environment is read. Everything else is handed
-// this object, already checked, with every default filled in.
 
 export interface AppConfig {
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly logging: {
     readonly level: LogLevel;
-    // False when LOG_LEVEL was not set and `level` is the default.
     readonly levelWasSet: boolean;
     readonly format: LogFormat;
   };
   readonly ollama: {
-    // No trailing slash.
     readonly host: string;
     readonly keepAlive: string;
   };
@@ -29,7 +25,6 @@ export interface AppConfig {
   };
   readonly deepgram: {
     readonly apiKey: Secret | null;
-    // Tried in order: the medical model, then the general one if it refuses.
     readonly sttModels: ReadonlyArray<string>;
     readonly ttsVoice: string;
     readonly speechMode: SpeechMode;
@@ -43,7 +38,6 @@ export interface AppConfig {
     readonly authEmulatorHost: string | null;
     readonly firestoreEmulatorHost: string | null;
   };
-  // Absolute paths.
   readonly files: {
     readonly caseFile: string;
     readonly stepsFile: string;
@@ -58,8 +52,7 @@ const DEFAULT_FIRESTORE_EMULATOR = '127.0.0.1:8080';
 
 export type EnvSource = Readonly<Record<string, string | undefined>>;
 
-// Pure: the same source always gives the same config, or the same error
-// listing every problem at once.
+/** Pure. On bad input, throws one error listing every problem. */
 export function loadConfig(source: EnvSource, projectDir: string = process.cwd()): AppConfig {
   const parsed = EnvSchema.safeParse(source);
   if (!parsed.success) {
@@ -103,10 +96,7 @@ export function loadConfig(source: EnvSource, projectDir: string = process.cwd()
   };
 }
 
-// Keys live in .env.local, which git ignores. The dev server has already
-// loaded it by the time this runs; the command-line tools have not, so it is
-// loaded here. A variable that is already set is never overwritten. Tests run
-// on defaults alone, so that none can reach a real service.
+// Skipped under test, so no test can reach a real service.
 function loadLocalEnvFile(projectDir: string): void {
   const file = path.join(projectDir, '.env.local');
   if (process.env.NODE_ENV === 'test' || !existsSync(file)) return;
@@ -119,8 +109,7 @@ function loadLocalEnvFile(projectDir: string): void {
 
 let cached: AppConfig | undefined;
 
-// Read on first use, never when a module loads: the framework requires that,
-// and a script can then fail with a clear message before doing any work.
+/** Read on first use, never at module load: the framework requires it. */
 export function getConfig(): AppConfig {
   if (!cached) {
     loadLocalEnvFile(process.cwd());
@@ -129,7 +118,6 @@ export function getConfig(): AppConfig {
   return cached;
 }
 
-// For tests that change the environment.
 export function resetConfig(): void {
   cached = undefined;
 }

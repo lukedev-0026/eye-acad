@@ -38,7 +38,11 @@ export interface RevisionPassage {
 
 export function revisionPrompt(
   variant: PromptVariant,
-  input: { target: string; guidance: string | null; passages: Array<RevisionPassage> },
+  input: {
+    target: string;
+    guidance: string | null;
+    passages: Array<RevisionPassage>;
+  },
   jsonShape: string,
 ): Prompt {
   const passages = input.passages
@@ -50,10 +54,19 @@ export function revisionPrompt(
     .join('\n\n');
   const user = [
     `The point to revise:\n${input.target}`,
-    input.guidance ? `Guidance from the case author on citing the note:\n${input.guidance}` : '',
+    input.guidance
+      ? `Guidance from the case author on citing the note:\n${input.guidance}`
+      : '',
     `Sentences from the reference note:\n\n${passages}`,
   ]
     .filter(Boolean)
     .join('\n\n');
-  return { system: assemble(variant, { task: TASK, rules: RULES, examples: EXAMPLES }, jsonShape), user };
+  return {
+    system: assemble(
+      variant,
+      { task: TASK, rules: RULES, examples: EXAMPLES },
+      jsonShape,
+    ),
+    user,
+  };
 }

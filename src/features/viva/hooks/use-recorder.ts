@@ -8,11 +8,8 @@ export interface Recording {
   ms: number;
 }
 
-// Clips shorter than this are a slip of the finger, not a request.
 const MIN_CLIP_MS = 350;
 
-// The microphone is only offered to a page served securely (or from this
-// machine); elsewhere the browser leaves `mediaDevices` out altogether.
 export const recordingSupported = (): boolean =>
   typeof navigator !== 'undefined' &&
   'mediaDevices' in navigator &&
@@ -21,12 +18,10 @@ export const recordingSupported = (): boolean =>
 
 export interface Recorder {
   start: () => Promise<void>;
-  // Resolves with null for a clip too short to mean anything.
   stop: () => Promise<Recording | null>;
 }
 
-// Press-and-hold recording. The microphone is opened on first use and kept for
-// the life of the page, so later turns start at once.
+/** Hold-to-record; the mic stays open so later turns start at once. */
 export function useRecorder(): Recorder {
   const stream = useRef<MediaStream | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -44,13 +39,20 @@ export function useRecorder(): Recorder {
 
   const start = useCallback(async () => {
     stream.current ??= await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        channelCount: 1,
+      },
     });
-    const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find((t) =>
-      MediaRecorder.isTypeSupported(t),
+    const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(
+      (t) => MediaRecorder.isTypeSupported(t),
     );
     chunks.current = [];
-    const rec = new MediaRecorder(stream.current, mimeType ? { mimeType } : undefined);
+    const rec = new MediaRecorder(
+      stream.current,
+      mimeType ? { mimeType } : undefined,
+    );
     rec.ondataavailable = (e) => {
       if (e.data.size) chunks.current.push(e.data);
     };
@@ -66,7 +68,9 @@ export function useRecorder(): Recorder {
     const ms = performance.now() - startedAt.current;
     return new Promise((resolve) => {
       rec.onstop = () => {
-        const blob = new Blob(chunks.current, { type: rec.mimeType || 'audio/webm' });
+        const blob = new Blob(chunks.current, {
+          type: rec.mimeType || 'audio/webm',
+        });
         if (ms < MIN_CLIP_MS || blob.size === 0) {
           resolve(null);
           return;

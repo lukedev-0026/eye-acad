@@ -20,36 +20,32 @@ export interface RevisionTrace {
   retrieval: Retrieval | null;
   revision: RevisionResult | null;
   verifier: VerifierResult | null;
-  // The improvement, when it is switched on: see below.
   keyPointCheck: VerifierResult | null;
 }
 
-// A named change to the logic, switched on per step in config/steps.json.
 const CHECK_AGAINST_KEY_POINT = 'check-against-key-point';
 
 export interface RevisionInput {
   notes: ExaminerNotes;
-  // The main answer only. The reply to the follow-up is not judged: the
-  // follow-up can hint at a gap, and counting the reply would hide it.
+  // Main answer only: counting the follow-up reply would hide the gap.
   answer: string;
   followUpQuestion: string | null;
   guidance: string | null;
 }
 
-// From the trainee's answer to the card they see:
-//   1. what did the answer miss?            (model judges, code checks quotes)
-//   2. search the note for that point       (no model)
-//   3. pick the supporting sentence, word   (model picks numbers, code quotes)
-//   4. does the quote support the advice?   (separate model call)
+/** Answer to revision card: find the gap, search the note, quote, verify. */
 export async function produceRevision(
   models: LanguageModelGateway,
   input: RevisionInput,
   config: StepsConfig,
   index: NoteIndex,
-  // For the "no support" checks: passages to leave out of the search.
   options: {
     exclude?: Array<string>;
-    pinnedTarget?: { id: string; kind: 'diagnosis' | 'key_point'; text: string };
+    pinnedTarget?: {
+      id: string;
+      kind: 'diagnosis' | 'key_point';
+      text: string;
+    };
   } = {},
 ): Promise<{ card: RevisionCard; trace: RevisionTrace }> {
   const trace: RevisionTrace = {
@@ -62,37 +58,61 @@ export async function produceRevision(
   };
   const now = () => Date.now();
 
-  let target: { id: string; kind: 'diagnosis' | 'key_point' | 'follow_up'; text: string };
+  let target: {
+    id: string;
+    kind: 'diagnosis' | 'key_point' | 'follow_up';
+    text: string;
+  };
   let missed: string | null;
   let preface: string | null = null;
   if (options.pinnedTarget) {
     target = options.pinnedTarget;
     missed = target.text;
   } else {
-    const coverage = await runCoverage(models, input.notes, input.answer, config.steps.coverage);
+    const coverage = await runCoverage(
+      models,
+      input.notes,
+      input.answer,
+      config.steps.coverage,
+    );
     trace.coverage = coverage;
     if (coverage.call.outcome !== 'ok') {
-      throw new RevisionUnavailableError('coverage', coverage.call.outcome, coverage.call.error);
+      throw new RevisionUnavailableError(
+        'coverage',
+        coverage.call.outcome,
+        coverage.call.error,
+      );
     }
     if (coverage.target) {
       target = coverage.target;
-      missed = coverage.target.kind === 'diagnosis' ? `The diagnosis: ${coverage.target.text}` : coverage.target.text;
+      missed =
+        coverage.target.kind === 'diagnosis'
+          ? `The diagnosis: ${coverage.target.text}`
+          : coverage.target.text;
     } else {
-      // Nothing missed: consolidate on what the follow-up asked about.
       target = {
         id: 'follow_up',
         kind: 'follow_up',
-        text: input.followUpQuestion ?? input.notes.key_points[0] ?? input.notes.diagnosis,
+        text:
+          input.followUpQuestion ??
+          input.notes.key_points[0] ??
+          input.notes.diagnosis,
       };
       missed = null;
-      preface = 'Your answer covered every key point. Here is a point to consolidate.';
+      preface =
+        'Your answer covered every key point. Here is a point to consolidate.';
     }
   }
   trace.target = target;
 
-  // The note says of itself that it is a revision summary, not guidance.
-  const noteLine = index.disclaimer.split(/(?<=[.])\s+/).find((s) => /not clinical guidance/i.test(s)) ?? null;
-  const base: Pick<RevisionCard, 'missed' | 'noteLine' | 'retrievedPages' | 'retrievalMode'> = {
+  const noteLine =
+    index.disclaimer
+      .split(/(?<=[.])\s+/)
+      .find((s) => /not clinical guidance/i.test(s)) ?? null;
+  const base: Pick<
+    RevisionCard,
+    'missed' | 'noteLine' | 'retrievedPages' | 'retrievalMode'
+  > = {
     missed,
     noteLine,
     retrievedPages: [],
@@ -112,10 +132,16 @@ export async function produceRevision(
   });
 
   const vector = (await models.embed([target.text], 'query'))?.[0] ?? null;
-  const retrieval = retrieve(index, { target: target.text, vector }, { exclude: options.exclude });
+  const retrieval = retrieve(
+    index,
+    { target: target.text, vector },
+    { exclude: options.exclude },
+  );
   trace.retrieval = retrieval;
   base.retrievalMode = retrieval.mode;
-  base.retrievedPages = [...new Set(retrieval.results.flatMap((r) => r.chunk.pages))].sort((a, b) => a - b);
+  base.retrievedPages = [
+    ...new Set(retrieval.results.flatMap((r) => r.chunk.pages)),
+  ].sort((a, b) => a - b);
   if (retrieval.noSupport) return { card: noSupport(), trace };
 
   const revision = await runRevision(
@@ -127,9 +153,17 @@ export async function produceRevision(
   );
   trace.revision = revision;
   if (revision.outcome === 'unusable') {
-    throw new RevisionUnavailableError('revision', revision.call.outcome, revision.call.error);
+    throw new RevisionUnavailableError(
+      'revision',
+      revision.call.outcome,
+      revision.call.error,
+    );
   }
-  if (revision.outcome === 'no_support' || !revision.citation || !revision.point) {
+  if (
+    revision.outcome === 'no_support' ||
+    !revision.citation ||
+    !revision.point
+  ) {
     return { card: noSupport(), trace };
   }
 
@@ -142,18 +176,16 @@ export async function produceRevision(
   );
   trace.verifier = verifier;
   if (verifier.call.outcome !== 'ok') {
-    throw new RevisionUnavailableError('verifier', verifier.call.outcome, verifier.call.error);
+    throw new RevisionUnavailableError(
+      'verifier',
+      verifier.call.outcome,
+      verifier.call.error,
+    );
   }
-  // No second attempt with other passages: in the walk-through, retrying after
-  // a rejection led straight to the wrong-section quote.
   if (!verifier.supported) return { card: noSupport(), trace };
 
-  // The improvement. The check above compares the quotation with the advice
-  // the model wrote. If the model reworded the advice to suit a passage about
-  // something else, the two agree and the check passes. So the quotation is
-  // also checked against the key point itself, which the model cannot
-  // reword. It applies to key points only: the diagnosis is a compound
-  // statement that no single sentence of a note is meant to back.
+  // Also check the quote against the key point, which the model cannot reword.
+  // Skipped for the diagnosis: no single sentence backs it.
   if (
     config.steps.verifier.improvements?.includes(CHECK_AGAINST_KEY_POINT) &&
     target.kind === 'key_point' &&
@@ -168,7 +200,11 @@ export async function produceRevision(
     );
     trace.keyPointCheck = keyPointCheck;
     if (keyPointCheck.call.outcome !== 'ok') {
-      throw new RevisionUnavailableError('key point check', keyPointCheck.call.outcome, keyPointCheck.call.error);
+      throw new RevisionUnavailableError(
+        'key point check',
+        keyPointCheck.call.outcome,
+        keyPointCheck.call.error,
+      );
     }
     if (!keyPointCheck.supported) return { card: noSupport(), trace };
   }

@@ -18,12 +18,15 @@ export interface CoverageItem {
   text: string;
 }
 
-// The diagnosis counts as an item alongside the key points. Otherwise a wrong
-// diagnosis could never be the thing to revise.
+/** Key points plus the diagnosis, so a wrong diagnosis can be revised. */
 export function coverageItems(notes: ExaminerNotes): Array<CoverageItem> {
   return [
     { id: 'item_0', kind: 'diagnosis' as const, text: notes.diagnosis },
-    ...notes.key_points.map((text, i) => ({ id: `item_${i + 1}`, kind: 'key_point' as const, text })),
+    ...notes.key_points.map((text, i) => ({
+      id: `item_${i + 1}`,
+      kind: 'key_point' as const,
+      text,
+    })),
   ];
 }
 
@@ -41,9 +44,7 @@ function coverageSchema(items: Array<CoverageItem>) {
 export type CoverageOutput = z.infer<ReturnType<typeof coverageSchema>>;
 
 export type JudgedItem = CoverageItem & {
-  // After the quote check below.
   status: Status;
-  // What the model said before it.
   modelStatus: Status;
   quote: string | null;
 };
@@ -51,15 +52,11 @@ export type JudgedItem = CoverageItem & {
 export interface CoverageResult {
   call: CallResult<CoverageOutput>;
   items: Array<JudgedItem>;
-  // The one thing to revise, or null when nothing was missed.
   target: JudgedItem | null;
-  // model: the model named it and code agreed it was open.
-  // order: code took the first open item in case-file order.
   targetChosenBy: 'model' | 'order' | null;
 }
 
-// Works out what the answer missed. The model judges; code checks its
-// evidence and has the final say on which gap is used.
+/** The model judges coverage; code checks its evidence and picks the gap. */
 export async function runCoverage(
   models: LanguageModelGateway,
   notes: ExaminerNotes,
@@ -71,7 +68,11 @@ export async function runCoverage(
   const schema = coverageSchema(items);
   const call = await models.callStep(
     settings,
-    coveragePrompt(settings.promptVariant, { items, answer }, describeJsonShape(schema)),
+    coveragePrompt(
+      settings.promptVariant,
+      { items, answer },
+      describeJsonShape(schema),
+    ),
     schema,
     { step: 'coverage' },
   );
@@ -80,13 +81,12 @@ export async function runCoverage(
   }
 
   const judged: Array<JudgedItem> = items.map((item) => {
-    // The reply's shape guarantees a judgement for every item; if one were
-    // ever missing, the safe reading is that the item was not covered.
-    const j = call.value.items[item.id] ?? { quote: '', status: 'not_covered' as const };
+    const j = call.value.items[item.id] ?? {
+      quote: '',
+      status: 'not_covered' as const,
+    };
     const claimed = j.status !== 'not_covered';
-    // "Covered" must come with the trainee's own words. A claim without a real
-    // quotation is not believed: a gap wrongly shown is cheaper than a gap
-    // wrongly hidden.
+    // "Covered" needs a real quote: a false gap beats a hidden one.
     const quoteOk = claimed && isQuoteFrom(j.quote, answer);
     return {
       ...item,

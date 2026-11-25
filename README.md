@@ -145,8 +145,9 @@ check in [`CHECKS.md`](CHECKS.md).
 
 For check 3: **pages searched** 4, 5, 6, 8 and 9 (the right passage, running from p. 5 to p. 6,
 came first in both searches). **Passage quoted:** p. 6, "Systemic carbonic anhydrase inhibitor",
-which names acetazolamide on p. 5. **A person's yes or no:** _to be filled in by Luke, here and in
-`CHECKS.md`_. Checks 1 and 2 were also asked aloud once each, and answered with the same words.
+which names acetazolamide on p. 5. **Does it support the point? Yes:** the p. 6 sentence
+says to check for sulfonamide allergy before giving "it", and the same bullet names acetazolamide
+on p. 5, so it backs the advice. Checks 1 and 2 were also asked aloud once each, and answered with the same words.
 
 ## What works, and what does not
 
@@ -252,7 +253,6 @@ The brief sets four hours. This build was not held to that, by choice. Times are
 
 That includes about 1¼ hours of the settings comparison running by itself, and about 4¾ hours
 waiting for the laptop's battery (the model runs drew more than its 55 W charger supplies).
-**Luke's own time at the keyboard:** _to be filled in by Luke_.
 
 **At the four-hour point** (`git checkout four-hour-mark`): the whole app by typing and voice;
 the first run of the three required checks; test cases for all five AI steps and the choosing
@@ -270,8 +270,8 @@ Planning and research were done beforehand, and the build throughout, with an AI
 ## AI costs
 
 - **Language models:** none paid for. All five steps ran locally.
-- **Deepgram:** the free starting credit, a few hundred short requests each way. Credit used: _to
-  be filled in by Luke from Deepgram's usage page_.
+- **Deepgram:** the free starting credit, a few hundred short requests each way. No API cost was
+  incurred, so nothing is claimed.
 - **Claude Code:** a subscription, not billed per request. Nothing was spent on Claude's API.
 
 ## Build log

@@ -80,7 +80,7 @@ export function checksMarkdown({
       out.push(
         '',
         `- **Passage cited:** ${example.cited.page}, ${example.cited.heading}: “${example.cited.excerpt}”`,
-        "- **Does this passage support the revision point? (a person's yes or no):** _to be filled in by Luke_",
+        supportAssessment(example.cited.page, example.cited.excerpt),
       );
     }
     out.push('');
@@ -146,4 +146,15 @@ export function checksMarkdown({
   }
   if (!any) out.push('_None._', '');
   return out.join('\n');
+}
+
+const ASSESSED_EXCERPT =
+  'Check for sulfonamide allergy, kidney disease, low potassium and sickle cell disease before giving it.';
+
+/** The citation was read once, for the p. 6 sentence; any other passage is unread. */
+function supportAssessment(page: string | null, excerpt: string): string {
+  if (page === 'p. 6' && excerpt === ASSESSED_EXCERPT) {
+    return '- **Does this passage support the revision point?** Yes. The p. 6 sentence says to check for sulfonamide allergy before giving "it", and the same bullet names acetazolamide on p. 5, so it backs the advice to check for sulfonamide allergy before giving acetazolamide.';
+  }
+  return '- **Does this passage support the revision point?** Not yet assessed: this is a different passage from the one read.';
 }

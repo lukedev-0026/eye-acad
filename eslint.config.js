@@ -9,19 +9,38 @@ import { configs as tsConfigs } from 'typescript-eslint';
 
 export default defineConfig([
   // Generated files, and folders that hold data and write-ups, not code.
-  globalIgnores(['dist/', '.output/', '.tanstack/', 'src/routeTree.gen.ts', 'data/', 'evals/', 'config/', 'docs/']),
+  globalIgnores([
+    'dist/',
+    '.output/',
+    '.tanstack/',
+    'src/routeTree.gen.ts',
+    'data/',
+    'evals/',
+    'config/',
+    'docs/',
+  ]),
 
   js.configs.recommended,
   tsConfigs.strictTypeChecked,
   tsConfigs.stylisticTypeChecked,
-  { languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } } },
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   importX.flatConfigs.recommended,
   importX.flatConfigs.typescript,
   ...pluginRouter.configs['flat/recommended'],
 
   {
     settings: {
-      'import-x/resolver-next': [createTypeScriptImportResolver({ alwaysTryTypes: true }), createNodeResolver()],
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({ alwaysTryTypes: true }),
+        createNodeResolver(),
+      ],
       'import-x/internal-regex': '^@(tests)?/',
     },
     rules: {
@@ -36,7 +55,12 @@ export default defineConfig([
       'import-x/order': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            ['parent', 'sibling', 'index'],
+          ],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
@@ -48,8 +72,15 @@ export default defineConfig([
         'error',
         {
           patterns: [
-            { group: ['../*'], message: 'Use the @/ alias for a file in another folder.' },
-            { group: ['./*/**'], message: 'Use the @/ alias for a file in another folder; ./ is for the same folder.' },
+            {
+              group: ['../*'],
+              message: 'Use the @/ alias for a file in another folder.',
+            },
+            {
+              group: ['./*/**'],
+              message:
+                'Use the @/ alias for a file in another folder; ./ is for the same folder.',
+            },
           ],
         },
       ],
@@ -61,27 +92,66 @@ export default defineConfig([
         {
           basePath: import.meta.dirname,
           zones: [
-            { target: './src/common', from: './src', except: ['./common', './config'] },
-            { target: './src/config', from: './src', except: ['./config', './common'] },
-            { target: './src/domain', from: './src', except: ['./domain', './common'] },
+            {
+              target: './src/common',
+              from: './src',
+              except: ['./common', './config'],
+            },
+            {
+              target: './src/config',
+              from: './src',
+              except: ['./config', './common'],
+            },
+            {
+              target: './src/domain',
+              from: './src',
+              except: ['./domain', './common'],
+            },
             {
               target: './src/infrastructure',
               from: './src',
               except: ['./infrastructure', './domain', './common', './config'],
             },
-            { target: './src/application', from: ['./src/server', './src/eval', './src/features', './src/routes'] },
-            { target: './src/eval', from: ['./src/server', './src/features', './src/routes'] },
+            {
+              target: './src/application',
+              from: [
+                './src/server',
+                './src/eval',
+                './src/features',
+                './src/routes',
+              ],
+            },
+            {
+              target: './src/eval',
+              from: ['./src/server', './src/features', './src/routes'],
+            },
             { target: './src/server', from: ['./src/eval', './src/routes'] },
             // The one step down into the browser's code: the sign-in middleware's
             // browser half needs the signed-in user's token.
-            { target: './src/server', from: './src/features', except: ['./auth/lib/id-token.ts'] },
+            {
+              target: './src/server',
+              from: './src/features',
+              except: ['./auth/lib/id-token.ts'],
+            },
             // The browser reaches the server only through server functions.
             {
               target: ['./src/features', './src/routes'],
-              from: ['./src/application', './src/infrastructure', './src/eval', './src/server/middleware'],
+              from: [
+                './src/application',
+                './src/infrastructure',
+                './src/eval',
+                './src/server/middleware',
+              ],
             },
-            { target: ['./src/features', './src/routes'], from: './src/config', except: ['./public-env.ts'] },
-            { target: ['./src/features', './src/routes'], from: './src/common/logging' },
+            {
+              target: ['./src/features', './src/routes'],
+              from: './src/config',
+              except: ['./public-env.ts'],
+            },
+            {
+              target: ['./src/features', './src/routes'],
+              from: './src/common/logging',
+            },
             { target: './src', from: ['./scripts', './tests'] },
           ],
         },
@@ -89,19 +159,33 @@ export default defineConfig([
       // Every import is at the top of its file, where it can be seen.
       'no-restricted-syntax': [
         'error',
-        { selector: 'ImportExpression', message: 'No dynamic import(). Import at the top of the file.' },
-        { selector: 'TSImportType', message: "No inline import('…') types. Use `import type` at the top of the file." },
+        {
+          selector: 'ImportExpression',
+          message: 'No dynamic import(). Import at the top of the file.',
+        },
+        {
+          selector: 'TSImportType',
+          message:
+            "No inline import('…') types. Use `import type` at the top of the file.",
+        },
         // The environment is read in src/config and nowhere else.
         {
-          selector: "MemberExpression[object.name='process'][property.name='env']",
-          message: 'Read settings through getConfig() from @/config/env.server.',
+          selector:
+            "MemberExpression[object.name='process'][property.name='env']",
+          message:
+            'Read settings through getConfig() from @/config/env.server.',
         },
         {
-          selector: "MemberExpression[object.type='MetaProperty'][property.name='env']",
-          message: 'Read browser settings through getPublicConfig() from @/config/public-env.',
+          selector:
+            "MemberExpression[object.type='MetaProperty'][property.name='env']",
+          message:
+            'Read browser settings through getPublicConfig() from @/config/public-env.',
         },
       ],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       // House style: Array<T>, and interfaces for the shape of an object.
       '@typescript-eslint/array-type': ['error', { default: 'generic' }],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
@@ -120,7 +204,10 @@ export default defineConfig([
       ],
       // `||` on text is often meant: an empty string should fall through. On
       // anything else, `??` is required.
-      '@typescript-eslint/prefer-nullish-coalescing': ['error', { ignorePrimitives: { string: true, boolean: true } }],
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { string: true, boolean: true } },
+      ],
       // This one rewrites a cast as `!`, which the rule against `!` then rejects.
       '@typescript-eslint/non-nullable-type-assertion-style': 'off',
       // What an exported function returns is part of its contract.
@@ -133,7 +220,10 @@ export default defineConfig([
   {
     files: ['src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
-    rules: { 'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'error' },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+    },
   },
 
   // The one place the environment is read. The import rules above still apply.
@@ -142,8 +232,15 @@ export default defineConfig([
     rules: {
       'no-restricted-syntax': [
         'error',
-        { selector: 'ImportExpression', message: 'No dynamic import(). Import at the top of the file.' },
-        { selector: 'TSImportType', message: "No inline import('…') types. Use `import type` at the top of the file." },
+        {
+          selector: 'ImportExpression',
+          message: 'No dynamic import(). Import at the top of the file.',
+        },
+        {
+          selector: 'TSImportType',
+          message:
+            "No inline import('…') types. Use `import type` at the top of the file.",
+        },
       ],
     },
   },
@@ -161,7 +258,10 @@ export default defineConfig([
   },
 
   // Tool configuration files must export a default.
-  { files: ['*.config.{js,ts}'], rules: { 'import-x/no-default-export': 'off' } },
+  {
+    files: ['*.config.{js,ts}'],
+    rules: { 'import-x/no-default-export': 'off' },
+  },
 
   // Plain JavaScript (this file) has no types to check against. Last, so that
   // it switches off every type-aware rule set above.

@@ -12,11 +12,18 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: 'unit', include: ['tests/**/*.test.ts'], exclude: ['tests/integration/**'] },
+        test: {
+          name: 'unit',
+          include: ['tests/**/*.test.ts'],
+          exclude: ['tests/integration/**'],
+        },
       },
       {
         extends: true,
-        test: { name: 'integration', include: ['tests/integration/**/*.test.ts'] },
+        test: {
+          name: 'integration',
+          include: ['tests/integration/**/*.test.ts'],
+        },
       },
     ],
   },

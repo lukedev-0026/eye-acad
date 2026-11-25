@@ -1,6 +1,6 @@
 # The choice, made on the tuning cases
 
-Recorded on 25 November 2026 at 13:50 GMT, after the 12 tuning runs (13:29 to 13:46) and **before
+Recorded on 25 November 2026 at 13:48 GMT, after the 12 tuning runs (13:29 to 13:46) and **before
 the held-back cases were opened**. Table: [`tuning-table.md`](tuning-table.md), rebuilt from the raw
 rows by `python3 evals/near-miss/summarise.py evals/results/check-2026-11-25T13-*.jsonl`.
 

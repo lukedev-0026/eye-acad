@@ -125,7 +125,7 @@ named in the tables above. The project's `README.md` and `CHECKS.md` hold the co
 | 23 | Met on the ten tuning pairs and the six held-back pairs: no wrong acceptance in 30 runs and in 18. The wrong-section quotation from page 8 was refused in 3 runs of 3 as a fixed pair. It was accepted once when it came up end to end (see 22), so this holds on the fixed pairs and not without exception in use. The thinking this needs is sometimes cut off; the trainee is then asked to try again. |
 | 24 | Met: 10 of 10 targets. |
 | 25 | Met, by a test with the meaning-based search unavailable (`tests/application/answer/`). Not run by hand in the browser. |
-| 26 | Met ([`evals/rehearsal/`](../evals/rehearsal/README.md)), and held by a test. In the rehearsal the finding marked unavailable was checked through `pnpm findings`, not asked ten times. |
+| 26 | Met ([`evals/rehearsal/`](../../evals/rehearsal/README.md)), and held by a test. In the rehearsal the finding marked unavailable was checked through `pnpm findings`, not asked ten times. |
 | 27 | Met for a note that has not been prepared (by hand: its own message, HTTP 503) and, by a test, for a PDF changed since it was prepared. |
 | 28 | Met in the sense written: 27 of 32 sentences on every run, and the five failures listed in `evals/readback.md`. |
 | 29 | Met, with one limit. On 24 November the project was cloned into an empty folder and installed from the lockfile, with no key file: `pnpm verify` and the emulator tests passed, and the app started from that copy answered both required questions correctly by typing. Java, Ollama and the model downloads were already on the machine, so those steps were not exercised from nothing. |

@@ -190,4 +190,4 @@ confirmation inside the sweep; any Claude model (the adapter is written, not run
   and support check were also run together.
 - The rule was written after the first run of the three required checks on the starting
   settings, and its tie-break was amended once, early, with the reason recorded (`RULE.md`,
-  `NOTES.md`).
+  the README's build log).
